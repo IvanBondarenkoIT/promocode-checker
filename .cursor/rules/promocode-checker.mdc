@@ -1,0 +1,50 @@
+---
+description: Always-on project context for promocode-checker agents
+alwaysApply: true
+---
+
+# Promocode Checker — Always Apply
+
+You are working in `promocode-checker`.
+
+## Mandatory reading before non-trivial work
+
+- `AGENTS.md`
+- `docs/context-handoff.md`
+- `docs/plan/IMPLEMENTATION_PLAN.md`
+- `docs/decisions.md`
+- latest files in `docs/reports/`
+
+## Process
+
+- Follow the staged plan. Do not skip stage gates.
+- Every stage ends with: tests → review → markdown report → open questions.
+- Do not start the next stage until the current stage report exists and open blockers are clarified.
+- Do not commit unless the user explicitly asks.
+
+## Locked decisions (do not re-ask)
+
+- Cashier UI: no login; track `point_id` and activity.
+- Admin UI: separate env login; roles `admin` and `viewer`.
+- Admin may reverse `USED -> ACTIVE` with audited reason.
+- Fraud window default: 2 hours.
+- Coffee beans group IDs: `11077`, `16276`, `16279`.
+- ERP: Proxy API primary + direct fallback.
+- Telegram alerts for changes, fraud, and crashes.
+- Targets: local first, Railway demo, Windows Server Docker prod for RDP cashiers.
+- Both web/PWA and desktop wrapper.
+
+## Current progress
+
+- Stage 1 done
+- Stage 2 done (migrations + tests on Postgres `:5433`)
+- Stage 3 done (cashier check/redeem/barcode)
+- Stage 4 done (ERP reconcile + Telegram, 28 tests passed)
+- Next: Stage 5 Cashier PWA
+
+## Coding expectations
+
+- Prefer clear structure over cleverness.
+- Keep comments short and useful.
+- Add tests for the stage being implemented.
+- Preserve existing env names from `.env.example`.

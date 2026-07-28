@@ -98,4 +98,8 @@ At this stage the repository contains:
 - seed script `scripts/seed_promocodes.py`
 - API tests for payloads and log creation
 
-Stages 1–3 are closed in code. Next: ERP reconcile + fraud/Telegram (Stage 4), then cashier PWA UX (Stage 5).
+Stages 1–4 are closed in code. Next: cashier PWA UX (Stage 5).
+
+```powershell
+python scripts/run_reconcile.py
+```

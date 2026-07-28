@@ -2,6 +2,15 @@
 
 `promocode-checker` is a monorepo for validating unique customer promo codes, closing them at cashier points, reconciling usage against ERP sales, and surfacing admin-level audit and fraud signals.
 
+## Start here for Cursor agents
+
+1. [`AGENTS.md`](AGENTS.md)
+2. [`docs/context-handoff.md`](docs/context-handoff.md)
+3. [`docs/plan/IMPLEMENTATION_PLAN.md`](docs/plan/IMPLEMENTATION_PLAN.md)
+4. [`docs/decisions.md`](docs/decisions.md)
+5. [`docs/prompts/`](docs/prompts/)
+6. [`docs/reports/`](docs/reports/)
+
 ## Project goals
 
 - Fast cashier workflow with an always-focused promo input and scanner-first UX.
@@ -16,19 +25,22 @@
 - `frontend/` cashier PWA and admin UI.
 - `desktop/` lightweight desktop shell for RDP users.
 - `infra/` Docker, Compose, and deployment assets.
-- `docs/` runbooks, prompts, branching rules, test stages, and stage reports.
+- `docs/` plan, decisions, prompts, reports, runbooks.
+- `config/` business config such as coffee beans group IDs.
 - `scripts/` helper scripts for local setup, seed data, and maintenance.
 - `tests/` backend and frontend tests.
 
 ## Current status
 
-Stages 1–3 are complete: repo bootstrap, data layer, and cashier API (`check` / `redeem` / barcode).
+- Stages **1–4 complete**: bootstrap, data layer, cashier API, ERP reconcile + Telegram.
+- Next: **Stage 5 — Cashier PWA**.
+- Supervisor audits: [`docs/supervisor.md`](docs/supervisor.md), [`docs/reports/supervisor-audit-2026-07-28.md`](docs/reports/supervisor-audit-2026-07-28.md).
 
 ## Quick start
 
 1. Create `.env` from `.env.example`.
 2. Activate the virtual environment:
-   - PowerShell: `.\\.venv\\Scripts\\Activate.ps1`
+   - PowerShell: `.\.venv\Scripts\Activate.ps1`
 3. Install backend dependencies:
    - `python -m pip install --upgrade pip`
    - `python -m pip install -e .[dev]`
@@ -43,4 +55,13 @@ Stages 1–3 are complete: repo bootstrap, data layer, and cashier API (`check` 
    - Health: `http://localhost:8000/health`
    - Docs: `http://localhost:8000/docs`
 
-Frontend PWA, ERP reconciliation, and production deploy assets come in later stages. See `docs/testing-stages.md` and `docs/branching.md`.
+## Continue in a new Cursor chat
+
+Paste:
+
+```text
+Продолжаем promocode-checker.
+Прочитай AGENTS.md, docs/context-handoff.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/decisions.md и docs/reports/.
+Этапы 1–4 закрыты. Следующий: Stage 5 Cashier PWA.
+Надзиратель сверяет этапы по docs/supervisor.md.
+```

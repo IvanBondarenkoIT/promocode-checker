@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "source": "granit-clients-based-segmentation/data/coffee_beans_kg_groups.json",
+    "description": "Primary coffee beans group whitelist for ERP reconcile matching"
+  },
+  "group_ids": [
+    {
+      "group_id": 11077,
+      "label": "Coffee Blasecafe blend (250 g)"
+    },
+    {
+      "group_id": 16276,
+      "label": "Coffee Blasercafe singl origin (250г)"
+    },
+    {
+      "group_id": 16279,
+      "label": "Coffee Blasercafe blend (1kg)"
+    }
+  ],
+  "fallback_param": {
+    "param_id": 2,
+    "note": "Продукция; use coffee kg value matching from segmentation tooling when extending beyond whitelist"
+  }
+}

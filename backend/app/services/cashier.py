@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models import CheckerActionType, CheckerLog, Promocode, PromocodeStatus
 from app.schemas.cashier import CashierCodeResponse, CashierResult
+from app.services.promocode_close import close_promocode
 from app.services.promocode_generator import is_valid_promocode
 
 
@@ -118,15 +119,12 @@ def redeem_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeRes
         )
 
     assert promocode is not None
-    now = _now()
-    promocode.status = PromocodeStatus.USED
-    promocode.redeemed_at = now
-    log = _write_log(
+    log = close_promocode(
         db,
-        scanned_code=code,
+        promocode,
         action_type=CheckerActionType.MANUAL_CLOSE,
         point_id=point_id,
-        promocode_id=promocode.id,
+        erp_sale_matched=False,
     )
     return _build_response(
         result=CashierResult.REDEEMED,

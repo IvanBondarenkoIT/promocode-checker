@@ -1,0 +1,17 @@
+---
+description: Backend FastAPI and data-layer conventions
+globs: backend/**/*.py
+alwaysApply: false
+---
+
+# Backend conventions
+
+- Keep business status transitions in services, not in route handlers.
+- API and cron must reuse the same redeem/auto-close logic.
+- Promocodes are exactly 8 digits.
+- Use SQLAlchemy models under `backend/app/models/`.
+- Alembic migrations live in `backend/alembic/versions/`.
+- Database URL uses `postgresql+psycopg://...`.
+- Local Postgres default: `localhost:5433`.
+- Write checker logs for scans and closes.
+- Admin edits must go through audited services, never silent raw updates.

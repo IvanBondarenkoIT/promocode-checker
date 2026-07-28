@@ -1,0 +1,31 @@
+---
+description: Cashier and admin frontend UX rules
+globs: frontend/**/*.{ts,tsx,js,jsx,css,html}
+alwaysApply: false
+---
+
+# Frontend conventions
+
+## Cashier UI
+
+- One input only for promocode entry.
+- Digits only, length exactly 8.
+- Absolute autofocus recovery after blur/click/submit/result.
+- Scanner Enter auto-submits.
+- Debounce/UI lock 1.5 seconds after request.
+- Large color statuses:
+  - green ACTIVE
+  - red USED
+  - gray/yellow NOT_FOUND
+- Audio:
+  - ACTIVE = one short high beep
+  - USED/NOT_FOUND = two low buzzes
+- No cashier login.
+- `point_id` from query/config.
+
+## Admin UI
+
+- Separate route/login.
+- Roles: admin (edit), viewer (read-only).
+- Dashboard for live activity, fraud, reconcile health.
+- Controlled edits with reason + audit trail.
