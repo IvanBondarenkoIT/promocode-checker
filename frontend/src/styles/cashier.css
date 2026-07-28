@@ -80,6 +80,18 @@ body,
   color: #bbf7d0;
 }
 
+.ready-indicator--degraded {
+  border-color: #92400e;
+  color: #fde68a;
+}
+
+.ready-indicator--degraded .ready-lamp {
+  background: #f59e0b;
+  box-shadow:
+    0 0 0 2px rgba(245, 158, 11, 0.25),
+    0 0 10px rgba(245, 158, 11, 0.75);
+}
+
 .ready-lamp {
   width: 0.75rem;
   height: 0.75rem;

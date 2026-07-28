@@ -7,13 +7,13 @@ import { CashierApp } from "./CashierApp";
 const checkPromocode = vi.fn();
 const redeemPromocode = vi.fn();
 const sendHeartbeat = vi.fn();
-const checkHealth = vi.fn();
+const fetchSystemHealth = vi.fn();
 
 vi.mock("./api", () => ({
   checkPromocode: (...args: unknown[]) => checkPromocode(...args),
   redeemPromocode: (...args: unknown[]) => redeemPromocode(...args),
   sendHeartbeat: (...args: unknown[]) => sendHeartbeat(...args),
-  checkHealth: (...args: unknown[]) => checkHealth(...args),
+  fetchSystemHealth: (...args: unknown[]) => fetchSystemHealth(...args),
 }));
 
 vi.mock("./audio", () => ({
@@ -28,8 +28,12 @@ describe("CashierApp", () => {
     checkPromocode.mockReset();
     redeemPromocode.mockReset();
     sendHeartbeat.mockReset();
-    checkHealth.mockReset();
-    checkHealth.mockResolvedValue(true);
+    fetchSystemHealth.mockReset();
+    fetchSystemHealth.mockResolvedValue({
+      state: "ready",
+      message: "Ready",
+      ready: true,
+    });
     sendHeartbeat.mockResolvedValue({
       ok: true,
       point_id: "shop_test",

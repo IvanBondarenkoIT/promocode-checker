@@ -7,7 +7,13 @@ import {
   useState,
 } from "react";
 
-import { checkHealth, checkPromocode, redeemPromocode, sendHeartbeat } from "./api";
+import {
+  checkPromocode,
+  fetchSystemHealth,
+  redeemPromocode,
+  sendHeartbeat,
+  type SystemHealth,
+} from "./api";
 import { playErrorBuzz, playSuccessBeep } from "./audio";
 import {
   DEBOUNCE_LOCK_MS,
@@ -20,6 +26,8 @@ import {
 import { heartbeatIntervalMs, resolvePointId } from "./pointId";
 import type { CashierCodeResponse } from "./types";
 
+const CONNECTING: SystemHealth = { state: "connecting", message: "Connecting…", ready: false };
+
 export function CashierApp() {
   const inputRef = useRef<HTMLInputElement>(null);
   const lockTimerRef = useRef<number | null>(null);
@@ -29,7 +37,28 @@ export function CashierApp() {
   const [busy, setBusy] = useState(false);
   const [lastResponse, setLastResponse] = useState<CashierCodeResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [systemReady, setSystemReady] = useState(false);
+  const [systemHealth, setSystemHealth] = useState<SystemHealth>(CONNECTING);
+
+  const refreshSystemHealth = useCallback(async (): Promise<SystemHealth> => {
+    const health = await fetchSystemHealth();
+    if (!health.ready) {
+      setSystemHealth(health);
+      return health;
+    }
+    try {
+      await sendHeartbeat(pointId);
+      setSystemHealth(health);
+      return health;
+    } catch {
+      const degraded: SystemHealth = {
+        state: "degraded",
+        message: "API unavailable",
+        ready: false,
+      };
+      setSystemHealth(degraded);
+      return degraded;
+    }
+  }, [pointId]);
 
   const focusInput = useCallback(() => {
     window.setTimeout(() => {
@@ -76,23 +105,12 @@ export function CashierApp() {
     let cancelled = false;
 
     const beat = async () => {
-      const healthy = await checkHealth();
+      const health = await refreshSystemHealth();
       if (cancelled) {
         return;
       }
-      if (!healthy) {
-        setSystemReady(false);
-        return;
-      }
-      try {
-        await sendHeartbeat(pointId);
-        if (!cancelled) {
-          setSystemReady(true);
-        }
-      } catch {
-        if (!cancelled) {
-          setSystemReady(false);
-        }
+      if (!health.ready) {
+        setSystemHealth(health);
       }
     };
 
@@ -105,7 +123,7 @@ export function CashierApp() {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [pointId]);
+  }, [refreshSystemHealth]);
 
   const applyResponse = useCallback((response: CashierCodeResponse) => {
     setLastResponse(response);
@@ -131,10 +149,16 @@ export function CashierApp() {
       try {
         const response = await checkPromocode(normalized, pointId);
         applyResponse(response);
-        setSystemReady(true);
+        await refreshSystemHealth();
       } catch (error) {
         setLastResponse(null);
         setErrorMessage(error instanceof Error ? error.message : "Check failed");
+        setSystemHealth({
+          state: "degraded",
+          message: "Check failed",
+          ready: false,
+        });
+        void refreshSystemHealth();
         playErrorBuzz();
       } finally {
         setBusy(false);
@@ -143,7 +167,7 @@ export function CashierApp() {
         focusInput();
       }
     },
-    [applyResponse, busy, focusInput, locked, pointId, startLock],
+    [applyResponse, busy, focusInput, locked, pointId, refreshSystemHealth, startLock],
   );
 
   const runRedeem = useCallback(async () => {
@@ -157,6 +181,12 @@ export function CashierApp() {
       applyResponse(response);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Redeem failed");
+      setSystemHealth({
+        state: "degraded",
+        message: "Redeem failed",
+        ready: false,
+      });
+      void refreshSystemHealth();
       playErrorBuzz();
     } finally {
       setBusy(false);
@@ -164,7 +194,7 @@ export function CashierApp() {
       setCode("");
       focusInput();
     }
-  }, [applyResponse, busy, focusInput, lastResponse, pointId, startLock]);
+  }, [applyResponse, busy, focusInput, lastResponse, pointId, refreshSystemHealth, startLock]);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -191,7 +221,13 @@ export function CashierApp() {
 
   const tone = errorMessage ? "error" : resultToTone(lastResponse?.result ?? null);
   const statusText = errorMessage ? "ERROR" : resultLabel(lastResponse?.result ?? null);
-  const canRedeem = !busy && lastResponse?.result === "valid";
+  const canRedeem = systemHealth.ready && !busy && lastResponse?.result === "valid";
+  const lampClass =
+    systemHealth.state === "ready"
+      ? "ready-indicator--ok"
+      : systemHealth.state === "degraded"
+        ? "ready-indicator--degraded"
+        : "ready-indicator--off";
 
   return (
     <div className="cashier-shell" data-testid="cashier-shell">
@@ -203,12 +239,13 @@ export function CashierApp() {
           </div>
         </div>
         <div
-          className={`ready-indicator ${systemReady ? "ready-indicator--ok" : "ready-indicator--off"}`}
+          className={`ready-indicator ${lampClass}`}
           data-testid="system-ready"
+          data-ready={systemHealth.ready ? "true" : "false"}
           aria-live="polite"
         >
           <span className="ready-lamp" aria-hidden="true" />
-          <span>{systemReady ? "Ready" : "Connecting…"}</span>
+          <span>{systemHealth.message}</span>
         </div>
       </header>
 
