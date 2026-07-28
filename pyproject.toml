@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "promocode-checker"
+version = "0.1.0"
+description = "Promo code checker with FastAPI backend, cashier PWA, admin UI, and ERP reconciliation."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.16.4",
+    "fastapi>=0.116.1",
+    "httpx>=0.28.1",
+    "pillow>=11.3.0",
+    "psycopg[binary]>=3.2.9",
+    "pydantic-settings>=2.10.1",
+    "python-barcode>=0.16.1",
+    "python-dotenv>=1.1.1",
+    "sqlalchemy>=2.0.42",
+    "uvicorn[standard]>=0.35.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "ruff>=0.12.7",
+]
+
+[tool.setuptools]
+package-dir = {"" = "backend"}
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
