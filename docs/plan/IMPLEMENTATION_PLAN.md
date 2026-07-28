@@ -94,20 +94,37 @@ flowchart LR
 - [x] Telegram alerts for changes/fraud/crashes
 - [x] Tests + report (`docs/reports/stage-04-erp-reconcile.md`, 28 passed)
 
-### Stage 5 — Cashier PWA — NEXT
+### Stage 5 — Cashier PWA — DONE
 
-- [ ] One numeric input, length 8
-- [ ] Absolute autofocus recovery
-- [ ] Scanner Enter auto-submit
-- [ ] 1.5s debounce lock
-- [ ] Status colors + Redeem button
-- [ ] Audio feedback
-- [ ] point_id from query/settings
-- [ ] Session heartbeat without login
-- [ ] Tests/manual scanner checks + report
+Gate: `docs/reports/supervisor-gate-stage5-2026-07-28.md`
+Report: `docs/reports/stage-05-cashier-pwa.md`
 
-### Stage 6 — Admin UI
+- [x] One numeric input, length 8
+- [x] Absolute autofocus recovery
+- [x] Scanner Enter auto-submit
+- [x] 1.5s debounce lock
+- [x] Status colors + Redeem button
+- [x] Audio feedback
+- [x] point_id from query/settings
+- [x] Session heartbeat without login
+- [x] Tests/manual scanner checks + report (backend 29 / frontend 8)
 
+Deferred (resolved by Stage 5/6 gate):
+
+- concurrent redeem row-lock → **Stage 5.1 before Stage 6**
+- live Granit SQL validation → Stage 4.1
+- Telegram per-code auto-close → use run summary instead
+
+### Stage 5.1 — Concurrent redeem lock — DONE
+
+- [x] Row lock / safe close on redeem and shared close path
+- [x] Tests for double-redeem race (sequential + concurrent)
+- [x] Report `docs/reports/stage-05-1-redeem-lock.md`
+- [ ] Supervisor PASS before Stage 6
+
+### Stage 6 — Admin UI — NEXT
+
+- [ ] Same Vite app, separate `/admin` login route
 - [ ] Separate login (admin/viewer from env)
 - [ ] Dashboard: active/used/expired, last scans, auto-closes, fraud, job health
 - [ ] Table browsers for all checker DB tables

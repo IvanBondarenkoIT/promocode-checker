@@ -22,22 +22,25 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 - Stage 1 bootstrap: **done**
 - Stage 2 data layer: **done**
 - Stage 3 cashier API: **done**
-  - `POST /api/v1/cashier/check`
-  - `POST /api/v1/cashier/redeem`
-  - `GET /api/v1/cashier/barcode/{code}`
-- Stage 4 ERP reconcile + Telegram: **done**
-  - ERP adapter mock/proxy/direct + hourly reconcile CLI
-  - AUTO_CLOSE, fraud warnings, Telegram dedup
-  - tests: **28 passed** (see `docs/reports/stage-04-erp-reconcile.md`)
-- Next stage: **Stage 5 — Cashier PWA**
+- Stage 4 ERP reconcile + Telegram: **done** (local/mock)
+- Stage 5 Cashier PWA: **done** — supervisor **PASS**
+  - Vite/React PWA, autofocus, debounce, redeem, audio, point_id, heartbeat
+  - tests: backend **29 passed**, frontend **8 passed**
+  - report: `docs/reports/stage-05-cashier-pwa.md`
+  - supervisor: `docs/reports/supervisor-audit-stage5-2026-07-28.md`
+- Stage 5.1 concurrent redeem lock: **done**
+  - FOR UPDATE on redeem/reconcile close
+  - tests: backend **31 passed**
+  - report: `docs/reports/stage-05-1-redeem-lock.md`
+- Next: **Stage 6 — Admin UI** (after supervisor check on 5.1)
 
 ## Hard process rules
 
 - Work only in this directory: `promocode-checker` (not the old typo folder `promocode-chacker`).
-- After every stage: tests → review → short report in `docs/reports/` → clarify open questions → only then next stage.
-- Stage prompts must always include this gate: see [`docs/prompts/stage-prompts.md`](docs/prompts/stage-prompts.md) (mandatory block on every stage) and [`docs/prompts/project-prompts.md`](docs/prompts/project-prompts.md).
+- After every stage: tests → review → short report in `docs/reports/` → clarify open questions → **commit + push** → only then next stage.
+- Stage prompts must always include this gate: see [`docs/prompts/stage-prompts.md`](docs/prompts/stage-prompts.md) and [`docs/prompts/project-prompts.md`](docs/prompts/project-prompts.md).
 - Prefer local-first verification. Railway is demo. Windows Server Docker is production.
-- Do not commit unless the user explicitly asks.
+- **Do not ask whether to commit/push** — at stage end always commit on `feature/*`, merge to `develop`, push both (see [`docs/branching.md`](docs/branching.md)).
 - Do not invent ERP schema assumptions beyond the documented coffee beans whitelist and proxy/direct modes.
 - Do not re-ask locked decisions from `docs/decisions.md`.
 

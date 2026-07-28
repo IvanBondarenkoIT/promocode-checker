@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models import CheckerActionType, CheckerLog, Promocode, PromocodeStatus
 from app.schemas.cashier import CashierCodeResponse, CashierResult
-from app.services.promocode_close import close_promocode
+from app.services.promocode_close import close_promocode, lock_promocode_by_code
 from app.services.promocode_generator import is_valid_promocode
 
 
@@ -108,7 +108,7 @@ def redeem_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeRes
             point_id=point_id,
         )
 
-    promocode = _get_promocode(db, code)
+    promocode = lock_promocode_by_code(db, code)
     lookup_result = _resolve_lookup_result(promocode)
     if lookup_result != CashierResult.VALID:
         return _build_response(

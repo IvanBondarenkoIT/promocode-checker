@@ -7,6 +7,7 @@
 3. [`plan/IMPLEMENTATION_PLAN.md`](plan/IMPLEMENTATION_PLAN.md)
 4. [`decisions.md`](decisions.md)
 5. [`business-requirements.md`](business-requirements.md)
+6. [`supervisor.md`](supervisor.md)
 
 ## Process
 
@@ -27,6 +28,14 @@
 - [`reports/stage-02-data-layer.md`](reports/stage-02-data-layer.md)
 - [`reports/stage-03-cashier-api.md`](reports/stage-03-cashier-api.md)
 - [`reports/stage-04-erp-reconcile.md`](reports/stage-04-erp-reconcile.md)
+- [`reports/stage-05-cashier-pwa.md`](reports/stage-05-cashier-pwa.md)
+- [`reports/stage-05-1-redeem-lock.md`](reports/stage-05-1-redeem-lock.md)
+
+## Supervisor
+
+- [`reports/supervisor-audit-2026-07-28.md`](reports/supervisor-audit-2026-07-28.md)
+- [`reports/supervisor-gate-stage5-2026-07-28.md`](reports/supervisor-gate-stage5-2026-07-28.md)
+- [`reports/supervisor-audit-stage5-2026-07-28.md`](reports/supervisor-audit-stage5-2026-07-28.md) — Stage 5 PASS; next 5.1 then 6
 
 ## Config
 

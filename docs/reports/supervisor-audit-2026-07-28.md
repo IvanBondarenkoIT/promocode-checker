@@ -73,19 +73,15 @@ Conditions / not fully closed for production:
 2. Coffee groups exist both as env and `config/coffee_beans_groups.json` — good; ensure runtime actually reads JSON or document env-as-source-of-truth.
 3. Workspace still may be opened from typo folder in some Cursor sessions — operational risk.
 
-## Before Stage 5 — supervisor recommendation
+## Before Stage 5 — gate CLOSED
 
-Allowed to proceed to Stage 5 **if**:
+See [`supervisor-gate-stage5-2026-07-28.md`](supervisor-gate-stage5-2026-07-28.md).
 
-1. User accepts Stage 4 as “done for local/mock”, with live ERP SQL as follow-up (can run in parallel or Stage 4.1)
-2. Concurrent redeem lock either:
-   - deferred explicitly to later, or
-   - scheduled as small fix before/with Stage 5
-3. README / any stale paste prompts say next = Stage 5
+Locked answers:
 
-## Questions for product owner
+1. Stage 4 accepted as done for local/mock; live ERP SQL = Stage 4.1 follow-up
+2. Concurrent redeem lock deferred until **after** Stage 5
+3. Telegram auto-close = **one summary per reconcile run**
+4. Whitelist coffee sale match without discount column is enough for now
 
-1. Accept Stage 4 without live ERP SQL validation yet?
-2. Is “any coffee sale” enough as match, or must discount flag be required?
-3. Fix concurrent redeem before PWA?
-4. Telegram: one alert per auto-close vs one summary per reconcile run?
+**Stage 5 Cashier PWA: APPROVED.**

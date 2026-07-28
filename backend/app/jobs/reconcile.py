@@ -21,7 +21,7 @@ from app.models import (
     Promocode,
     PromocodeStatus,
 )
-from app.services.promocode_close import close_promocode
+from app.services.promocode_close import close_promocode, lock_promocode_by_id
 from app.services.telegram import send_alert
 
 logger = logging.getLogger(__name__)
@@ -96,27 +96,40 @@ def _auto_close_active(
         if not _has_sale_in_window(customer_sales, since=created, until=now):
             continue
 
+        locked = lock_promocode_by_id(db, promo.id)
+        if locked is None or locked.status != PromocodeStatus.ACTIVE:
+            continue
+        if _is_expired(locked, now=now):
+            continue
+
         close_promocode(
             db,
-            promo,
+            locked,
             action_type=CheckerActionType.AUTO_CLOSE,
             point_id=RECONCILE_POINT_ID,
             erp_sale_matched=True,
             now=now,
         )
-        result.auto_closed.append(promo.promocode)
+        result.auto_closed.append(locked.promocode)
 
         # Decisions: alerts for reconcile changes are mandatory.
         send_alert(
             db,
             event_type="reconcile_auto_close",
-            dedup_key=f"auto_close:{promo.promocode}:{now.date().isoformat()}",
+            dedup_key=f"auto_close:{locked.promocode}:{now.date().isoformat()}",
             message=(
-                f"AUTO_CLOSE promocode={promo.promocode} "
-                f"customer_erp_id={promo.customer_erp_id}"
+                f"AUTO_CLOSE promocode={locked.promocode} "
+                f"customer_erp_id={locked.customer_erp_id}"
             ),
             settings=settings,
         )
+
+
+def _is_expired(promocode: Promocode, *, now: datetime) -> bool:
+    expires_at = promocode.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=UTC)
+    return expires_at <= now
 
 
 def _fraud_check_manual_closes(

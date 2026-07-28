@@ -21,8 +21,14 @@ After each stage in the implementation agent, paste:
 5. Open questions listed before next stage
 6. Docs not stale (AGENTS / handoff / README / plan agree)
 
-## Last audit
+## Audits
 
-- Date: 2026-07-28
-- Scope: Stages 1–4
-- Result: see `docs/reports/supervisor-audit-2026-07-28.md`
+- 2026-07-28 Stages 1–4: [`docs/reports/supervisor-audit-2026-07-28.md`](reports/supervisor-audit-2026-07-28.md)
+- 2026-07-28 Stage 5 gate: [`docs/reports/supervisor-gate-stage5-2026-07-28.md`](reports/supervisor-gate-stage5-2026-07-28.md)
+- 2026-07-28 Stage 5 close: [`docs/reports/supervisor-audit-stage5-2026-07-28.md`](reports/supervisor-audit-stage5-2026-07-28.md) — **PASS**
+
+## Current green light
+
+- Stages 1–5: closed (Stage 4 local/mock; Stage 5 PWA PASS)
+- **Next: Stage 6 Admin UI** after supervisor PASS on 5.1
+- Stage 5.1 redeem lock: **done**

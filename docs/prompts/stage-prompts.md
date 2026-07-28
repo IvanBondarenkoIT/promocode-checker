@@ -17,8 +17,8 @@ STAGE-GATE (обязательно на каждом этапе):
    - какие тесты / проверки
    - что могли упустить
    - какие вопросы нужно уточнить ДО следующего этапа
-8. Коммиты/push — только если пользователь явно попросил.
-9. Не начинай следующий этап без явного OK пользователя.
+8. В конце этапа: commit + push на feature/*, merge в develop, push develop (не спрашивать владельца).
+9. Не начинай следующий этап без явного OK пользователя / надзирателя.
 ```
 
 Also reuse the pack in [`project-prompts.md`](project-prompts.md) sections `0`, `2`, `3`.
@@ -43,30 +43,30 @@ Already delivered:
 - report: `docs/reports/stage-04-erp-reconcile.md`
 - tests: 28 passed
 
-## Stage 5 — Cashier PWA — NEXT
+## Stage 5 — Cashier PWA — DONE (supervisor PASS)
 
-```text
-Этап 5: cashier PWA.
-Сначала прочитай AGENTS.md, docs/decisions.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/reports/stage-04-erp-reconcile.md.
-Must-have: absolute autofocus, numeric 8 digits, scanner Enter, 1.5s debounce, status colors, audio feedback, point_id.
-No cashier login. Session heartbeat only.
-Не начинай Admin UI / desktop / deploy.
+Already delivered:
 
-STAGE-GATE (обязательно):
-- тесты/ручная проверка сканера
-- ревью
-- docs/reports/stage-05-cashier-pwa.md
-- обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
-- короткий доклад: сделано / проверки / упущения / вопросы до Stage 6
-- коммиты только по явной просьбе
-- следующий этап только после OK
-```
+- Vite/React cashier PWA + heartbeat endpoint
+- report: `docs/reports/stage-05-cashier-pwa.md`
+- supervisor: `docs/reports/supervisor-audit-stage5-2026-07-28.md` — PASS
+- tests: backend 29 passed, frontend 8 passed
 
-## Stage 6 — Admin UI
+## Stage 5.1 — Concurrent redeem lock — DONE
+
+Already delivered:
+
+- FOR UPDATE on redeem + reconcile auto-close
+- report: `docs/reports/stage-05-1-redeem-lock.md`
+- tests: backend 31 passed
+
+## Stage 6 — Admin UI — NEXT
 
 ```text
 Этап 6: admin UI.
-Сначала прочитай AGENTS.md, docs/decisions.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/reports/stage-05-cashier-pwa.md.
+Сначала прочитай AGENTS.md, docs/decisions.md, docs/plan/IMPLEMENTATION_PLAN.md,
+docs/reports/stage-05-cashier-pwa.md, docs/reports/stage-05-1-redeem-lock.md.
+Тот же Vite app: отдельный route /admin + login.
 Roles admin/viewer from env.
 Dashboard + all tables + logs + fraud + reconcile health.
 Admin full edits including USED→ACTIVE with audit reason.
@@ -79,7 +79,7 @@ STAGE-GATE (обязательно):
 - docs/reports/stage-06-admin-ui.md
 - обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
 - короткий доклад: сделано / проверки / упущения / вопросы до Stage 7
-- коммиты только по явной просьбе
+- commit + push feature branch and develop
 - следующий этап только после OK
 ```
 
@@ -97,7 +97,7 @@ STAGE-GATE (обязательно):
 - docs/reports/stage-07-desktop-wrapper.md
 - обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
 - короткий доклад: сделано / проверки / упущения / вопросы до Stage 8
-- коммиты только по явной просьбе
+- commit + push feature branch and develop
 - следующий этап только после OK
 ```
 
@@ -116,7 +116,7 @@ STAGE-GATE (обязательно):
 - docs/reports/stage-08-deploy.md
 - обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
 - короткий доклад: сделано / проверки / упущения / вопросы до Stage 9
-- коммиты только по явной просьбе
+- commit + push feature branch and develop
 - следующий этап только после OK
 ```
 
@@ -134,7 +134,7 @@ STAGE-GATE (обязательно):
 - docs/reports/stage-09-cicd.md
 - обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
 - короткий доклад: сделано / проверки / упущения / вопросы до Stage 10 (runbooks)
-- коммиты только по явной просьбе
+- commit + push feature branch and develop
 - следующий этап только после OK
 ```
 

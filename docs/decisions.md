@@ -68,6 +68,36 @@ Env:
 - `TELEGRAM_ALERT_CHAT_ID`
 - dedup window to avoid spam
 
+Telegram auto-close delivery mode:
+
+- **one summary message per reconcile run** (not one alert per closed code)
+- fraud warnings and job crashes remain event alerts with dedup
+
+## Stage 4 / Stage 5 gate (locked 2026-07-28)
+
+Supervisor gate before Cashier PWA:
+
+1. Stage 4 is accepted as **done for local/mock**. Live Granit SQL validation is a follow-up (`Stage 4.1`), not a Stage 5 blocker.
+2. Concurrent redeem row-lock is **deferred until after Stage 5 PWA**.
+3. Telegram reconcile auto-close uses **run summary**, not per-code spam.
+
+Coffee sale match for reconcile remains: whitelist group sale in window is enough for now; a strict discount-column filter is a later ERP refinement after live SQL validation.
+
+## Stage 5 / Stage 6 gate (locked 2026-07-28)
+
+Supervisor closed Stage 5 as **PASS**. Answers before Stage 6:
+
+1. **Admin UI packaging:** same Vite app as cashier, separate protected route `/admin` (and login page). Not a second standalone frontend app for MVP.
+2. **Concurrent redeem lock:** do as **Stage 5.1** mini-fix **before** Stage 6 Admin UI. Use DB row lock / safe close so double redeem cannot double-close.
+3. **Git:** Stage 5 commit is recommended after PASS, but agents commit/push **only when the user explicitly asks**. Push is optional unless user requests remote backup/CI.
+
+Stage 5 accepted follow-ups (not Stage 5 blockers):
+
+- Hardware scanner check on RDP before Stage 7
+- Persisted cashier sessions table only if Admin needs it
+- Static frontend from FastAPI in Stage 8
+
+
 ## Delivery targets
 
 1. Local development first
@@ -89,3 +119,16 @@ Every stage ends with:
 2. review
 3. short markdown report in `docs/reports/`
 4. open questions clarified before next stage
+5. **git commit + push** on `feature/*`, merge to `develop`, push (do not ask owner each time)
+
+## Git / delivery workflow (locked 2026-07-28)
+
+At the end of **every** stage or sub-stage (e.g. 5.1):
+
+1. Run stage tests and ruff/lint as applicable
+2. Write/update `docs/reports/stage-XX-....md`
+3. Update AGENTS / handoff / plan / INDEX / prompts
+4. Commit on `feature/*` branch with a clear message
+5. Merge into `develop` and **push** `feature/*` and `develop` to origin
+
+Agents must **not** re-ask «нужен ли commit/push?» — this is the default stage gate.

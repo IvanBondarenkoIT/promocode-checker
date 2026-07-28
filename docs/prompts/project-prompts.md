@@ -9,7 +9,7 @@ Reusable prompts for Cursor agents working on promocode-checker.
 Прочитай AGENTS.md, docs/context-handoff.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/decisions.md и последние docs/reports/.
 Не переспрашивай уже зафиксированные решения из docs/decisions.md.
 Работай по stage-gate на КАЖДОМ этапе:
-тесты → ревью → docs/reports/stage-XX → обновить handoff/plan/INDEX/prompts → короткий доклад (сделано/тесты/упущения/вопросы) → следующий этап только после OK.
+тесты → ревью → docs/reports/stage-XX → обновить handoff/plan/INDEX/prompts → commit+push → короткий доклад → следующий этап только после OK.
 Сейчас делаем: <STAGE_NAME>.
 Бери готовый текст этапа из docs/prompts/stage-prompts.md.
 ```
@@ -39,8 +39,7 @@ Reusable prompts for Cursor agents working on promocode-checker.
 - обновить docs/reports/stage-XX-....md
 - обновить AGENTS.md, docs/context-handoff.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/INDEX.md, docs/prompts/stage-prompts.md
 - в конце дать короткий доклад: сделано / тесты / упущения / вопросы до следующего этапа
-- коммиты/push только по явной просьбе
-- не начинать следующий этап без OK
+- в конце: commit + push (feature/* → develop), без вопроса владельцу
 STAGE-GATE шаблон и тексты этапов: docs/prompts/stage-prompts.md
 ```
 

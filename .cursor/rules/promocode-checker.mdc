@@ -20,7 +20,7 @@ You are working in `promocode-checker`.
 - Follow the staged plan. Do not skip stage gates.
 - Every stage ends with: tests → review → markdown report → open questions.
 - Do not start the next stage until the current stage report exists and open blockers are clarified.
-- Do not commit unless the user explicitly asks.
+- At every stage end: commit on `feature/*`, merge to `develop`, push both — do not ask owner.
 
 ## Locked decisions (do not re-ask)
 
@@ -39,8 +39,10 @@ You are working in `promocode-checker`.
 - Stage 1 done
 - Stage 2 done (migrations + tests on Postgres `:5433`)
 - Stage 3 done (cashier check/redeem/barcode)
-- Stage 4 done (ERP reconcile + Telegram, 28 tests passed)
-- Next: Stage 5 Cashier PWA
+- Stage 5 done (Cashier PWA, supervisor PASS)
+- Stage 5.1 done (redeem lock, 31 backend tests)
+- Next: Stage 6 Admin UI (after supervisor on 5.1)
+- At stage end: commit + push (do not ask)
 
 ## Coding expectations
 
