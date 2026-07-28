@@ -131,13 +131,13 @@ Deferred (resolved by Stage 5/6 gate):
 - [x] Controlled edits + audit (USED→ACTIVE, fraud review)
 - [x] Tests + report (`docs/reports/stage-06-admin-ui.md`)
 
-### Stage 7 — Desktop wrapper — NEXT
+### Stage 7 — Desktop wrapper — DONE
 
-- [ ] Lightweight shell for cashiers
-- [ ] Point binding + fullscreen-friendly launch
-- [ ] Tests/manual RDP check + report
+- [x] PowerShell launcher (`desktop/launch-cashier.ps1`) — Edge/Chrome app mode
+- [x] Per-machine config (`pointId`, `cashierBaseUrl`, fullscreen)
+- [x] Tests + report (`docs/reports/stage-07-desktop-wrapper.md`)
 
-### Stage 8 — Docker / Railway / server-prod
+### Stage 8 — Docker / Railway / server-prod — NEXT
 
 - [ ] App Dockerfile with static frontend
 - [ ] Local and prod compose

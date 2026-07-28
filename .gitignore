@@ -35,6 +35,8 @@ frontend/.npm/
 
 .tools/
 
+desktop/config.json
+
 logs/
 data/
 tmp/

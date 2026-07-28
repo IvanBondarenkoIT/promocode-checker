@@ -77,26 +77,11 @@ Report: [`reports/stage-06-admin-ui.md`](reports/stage-06-admin-ui.md)
 - Dummy seed codes, migration auto-recovery
 - Report: [`reports/stage-06-1-cashier-polish.md`](reports/stage-06-1-cashier-polish.md)
 
-## Stage 7 — Desktop wrapper — NEXT
+## Stage 7 — Desktop wrapper — DONE
 
-```text
-Этап 7: desktop wrapper for RDP cashiers.
-Сначала прочитай AGENTS.md, docs/decisions.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/reports/stage-06-admin-ui.md.
-Lightweight app-like launch, point_id binding, fullscreen-friendly.
-UI strings: English only (same as cashier/admin; no i18n).
-Не начинай Docker/Railway/CI.
+Report: [`reports/stage-07-desktop-wrapper.md`](reports/stage-07-desktop-wrapper.md)
 
-STAGE-GATE (обязательно):
-- тесты/ручная проверка под RDP
-- ревью
-- docs/reports/stage-07-desktop-wrapper.md
-- обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
-- короткий доклад: сделано / проверки / упущения / вопросы до Stage 8
-- commit + push feature branch and develop
-- следующий этап только после OK
-```
-
-## Stage 8 — Deploy
+## Stage 8 — Deploy — NEXT
 
 ```text
 Этап 8: Docker local/prod + Railway demo.

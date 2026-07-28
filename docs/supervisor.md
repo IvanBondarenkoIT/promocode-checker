@@ -30,5 +30,5 @@ After each stage in the implementation agent, paste:
 
 ## Current green light
 
-- Stages 1–6: closed
-- **Next: Stage 7 Desktop wrapper**
+- Stages 1–7: closed
+- **Next: Stage 8 Docker / Railway / server-prod**

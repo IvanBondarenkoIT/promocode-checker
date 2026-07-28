@@ -32,10 +32,11 @@
 
 ## Current status
 
-- Stages **1–6** complete (including 5.1 redeem lock).
+- Stages **1–7** complete (including 5.1, 6.1).
 - Cashier: `http://localhost:5173/?point_id=shop_01`
-- Admin: `http://localhost:5173/admin/login` (`.env` `ADMIN_*` / `VIEWER_*`)
-- Next: **Stage 7 — Desktop wrapper**
+- Desktop: `desktop/launch-cashier.ps1` (see `desktop/README.md`)
+- Admin: `http://localhost:5173/admin/login`
+- Next: **Stage 8 — Docker / Railway / server-prod**
 
 ## Continue in a new Cursor chat
 

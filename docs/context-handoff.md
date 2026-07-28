@@ -4,20 +4,17 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–6 и 5.1 закрыты. Следующий: Stage 7 Desktop wrapper.
-UI language: English only (cashier/admin/desktop; no i18n).
-Admin: http://localhost:5173/admin/login (ADMIN_* / VIEWER_* from .env)
+Этапы 1–7 и 5.1/6.1 закрыты. Следующий: Stage 8 Docker / Railway / server-prod.
+Desktop: desktop/launch-cashier.ps1 (config.json from config.example.json)
 Cashier: http://localhost:5173/?point_id=shop_01
 В конце этапа — commit+push без вопросов.
 ```
 
 ## Done
 
-- Stages 1–5, 5.1, 6 — see `docs/reports/`
+- Stages 1–7, 5.1, 6.1 — see `docs/reports/`
 
-## Next: Stage 7 — Desktop wrapper
-
-- Lightweight RDP shell, point_id binding, fullscreen-friendly
+## Next: Stage 8 — Docker / Railway / server-prod
 
 ## Commands
 

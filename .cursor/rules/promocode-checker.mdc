@@ -42,7 +42,9 @@ You are working in `promocode-checker`.
 - Stage 3 done (cashier check/redeem/barcode)
 - Stage 5 done (Cashier PWA, supervisor PASS)
 - Stage 6 done (Admin UI)
-- Next: Stage 7 desktop wrapper
+- Stage 6.1 done (cashier polish)
+- Stage 7 done (desktop wrapper)
+- Next: Stage 8 deploy
 
 ## Coding expectations
 
