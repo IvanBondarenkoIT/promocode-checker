@@ -1,11 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { CashierApp } from "./cashier/CashierApp";
-import "./styles/cashier.css";
+import App from "./App";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <CashierApp />
+    <App />
   </StrictMode>,
 );
