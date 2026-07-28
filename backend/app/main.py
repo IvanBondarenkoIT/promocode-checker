@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -7,7 +5,7 @@ from sqlalchemy import text
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.db.session import SessionLocal
-from app.static_files import mount_frontend
+from app.static_files import mount_frontend, resolve_static_dir
 
 settings = get_settings()
 
@@ -34,10 +32,6 @@ app.add_middleware(
 )
 app.include_router(api_router)
 
-static_path = Path(settings.static_dir).expanduser()
-if settings.static_dir.strip():
-    mount_frontend(app, static_path)
-
 
 @app.get("/health", tags=["system"])
 def healthcheck() -> dict[str, str | int]:
@@ -55,3 +49,8 @@ def healthcheck() -> dict[str, str | int]:
         "app_port": settings.app_port,
         "database": db_status,
     }
+
+
+static_path = resolve_static_dir(settings.static_dir)
+if static_path is not None:
+    mount_frontend(app, static_path)
