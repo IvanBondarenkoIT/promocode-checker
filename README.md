@@ -32,11 +32,11 @@
 
 ## Current status
 
-- Stages **1–7** complete (including 5.1, 6.1).
-- Cashier: `http://localhost:5173/?point_id=shop_01`
-- Desktop: `desktop/launch-cashier.ps1` (see `desktop/README.md`)
-- Admin: `http://localhost:5173/admin/login`
-- Next: **Stage 8 — Docker / Railway / server-prod**
+- Stages **1–8** complete.
+- **Docker stack:** `docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build` → `http://localhost:8000`
+- **Dev (Vite):** `http://localhost:5173/?point_id=shop_01`
+- **Desktop:** `desktop/launch-cashier.ps1`
+- Next: **Stage 9 — CI/CD**
 
 ## Continue in a new Cursor chat
 

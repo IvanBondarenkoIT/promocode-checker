@@ -1,7 +1,15 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def normalize_database_url(url: str) -> str:
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+psycopg://", 1)
+    if url.startswith("postgresql://") and "+psycopg" not in url:
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
 
 
 class Settings(BaseSettings):
@@ -54,9 +62,17 @@ class Settings(BaseSettings):
     telegram_dedup_window_seconds: int = Field(default=900, alias="TELEGRAM_DEDUP_WINDOW_SECONDS")
 
     frontend_base_url: str = Field(default="http://localhost:8000", alias="FRONTEND_BASE_URL")
+    static_dir: str = Field(default="", alias="STATIC_DIR")
     desktop_default_point_id: str = Field(default="shop_01", alias="DESKTOP_DEFAULT_POINT_ID")
     railway_public_domain: str = Field(default="", alias="RAILWAY_PUBLIC_DOMAIN")
     public_http_port: int = Field(default=8000, alias="PUBLIC_HTTP_PORT")
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _normalize_database_url(cls, value: object) -> object:
+        if isinstance(value, str):
+            return normalize_database_url(value)
+        return value
 
 
 @lru_cache

@@ -137,15 +137,14 @@ Deferred (resolved by Stage 5/6 gate):
 - [x] Per-machine config (`pointId`, `cashierBaseUrl`, fullscreen)
 - [x] Tests + report (`docs/reports/stage-07-desktop-wrapper.md`)
 
-### Stage 8 — Docker / Railway / server-prod — NEXT
+### Stage 8 — Docker / Railway / server-prod — DONE
 
-- [ ] App Dockerfile with static frontend
-- [ ] Local and prod compose
-- [ ] Railway demo config/env matrix
-- [ ] Healthchecks + restart policies + crash alerts
-- [ ] Tests/deploy smoke + report
+- [x] Dockerfile with static frontend
+- [x] Local + prod compose, Railway config
+- [x] Healthchecks, restart policies, reconcile worker, startup crash alert
+- [x] Report `docs/reports/stage-08-deploy.md`
 
-### Stage 9 — CI/CD
+### Stage 9 — CI/CD — NEXT
 
 - [ ] GitHub Actions lint/tests
 - [ ] Branch → environment mapping

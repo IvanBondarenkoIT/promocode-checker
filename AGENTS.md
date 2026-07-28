@@ -31,8 +31,9 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 - Stage 5.1 concurrent redeem lock: **done**
 - Stage 6 Admin UI: **done**
 - Stage 6.1 cashier polish: **done**
-- Stage 7 Desktop wrapper: **done** — `desktop/launch-cashier.ps1`, report `docs/reports/stage-07-desktop-wrapper.md`
-- Next: **Stage 8 — Docker / Railway / server-prod**
+- Stage 7 Desktop wrapper: **done**
+- Stage 8 Docker deploy: **done** — report `docs/reports/stage-08-deploy.md`
+- Next: **Stage 9 — CI/CD**
 
 ## Hard process rules
 

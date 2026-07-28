@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -5,6 +7,7 @@ from sqlalchemy import text
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.db.session import SessionLocal
+from app.static_files import mount_frontend
 
 settings = get_settings()
 
@@ -13,18 +16,27 @@ app = FastAPI(
     version="0.1.0",
     summary="Backend API for promo validation, cashier flows, admin tools, and ERP reconciliation.",
 )
+
+cors_origins = {
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    settings.frontend_base_url.rstrip("/"),
+}
+if settings.railway_public_domain.strip():
+    cors_origins.add(f"https://{settings.railway_public_domain.strip()}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        settings.frontend_base_url,
-    ],
+    allow_origins=sorted(cors_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 app.include_router(api_router)
+
+static_path = Path(settings.static_dir).expanduser()
+if settings.static_dir.strip():
+    mount_frontend(app, static_path)
 
 
 @app.get("/health", tags=["system"])

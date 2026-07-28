@@ -4,17 +4,15 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–7 и 5.1/6.1 закрыты. Следующий: Stage 8 Docker / Railway / server-prod.
-Desktop: desktop/launch-cashier.ps1 (config.json from config.example.json)
-Cashier: http://localhost:5173/?point_id=shop_01
-В конце этапа — commit+push без вопросов.
+Этапы 1–8 закрыты. Следующий: Stage 9 CI/CD.
+Docker stack: docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build
 ```
 
 ## Done
 
-- Stages 1–7, 5.1, 6.1 — see `docs/reports/`
+- Stages 1–8 — see `docs/reports/`
 
-## Next: Stage 8 — Docker / Railway / server-prod
+## Next: Stage 9 — CI/CD
 
 ## Commands
 

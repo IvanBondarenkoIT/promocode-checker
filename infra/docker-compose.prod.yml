@@ -1,0 +1,96 @@
+# Production stack for Windows Server Docker / internal host.
+# Usage on server:
+#   copy infra/.env.prod.example to infra/.env.prod and fill secrets
+#   docker compose --env-file infra/.env.prod -f infra/docker-compose.prod.yml up -d --build
+
+name: promocode-checker-prod
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-promocode_checker}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.prod}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-promocode_checker}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    env_file:
+      - .env.prod
+    environment:
+      APP_ENV: prod
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      STATIC_DIR: /app/static
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-promocode_checker}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:${PUBLIC_HTTP_PORT:-8000}}
+      ERP_ACCESS_MODE: ${ERP_ACCESS_MODE:-proxy}
+    ports:
+      - "${PUBLIC_HTTP_PORT:-8000}:8000"
+    networks:
+      - internal
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  reconcile:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    env_file:
+      - .env.prod
+    entrypoint: ["/app/infra/docker-worker-entrypoint.sh"]
+    command: ["python", "/app/scripts/run_reconcile_loop.py"]
+    environment:
+      APP_ENV: prod
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-promocode_checker}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      ERP_ACCESS_MODE: ${ERP_ACCESS_MODE:-proxy}
+    networks:
+      - internal
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:

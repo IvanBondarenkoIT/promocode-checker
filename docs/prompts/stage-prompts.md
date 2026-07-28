@@ -81,27 +81,11 @@ Report: [`reports/stage-06-admin-ui.md`](reports/stage-06-admin-ui.md)
 
 Report: [`reports/stage-07-desktop-wrapper.md`](reports/stage-07-desktop-wrapper.md)
 
-## Stage 8 — Deploy — NEXT
+## Stage 8 — Deploy — DONE
 
-```text
-Этап 8: Docker local/prod + Railway demo.
-Сначала прочитай AGENTS.md, docs/decisions.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/reports/stage-07-desktop-wrapper.md.
-Reuse patterns from dimkava-big-book / prices-monitoring-scrappers / stock-safety-monitor.
-Healthchecks + crash alerts + reconcile cron wiring.
-Product UI remains English only (no i18n).
-Не начинай полный CI/CD polish без необходимости.
+Report: [`reports/stage-08-deploy.md`](reports/stage-08-deploy.md)
 
-STAGE-GATE (обязательно):
-- build/smoke checks local (+ Railway config review)
-- ревью
-- docs/reports/stage-08-deploy.md
-- обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
-- короткий доклад: сделано / проверки / упущения / вопросы до Stage 9
-- commit + push feature branch and develop
-- следующий этап только после OK
-```
-
-## Stage 9 — CI/CD
+## Stage 9 — CI/CD — NEXT
 
 ```text
 Этап 9: GitHub Actions + branch→env mapping.

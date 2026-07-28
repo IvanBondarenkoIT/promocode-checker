@@ -123,6 +123,20 @@ npm test
 
 If npm SSL fails on this machine, use `npm install --strict-ssl=false` (same class of issue as pip `--trusted-host`).
 
+## Docker full stack (Stage 8)
+
+Single container serves API + built cashier/admin UI:
+
+```powershell
+docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build
+```
+
+- Cashier: `http://localhost:8000/?point_id=shop_01`
+- Admin: `http://localhost:8000/admin/login`
+- Health: `http://localhost:8000/health`
+
+Production and Railway: see [`docs/reports/stage-08-deploy.md`](reports/stage-08-deploy.md) and [`env-matrix.md`](env-matrix.md).
+
 ## Stage 1 scope
 
 At this stage the repository contains:

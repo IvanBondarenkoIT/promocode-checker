@@ -44,7 +44,8 @@ You are working in `promocode-checker`.
 - Stage 6 done (Admin UI)
 - Stage 6.1 done (cashier polish)
 - Stage 7 done (desktop wrapper)
-- Next: Stage 8 deploy
+- Stage 8 done (Docker / Railway / prod compose)
+- Next: Stage 9 CI/CD
 
 ## Coding expectations
 

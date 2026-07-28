@@ -10,12 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from sqlalchemy import select  # noqa: E402
-
 from app.core.config import get_settings  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
 from app.models import Promocode, PromocodeStatus  # noqa: E402
 from app.services.promocode_generator import calculate_expires_at  # noqa: E402
+from sqlalchemy import select  # noqa: E402
 
 
 @dataclass(frozen=True)
@@ -33,8 +32,12 @@ DUMMY_PROMOCODES: tuple[DummyPromocode, ...] = (
     DummyPromocode("DEMO-ACTIVE-1", "10000001", PromocodeStatus.ACTIVE, "ACTIVE - redeem OK"),
     DummyPromocode("DEMO-ACTIVE-2", "10000002", PromocodeStatus.ACTIVE, "ACTIVE - redeem OK"),
     DummyPromocode("DEMO-ACTIVE-3", "10000003", PromocodeStatus.ACTIVE, "ACTIVE - redeem OK"),
-    DummyPromocode("DEMO-USED-1", "20000001", PromocodeStatus.USED, "USED - already closed", redeemed=True),
-    DummyPromocode("DEMO-USED-2", "20000002", PromocodeStatus.USED, "USED - already closed", redeemed=True),
+    DummyPromocode(
+        "DEMO-USED-1", "20000001", PromocodeStatus.USED, "USED - already closed", redeemed=True
+    ),
+    DummyPromocode(
+        "DEMO-USED-2", "20000002", PromocodeStatus.USED, "USED - already closed", redeemed=True
+    ),
     DummyPromocode(
         "DEMO-EXPIRED-1",
         "30000001",

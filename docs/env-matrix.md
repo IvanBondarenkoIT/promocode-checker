@@ -14,6 +14,14 @@
 | `VIEWER_USERNAME` / `VIEWER_PASSWORD` | local defaults | secrets | secrets | |
 | `TELEGRAM_BOT_TOKEN` | optional local | recommended | required | |
 | `TELEGRAM_ALERT_CHAT_ID` | optional local | recommended | required | |
+| `FRONTEND_BASE_URL` | `http://localhost:8000` | `https://$RAILWAY_PUBLIC_DOMAIN` | server URL | same origin when static served from FastAPI |
+| `STATIC_DIR` | empty (Vite dev) | `/app/static` | `/app/static` | set in Docker image |
 | `DEFAULT_POINT_ID` | `shop_01` | demo point | real shop ids | |
 
 See `.env.example` for the full template.
+
+## Docker deploy (Stage 8)
+
+- Local stack: `docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build`
+- Prod: `infra/docker-compose.prod.yml` + `infra/.env.prod`
+- Railway: `railway.toml` + `infra/railway.env.example`
