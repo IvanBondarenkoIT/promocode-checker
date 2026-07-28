@@ -22,7 +22,7 @@
 
 ## Current status
 
-Stages 1–2 are complete: repo bootstrap, FastAPI `/health`, SQLAlchemy models, Alembic migration, local Postgres via Compose (`5433`), and promocode generation tests.
+Stages 1–3 are complete: repo bootstrap, data layer, and cashier API (`check` / `redeem` / barcode).
 
 ## Quick start
 
@@ -35,9 +35,12 @@ Stages 1–2 are complete: repo bootstrap, FastAPI `/health`, SQLAlchemy models,
 4. Start local Postgres and apply migrations:
    - `docker compose -f infra/docker-compose.yml up -d`
    - `python scripts/run_migrations.py`
-5. Run the API:
+5. (Optional) Seed demo promocodes:
+   - `python scripts/seed_promocodes.py`
+6. Run the API:
    - `uvicorn app.main:app --app-dir backend --reload`
-6. Open the health endpoint:
-   - `http://localhost:8000/health`
+7. Open:
+   - Health: `http://localhost:8000/health`
+   - Docs: `http://localhost:8000/docs`
 
-Cashier API endpoints, frontend PWA, ERP reconciliation, and production deploy assets come in later stages. See `docs/testing-stages.md` and `docs/branching.md`.
+Frontend PWA, ERP reconciliation, and production deploy assets come in later stages. See `docs/testing-stages.md` and `docs/branching.md`.

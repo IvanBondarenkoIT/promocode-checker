@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from sqlalchemy import text
 
+from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.db.session import SessionLocal
 
@@ -11,6 +12,7 @@ app = FastAPI(
     version="0.1.0",
     summary="Backend API for promo validation, cashier flows, admin tools, and ERP reconciliation.",
 )
+app.include_router(api_router)
 
 
 @app.get("/health", tags=["system"])

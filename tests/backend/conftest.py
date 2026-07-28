@@ -4,7 +4,10 @@ from functools import lru_cache
 
 import pytest
 from app.core.config import Settings, get_settings
+from app.db.session import get_db
+from app.main import app
 from app.models import Base
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -63,3 +66,14 @@ def db_session(engine) -> Generator[Session, None, None]:
         session.close()
         transaction.rollback()
         connection.close()
+
+
+@pytest.fixture
+def client(db_session: Session) -> Generator[TestClient, None, None]:
+    def override_get_db() -> Generator[Session, None, None]:
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()

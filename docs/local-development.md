@@ -54,6 +54,25 @@ uvicorn app.main:app --app-dir backend --reload
 GET /health
 ```
 
+Optional seed for cashier testing:
+
+```powershell
+python scripts/seed_promocodes.py
+```
+
+Cashier API examples:
+
+```powershell
+# check
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/cashier/check -ContentType "application/json" -Body '{"code":"12345678"}'
+
+# redeem
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/cashier/redeem -ContentType "application/json" -Body '{"code":"12345678","point_id":"shop_01"}'
+
+# barcode PNG
+Invoke-WebRequest -Uri http://localhost:8000/api/v1/cashier/barcode/12345678 -OutFile promo.png
+```
+
 ## Stage 1 scope
 
 At this stage the repository contains:
@@ -72,4 +91,11 @@ At this stage the repository contains:
 - local Postgres compose file on port `5433`
 - backend tests for models and promocode generation
 
-Stages 1–2 are closed in code. Next: cashier API (`check` / `redeem` / barcode) in Stage 3, then frontend PWA, ERP connectors, admin UI, and production Docker/Railway assets.
+## Stage 3 scope
+
+- Cashier endpoints: `POST /api/v1/cashier/check`, `POST /api/v1/cashier/redeem`, `GET /api/v1/cashier/barcode/{code}`
+- `checker_logs` for `SCAN_CHECK` / `MANUAL_CLOSE`
+- seed script `scripts/seed_promocodes.py`
+- API tests for payloads and log creation
+
+Stages 1–3 are closed in code. Next: ERP reconcile + fraud/Telegram (Stage 4), then cashier PWA UX (Stage 5).
