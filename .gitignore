@@ -33,6 +33,8 @@ backend/.mypy_cache/
 backend/.ruff_cache/
 frontend/.npm/
 
+.tools/
+
 logs/
 data/
 tmp/

@@ -73,6 +73,26 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/v1/cashier/redeem 
 Invoke-WebRequest -Uri http://localhost:8000/api/v1/cashier/barcode/12345678 -OutFile promo.png
 ```
 
+## Cashier PWA (Stage 5)
+
+In a second terminal:
+
+```powershell
+cd D:\CursorProjects\promocode-checker\frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173/?point_id=shop_01` (Vite proxies `/api` to backend `:8000`).
+
+Frontend tests:
+
+```powershell
+npm test
+```
+
+If npm SSL fails on this machine, use `npm install --strict-ssl=false` (same class of issue as pip `--trusted-host`).
+
 ## Stage 1 scope
 
 At this stage the repository contains:
@@ -98,7 +118,7 @@ At this stage the repository contains:
 - seed script `scripts/seed_promocodes.py`
 - API tests for payloads and log creation
 
-Stages 1–4 are closed in code. Next: cashier PWA UX (Stage 5).
+Stages 1–5 are closed in code. Next: Admin UI (Stage 6) after supervisor check on Stage 5.
 
 ```powershell
 python scripts/run_reconcile.py

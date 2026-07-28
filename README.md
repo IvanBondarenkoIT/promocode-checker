@@ -32,9 +32,17 @@
 
 ## Current status
 
-- Stages **1–4 complete**: bootstrap, data layer, cashier API, ERP reconcile + Telegram.
-- Next: **Stage 5 — Cashier PWA**.
-- Supervisor audits: [`docs/supervisor.md`](docs/supervisor.md), [`docs/reports/supervisor-audit-2026-07-28.md`](docs/reports/supervisor-audit-2026-07-28.md).
+- Stages **1–5 complete** — Stage 5 supervisor **PASS**.
+- Next: **Stage 5.1 concurrent redeem lock**, then **Stage 6 Admin UI** (`/admin` in same Vite app).
+- Supervisor: [`docs/supervisor.md`](docs/supervisor.md), [`docs/reports/supervisor-audit-stage5-2026-07-28.md`](docs/reports/supervisor-audit-stage5-2026-07-28.md).
+
+## Continue in a new Cursor chat
+
+```text
+Продолжаем promocode-checker.
+Прочитай AGENTS.md, docs/context-handoff.md, docs/decisions.md, docs/supervisor.md.
+Stage 5 PASS. Сейчас Stage 5.1 concurrent redeem lock, потом Stage 6 Admin UI.
+```
 
 ## Quick start
 
@@ -51,17 +59,11 @@
    - `python scripts/seed_promocodes.py`
 6. Run the API:
    - `uvicorn app.main:app --app-dir backend --reload`
-7. Open:
+7. Run cashier PWA:
+   - `cd frontend`
+   - `npm install`
+   - `npm run dev`
+   - open `http://localhost:5173/?point_id=shop_01`
+8. Open:
    - Health: `http://localhost:8000/health`
    - Docs: `http://localhost:8000/docs`
-
-## Continue in a new Cursor chat
-
-Paste:
-
-```text
-Продолжаем promocode-checker.
-Прочитай AGENTS.md, docs/context-handoff.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/decisions.md и docs/reports/.
-Этапы 1–4 закрыты. Следующий: Stage 5 Cashier PWA.
-Надзиратель сверяет этапы по docs/supervisor.md.
-```

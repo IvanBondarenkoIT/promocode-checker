@@ -1,6 +1,8 @@
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
@@ -14,6 +16,16 @@ router = APIRouter(prefix="/cashier", tags=["cashier"])
 
 DbSession = Annotated[Session, Depends(get_db)]
 AppSettings = Annotated[Settings, Depends(get_settings)]
+
+
+class HeartbeatRequest(BaseModel):
+    point_id: str | None = Field(default=None, max_length=64)
+
+
+class HeartbeatResponse(BaseModel):
+    ok: bool = True
+    point_id: str
+    server_time: datetime
 
 
 def _resolve_point_id(point_id: str | None, settings: Settings) -> str:
@@ -43,6 +55,15 @@ def redeem_code(
         db,
         code=payload.code,
         point_id=_resolve_point_id(payload.point_id, settings),
+    )
+
+
+@router.post("/heartbeat", response_model=HeartbeatResponse)
+def heartbeat(payload: HeartbeatRequest, settings: AppSettings) -> HeartbeatResponse:
+    return HeartbeatResponse(
+        ok=True,
+        point_id=_resolve_point_id(payload.point_id, settings),
+        server_time=datetime.now(UTC),
     )
 
 
