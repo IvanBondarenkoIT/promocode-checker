@@ -60,6 +60,36 @@ Optional seed for cashier testing:
 python scripts/seed_promocodes.py
 ```
 
+Dummy codes (fixed, idempotent — safe to re-run):
+
+| Code | Expected result |
+|------|-----------------|
+| `10000001`–`10000003` | ACTIVE |
+| `20000001`–`20000002` | USED |
+| `30000001`–`30000002` | EXPIRED |
+| `99999999` | NOT_FOUND (not in DB) |
+
+### Troubleshooting
+
+**Admin/cashier API returns 500, logs show `relation "promocodes" does not exist`:**
+
+The DB was stamped by Alembic but tables were never created. Re-apply schema:
+
+```powershell
+python scripts/run_migrations.py
+python scripts/seed_promocodes.py
+```
+
+`run_migrations.py` auto-detects this broken state and re-applies the migration.
+
+**Vite proxy errors (`ECONNREFUSED 127.0.0.1:8000`):**
+
+Start the backend before using the UI:
+
+```powershell
+uvicorn app.main:app --app-dir backend --reload
+```
+
 Cashier API examples:
 
 ```powershell

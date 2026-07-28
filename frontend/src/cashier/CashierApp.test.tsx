@@ -7,11 +7,13 @@ import { CashierApp } from "./CashierApp";
 const checkPromocode = vi.fn();
 const redeemPromocode = vi.fn();
 const sendHeartbeat = vi.fn();
+const checkHealth = vi.fn();
 
 vi.mock("./api", () => ({
   checkPromocode: (...args: unknown[]) => checkPromocode(...args),
   redeemPromocode: (...args: unknown[]) => redeemPromocode(...args),
   sendHeartbeat: (...args: unknown[]) => sendHeartbeat(...args),
+  checkHealth: (...args: unknown[]) => checkHealth(...args),
 }));
 
 vi.mock("./audio", () => ({
@@ -26,6 +28,8 @@ describe("CashierApp", () => {
     checkPromocode.mockReset();
     redeemPromocode.mockReset();
     sendHeartbeat.mockReset();
+    checkHealth.mockReset();
+    checkHealth.mockResolvedValue(true);
     sendHeartbeat.mockResolvedValue({
       ok: true,
       point_id: "shop_test",
@@ -66,7 +70,7 @@ describe("CashierApp", () => {
     await waitFor(() => {
       expect(checkPromocode).toHaveBeenCalledWith("12345678", "shop_test");
     });
-    expect(screen.getByTestId("status-panel")).toHaveTextContent("АКТИВЕН");
+    expect(screen.getByTestId("status-panel")).toHaveTextContent("ACTIVE");
     expect(screen.getByTestId("redeem-button")).not.toBeDisabled();
   });
 

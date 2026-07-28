@@ -30,9 +30,7 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
   - supervisor: `docs/reports/supervisor-audit-stage5-2026-07-28.md`
 - Stage 5.1 concurrent redeem lock: **done**
 - Stage 6 Admin UI: **done**
-  - `/admin` login, dashboard, tables, audit edits (admin only)
-  - tests: backend **36 passed**, frontend **10 passed**
-  - report: `docs/reports/stage-06-admin-ui.md`
+- Stage 6.1 cashier polish: **done** — report `docs/reports/stage-06-1-cashier-polish.md`
 - Next: **Stage 7 — Desktop wrapper**
 
 ## Hard process rules
@@ -44,6 +42,7 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 - **Do not ask whether to commit/push** — at stage end always commit on `feature/*`, merge to `develop`, push both (see [`docs/branching.md`](docs/branching.md)).
 - Do not invent ERP schema assumptions beyond the documented coffee beans whitelist and proxy/direct modes.
 - Do not re-ask locked decisions from `docs/decisions.md`.
+- **UI language: English only** for all user-facing strings (cashier, admin, desktop). No i18n / no mixed locales in the product UI.
 
 ## Environments
 

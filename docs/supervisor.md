@@ -9,6 +9,7 @@ After each stage in the implementation agent, paste:
 ```text
 Надзиратель: проверь Stage N.
 Сверь docs/reports/stage-0N-*.md, код и docs/plan/IMPLEMENTATION_PLAN.md + docs/decisions.md.
+Проверь, что продуктовый UI на английском (English only, без i18n).
 Дай вердикт PASS / PARTIAL / FAIL, отклонения, блокеры до следующего этапа.
 ```
 
@@ -16,7 +17,7 @@ After each stage in the implementation agent, paste:
 
 1. Stage report exists and has: scope / implementation / tests / review / risks
 2. Plan checklist matches reality
-3. Locked decisions not violated
+3. Locked decisions not violated (incl. **English-only product UI**)
 4. Tests claimed in report are plausible / re-runnable
 5. Open questions listed before next stage
 6. Docs not stale (AGENTS / handoff / README / plan agree)

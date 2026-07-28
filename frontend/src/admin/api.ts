@@ -47,8 +47,17 @@ async function request<T>(
   }
   const response = await fetch(path, { ...options, headers });
   if (!response.ok) {
+    let message = `HTTP ${response.status}`;
     const text = await response.text();
-    throw new Error(text || `HTTP ${response.status}`);
+    if (text) {
+      try {
+        const payload = JSON.parse(text) as { detail?: string };
+        message = payload.detail ?? text;
+      } catch {
+        message = text;
+      }
+    }
+    throw new Error(message);
   }
   return (await response.json()) as T;
 }

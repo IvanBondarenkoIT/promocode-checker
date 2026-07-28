@@ -30,19 +30,19 @@ export function resultToTone(result: string | null): StatusTone {
 export function resultLabel(result: string | null): string {
   switch (result) {
     case "valid":
-      return "АКТИВЕН";
+      return "ACTIVE";
     case "redeemed":
-      return "ПРИМЕНЁН";
+      return "APPLIED";
     case "used":
-      return "ИСПОЛЬЗОВАН";
+      return "USED";
     case "expired":
-      return "ИСТЁК";
+      return "EXPIRED";
     case "not_found":
-      return "НЕ НАЙДЕН";
+      return "NOT FOUND";
     case "invalid_format":
-      return "НЕВЕРНЫЙ ФОРМАТ";
+      return "INVALID FORMAT";
     default:
-      return "ГОТОВ К СКАНИРОВАНИЮ";
+      return "READY TO SCAN";
   }
 }
 

@@ -33,6 +33,7 @@ You are working in `promocode-checker`.
 - Telegram alerts for changes, fraud, and crashes.
 - Targets: local first, Railway demo, Windows Server Docker prod for RDP cashiers.
 - Both web/PWA and desktop wrapper.
+- **UI language: English only** — cashier, admin, desktop; no i18n / no Russian labels in product UI.
 
 ## Current progress
 

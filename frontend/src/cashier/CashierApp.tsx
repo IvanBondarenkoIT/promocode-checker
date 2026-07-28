@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 
-import { checkPromocode, redeemPromocode, sendHeartbeat } from "./api";
+import { checkHealth, checkPromocode, redeemPromocode, sendHeartbeat } from "./api";
 import { playErrorBuzz, playSuccessBeep } from "./audio";
 import {
   DEBOUNCE_LOCK_MS,
@@ -20,13 +20,6 @@ import {
 import { heartbeatIntervalMs, resolvePointId } from "./pointId";
 import type { CashierCodeResponse } from "./types";
 
-function formatTime(value: Date | null): string {
-  if (!value) {
-    return "—";
-  }
-  return value.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
-
 export function CashierApp() {
   const inputRef = useRef<HTMLInputElement>(null);
   const lockTimerRef = useRef<number | null>(null);
@@ -36,19 +29,13 @@ export function CashierApp() {
   const [busy, setBusy] = useState(false);
   const [lastResponse, setLastResponse] = useState<CashierCodeResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [sessionStartedAt] = useState(() => new Date());
-  const [lastActivityAt, setLastActivityAt] = useState(() => new Date());
-  const [lastHeartbeatAt, setLastHeartbeatAt] = useState<Date | null>(null);
+  const [systemReady, setSystemReady] = useState(false);
 
   const focusInput = useCallback(() => {
     window.setTimeout(() => {
       inputRef.current?.focus({ preventScroll: true });
       inputRef.current?.select();
     }, 0);
-  }, []);
-
-  const markActivity = useCallback(() => {
-    setLastActivityAt(new Date());
   }, []);
 
   const startLock = useCallback(() => {
@@ -89,13 +76,23 @@ export function CashierApp() {
     let cancelled = false;
 
     const beat = async () => {
+      const healthy = await checkHealth();
+      if (cancelled) {
+        return;
+      }
+      if (!healthy) {
+        setSystemReady(false);
+        return;
+      }
       try {
         await sendHeartbeat(pointId);
         if (!cancelled) {
-          setLastHeartbeatAt(new Date());
+          setSystemReady(true);
         }
       } catch {
-        // Heartbeat is best-effort; UI stays usable offline of heartbeat.
+        if (!cancelled) {
+          setSystemReady(false);
+        }
       }
     };
 
@@ -110,19 +107,15 @@ export function CashierApp() {
     };
   }, [pointId]);
 
-  const applyResponse = useCallback(
-    (response: CashierCodeResponse) => {
-      setLastResponse(response);
-      setErrorMessage(null);
-      markActivity();
-      if (isSuccessResult(response.result)) {
-        playSuccessBeep();
-      } else {
-        playErrorBuzz();
-      }
-    },
-    [markActivity],
-  );
+  const applyResponse = useCallback((response: CashierCodeResponse) => {
+    setLastResponse(response);
+    setErrorMessage(null);
+    if (isSuccessResult(response.result)) {
+      playSuccessBeep();
+    } else {
+      playErrorBuzz();
+    }
+  }, []);
 
   const runCheck = useCallback(
     async (rawCode: string) => {
@@ -138,9 +131,10 @@ export function CashierApp() {
       try {
         const response = await checkPromocode(normalized, pointId);
         applyResponse(response);
+        setSystemReady(true);
       } catch (error) {
         setLastResponse(null);
-        setErrorMessage(error instanceof Error ? error.message : "Ошибка проверки");
+        setErrorMessage(error instanceof Error ? error.message : "Check failed");
         playErrorBuzz();
       } finally {
         setBusy(false);
@@ -162,7 +156,7 @@ export function CashierApp() {
       const response = await redeemPromocode(lastResponse.code, pointId);
       applyResponse(response);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Ошибка применения");
+      setErrorMessage(error instanceof Error ? error.message : "Redeem failed");
       playErrorBuzz();
     } finally {
       setBusy(false);
@@ -190,50 +184,51 @@ export function CashierApp() {
     }
     const next = digitsOnly(value);
     setCode(next);
-    markActivity();
     if (isCompleteCode(next)) {
       void runCheck(next);
     }
   };
 
   const tone = errorMessage ? "error" : resultToTone(lastResponse?.result ?? null);
-  const statusText = errorMessage
-    ? "ОШИБКА"
-    : resultLabel(lastResponse?.result ?? null);
+  const statusText = errorMessage ? "ERROR" : resultLabel(lastResponse?.result ?? null);
   const canRedeem = !busy && lastResponse?.result === "valid";
 
   return (
     <div className="cashier-shell" data-testid="cashier-shell">
-      <header className="cashier-meta">
-        <div>
-          <div className="meta-label">Точка</div>
+      <header className="cashier-topbar">
+        <div className="shop-badge">
+          <div className="meta-label">Shop</div>
           <div className="meta-value" data-testid="point-id">
             {pointId}
           </div>
         </div>
-        <div>
-          <div className="meta-label">Сессия</div>
-          <div className="meta-value">{formatTime(sessionStartedAt)}</div>
-        </div>
-        <div>
-          <div className="meta-label">Активность</div>
-          <div className="meta-value" data-testid="last-activity">
-            {formatTime(lastActivityAt)}
-          </div>
-        </div>
-        <div>
-          <div className="meta-label">Heartbeat</div>
-          <div className="meta-value" data-testid="last-heartbeat">
-            {formatTime(lastHeartbeatAt)}
-          </div>
+        <div
+          className={`ready-indicator ${systemReady ? "ready-indicator--ok" : "ready-indicator--off"}`}
+          data-testid="system-ready"
+          aria-live="polite"
+        >
+          <span className="ready-lamp" aria-hidden="true" />
+          <span>{systemReady ? "Ready" : "Connecting…"}</span>
         </div>
       </header>
 
       <main className="cashier-main">
         <p className="brand">Promocode Checker</p>
+
+        <div
+          className={`status-panel tone-${tone}`}
+          data-testid="status-panel"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="status-label">{statusText}</div>
+          <div className="status-code">{lastResponse?.code || code || "—"}</div>
+          {errorMessage ? <div className="status-detail">{errorMessage}</div> : null}
+        </div>
+
         <form className="scan-form" onSubmit={onSubmit}>
           <label className="sr-only" htmlFor="promocode-input">
-            Промокод
+            Promocode
           </label>
           <input
             id="promocode-input"
@@ -254,34 +249,20 @@ export function CashierApp() {
           />
         </form>
 
-        <div
-          className={`status-panel tone-${tone}`}
-          data-testid="status-panel"
-          role="status"
-          aria-live="polite"
-        >
-          <div className="status-label">{statusText}</div>
-          <div className="status-code">{lastResponse?.code || code || "—"}</div>
-          {errorMessage ? <div className="status-detail">{errorMessage}</div> : null}
-          {lastResponse?.status ? (
-            <div className="status-detail">DB: {lastResponse.status}</div>
-          ) : null}
-        </div>
-
         <button
           type="button"
-          className="redeem-button"
+          className={`redeem-button ${canRedeem ? "redeem-button--ready" : ""}`}
           data-testid="redeem-button"
           disabled={!canRedeem}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => void runRedeem()}
         >
-          Применить скидку
+          Apply discount
         </button>
 
         {(locked || busy) && (
           <p className="lock-hint" data-testid="lock-hint">
-            {busy ? "Запрос…" : "Пауза 1.5с"}
+            {busy ? "Processing…" : "Pause 1.5s"}
           </p>
         )}
       </main>

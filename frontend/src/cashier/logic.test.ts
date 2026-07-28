@@ -24,8 +24,8 @@ describe("cashier logic", () => {
     expect(resultToTone("valid")).toBe("active");
     expect(resultToTone("used")).toBe("used");
     expect(resultToTone("not_found")).toBe("missing");
-    expect(resultLabel("valid")).toBe("АКТИВЕН");
-    expect(resultLabel("not_found")).toBe("НЕ НАЙДЕН");
+    expect(resultLabel("valid")).toBe("ACTIVE");
+    expect(resultLabel("not_found")).toBe("NOT FOUND");
     expect(isSuccessResult("valid")).toBe(true);
     expect(isSuccessResult("used")).toBe(false);
   });

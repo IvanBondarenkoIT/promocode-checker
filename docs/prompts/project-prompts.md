@@ -2,12 +2,22 @@
 
 Reusable prompts for Cursor agents working on promocode-checker.
 
+## UI language (locked — include in every UI task)
+
+```text
+Язык интерфейса: только английский (English).
+Все подписи, кнопки, ошибки, статусы и подсказки в cashier/admin/desktop UI — на английском.
+Без i18n, без второй локали, без русских строк в продуктовом UI.
+Даты/время в UI: en-US.
+```
+
 ## 0) Continue from handoff
 
 ```text
 Продолжаем promocode-checker.
 Прочитай AGENTS.md, docs/context-handoff.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/decisions.md и последние docs/reports/.
 Не переспрашивай уже зафиксированные решения из docs/decisions.md.
+UI: только английский (English) во всём продуктовом интерфейсе — без i18n и без русских подписей.
 Работай по stage-gate на КАЖДОМ этапе:
 тесты → ревью → docs/reports/stage-XX → обновить handoff/plan/INDEX/prompts → commit+push → короткий доклад → следующий этап только после OK.
 Сейчас делаем: <STAGE_NAME>.
@@ -24,6 +34,7 @@ Reusable prompts for Cursor agents working on promocode-checker.
 - ERP reconcile через Proxy API primary + direct fallback
 - Telegram alerts на изменения, fraud и падения
 - local / railway-demo / server-prod
+- UI language: English only (cashier + admin + desktop); no i18n
 Не ломай уже закрытые этапы. Сверяйся с docs/plan/IMPLEMENTATION_PLAN.md и docs/decisions.md.
 ```
 
@@ -33,6 +44,7 @@ Reusable prompts for Cursor agents working on promocode-checker.
 Реализуй только текущий этап: <STAGE_NAME>.
 Ограничения:
 - не расползаться на следующие этапы
+- UI strings: English only (no i18n, no Russian labels in product UI)
 - писать чистый код и минимально необходимые комментарии
 - покрыть этап тестами
 - прогнать проверки этапа
@@ -66,6 +78,7 @@ STAGE-GATE шаблон и тексты этапов: docs/prompts/stage-prompts
 - audit trail admin overrides
 - Telegram alerts без спама (dedup)
 - whitelist coffee group_ids 11077,16276,16279
+- fraud/admin UI messages in English only (no i18n)
 Найди дыры и предложи минимальные правки.
 ```
 
@@ -73,6 +86,7 @@ STAGE-GATE шаблон и тексты этапов: docs/prompts/stage-prompts
 
 ```text
 Проверь cashier UI как kiosk для сканера:
+- все тексты UI на английском (English only, без i18n)
 - одно поле, только цифры, ровно 8
 - autofocus возвращается после blur/click/submit/result
 - Enter от сканера отправляет форму
@@ -87,6 +101,7 @@ STAGE-GATE шаблон и тексты этапов: docs/prompts/stage-prompts
 
 ```text
 Проверь admin UI:
+- все тексты UI на английском (English only, без i18n)
 - login через env credentials
 - admin vs viewer
 - dashboard “что происходит сейчас”
@@ -113,4 +128,5 @@ STAGE-GATE шаблон и тексты этапов: docs/prompts/stage-prompts
 Я открыл D:\CursorProjects\promocode-checker в Cursor.
 Подхвати контекст из AGENTS.md и docs/.
 Кратко подтверди текущий статус этапов и предложи следующий конкретный шаг без лишних вопросов по уже принятым решениям.
+Помни: продуктовый UI — только английский (English), без i18n.
 ```

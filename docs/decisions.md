@@ -22,6 +22,7 @@ These decisions are already agreed and should not be re-litigated unless the use
    - web/PWA
    - lightweight desktop wrapper (almost like an app, no browser friction)
 8. Concurrent multi-user access is required.
+9. **UI language: English only.** All user-facing text in cashier PWA, admin UI, and desktop wrapper must be English. No i18n / no second locale for MVP. Use `en-US` for dates and times in the UI.
 
 ## Promo / antifraud rules
 

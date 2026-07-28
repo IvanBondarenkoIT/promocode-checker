@@ -34,3 +34,16 @@ export function sendHeartbeat(pointId: string): Promise<HeartbeatResponse> {
     point_id: pointId,
   });
 }
+
+export async function checkHealth(): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE}/health`);
+    if (!response.ok) {
+      return false;
+    }
+    const payload = (await response.json()) as { status?: string };
+    return payload.status === "ok";
+  } catch {
+    return false;
+  }
+}

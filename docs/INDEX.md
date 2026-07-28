@@ -31,6 +31,7 @@
 - [`reports/stage-05-cashier-pwa.md`](reports/stage-05-cashier-pwa.md)
 - [`reports/stage-05-1-redeem-lock.md`](reports/stage-05-1-redeem-lock.md)
 - [`reports/stage-06-admin-ui.md`](reports/stage-06-admin-ui.md)
+- [`reports/stage-06-1-cashier-polish.md`](reports/stage-06-1-cashier-polish.md)
 
 ## Supervisor
 

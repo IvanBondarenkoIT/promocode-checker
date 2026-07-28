@@ -11,6 +11,7 @@ Build a monorepo for validating unique customer promocodes, closing them at cash
 - Backend: Python 3.11, FastAPI, SQLAlchemy, Alembic, PostgreSQL
 - Frontend: React/Vite PWA (cashier + admin)
 - Desktop: lightweight Windows/RDP wrapper over the same UI
+- **UI language: English only** — all user-facing strings; no i18n for MVP
 - Deploy: Docker Compose locally/prod, Railway for demo, GitHub Actions CI/CD
 
 ## Architecture
