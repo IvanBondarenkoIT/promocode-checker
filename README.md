@@ -32,16 +32,16 @@
 
 ## Current status
 
-- Stages **1–5 complete** — Stage 5 supervisor **PASS**.
-- Next: **Stage 5.1 concurrent redeem lock**, then **Stage 6 Admin UI** (`/admin` in same Vite app).
-- Supervisor: [`docs/supervisor.md`](docs/supervisor.md), [`docs/reports/supervisor-audit-stage5-2026-07-28.md`](docs/reports/supervisor-audit-stage5-2026-07-28.md).
+- Stages **1–6** complete (including 5.1 redeem lock).
+- Cashier: `http://localhost:5173/?point_id=shop_01`
+- Admin: `http://localhost:5173/admin/login` (`.env` `ADMIN_*` / `VIEWER_*`)
+- Next: **Stage 7 — Desktop wrapper**
 
 ## Continue in a new Cursor chat
 
 ```text
 Продолжаем promocode-checker.
-Прочитай AGENTS.md, docs/context-handoff.md, docs/decisions.md, docs/supervisor.md.
-Stage 5 PASS. Сейчас Stage 5.1 concurrent redeem lock, потом Stage 6 Admin UI.
+Этапы 1–6 закрыты. Следующий: Stage 7 Desktop wrapper.
 ```
 
 ## Quick start

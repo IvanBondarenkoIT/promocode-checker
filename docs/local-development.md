@@ -83,7 +83,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173/?point_id=shop_01` (Vite proxies `/api` to backend `:8000`).
+Open `http://localhost:5173/?point_id=shop_01` (cashier) or `http://localhost:5173/admin/login` (admin; creds from `.env` `ADMIN_*` / `VIEWER_*`).
 
 Frontend tests:
 

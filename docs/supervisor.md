@@ -29,6 +29,5 @@ After each stage in the implementation agent, paste:
 
 ## Current green light
 
-- Stages 1–5: closed (Stage 4 local/mock; Stage 5 PWA PASS)
-- **Next: Stage 6 Admin UI** after supervisor PASS on 5.1
-- Stage 5.1 redeem lock: **done**
+- Stages 1–6: closed
+- **Next: Stage 7 Desktop wrapper**

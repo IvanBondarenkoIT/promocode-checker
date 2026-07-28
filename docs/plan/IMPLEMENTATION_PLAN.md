@@ -122,17 +122,15 @@ Deferred (resolved by Stage 5/6 gate):
 - [x] Report `docs/reports/stage-05-1-redeem-lock.md`
 - [ ] Supervisor PASS before Stage 6
 
-### Stage 6 — Admin UI — NEXT
+### Stage 6 — Admin UI — DONE
 
-- [ ] Same Vite app, separate `/admin` login route
-- [ ] Separate login (admin/viewer from env)
-- [ ] Dashboard: active/used/expired, last scans, auto-closes, fraud, job health
-- [ ] Table browsers for all checker DB tables
-- [ ] Controlled edits with audit trail
-- [ ] Full admin correction rights including USED→ACTIVE
-- [ ] Tests + report
+- [x] Same Vite app, `/admin` login route
+- [x] Roles admin/viewer from env
+- [x] Dashboard + table browsers
+- [x] Controlled edits + audit (USED→ACTIVE, fraud review)
+- [x] Tests + report (`docs/reports/stage-06-admin-ui.md`)
 
-### Stage 7 — Desktop wrapper for RDP
+### Stage 7 — Desktop wrapper — NEXT
 
 - [ ] Lightweight shell for cashiers
 - [ ] Point binding + fullscreen-friendly launch

@@ -29,10 +29,11 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
   - report: `docs/reports/stage-05-cashier-pwa.md`
   - supervisor: `docs/reports/supervisor-audit-stage5-2026-07-28.md`
 - Stage 5.1 concurrent redeem lock: **done**
-  - FOR UPDATE on redeem/reconcile close
-  - tests: backend **31 passed**
-  - report: `docs/reports/stage-05-1-redeem-lock.md`
-- Next: **Stage 6 — Admin UI** (after supervisor check on 5.1)
+- Stage 6 Admin UI: **done**
+  - `/admin` login, dashboard, tables, audit edits (admin only)
+  - tests: backend **36 passed**, frontend **10 passed**
+  - report: `docs/reports/stage-06-admin-ui.md`
+- Next: **Stage 7 — Desktop wrapper**
 
 ## Hard process rules
 

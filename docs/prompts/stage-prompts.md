@@ -60,7 +60,11 @@ Already delivered:
 - report: `docs/reports/stage-05-1-redeem-lock.md`
 - tests: backend 31 passed
 
-## Stage 6 — Admin UI — NEXT
+- [`reports/stage-06-admin-ui.md`](reports/stage-06-admin-ui.md)
+
+## Stage 6 — Admin UI — DONE
+
+## Stage 7 — Desktop wrapper — NEXT
 
 ```text
 Этап 6: admin UI.

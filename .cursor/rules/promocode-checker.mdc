@@ -40,9 +40,8 @@ You are working in `promocode-checker`.
 - Stage 2 done (migrations + tests on Postgres `:5433`)
 - Stage 3 done (cashier check/redeem/barcode)
 - Stage 5 done (Cashier PWA, supervisor PASS)
-- Stage 5.1 done (redeem lock, 31 backend tests)
-- Next: Stage 6 Admin UI (after supervisor on 5.1)
-- At stage end: commit + push (do not ask)
+- Stage 6 done (Admin UI)
+- Next: Stage 7 desktop wrapper
 
 ## Coding expectations
 
