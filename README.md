@@ -32,17 +32,17 @@
 
 ## Current status
 
-- Stages **1–8** complete.
+- Stages **1–9** complete (CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 - **Docker stack:** `docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build` → `http://localhost:8000`
 - **Dev (Vite):** `http://localhost:5173/?point_id=shop_01`
 - **Desktop:** `desktop/launch-cashier.ps1`
-- Next: **Stage 9 — CI/CD**
+- Next: **Stage 10 — Runbooks polish**
 
 ## Continue in a new Cursor chat
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–6 закрыты. Следующий: Stage 7 Desktop wrapper.
+Этапы 1–9 закрыты. Следующий: Stage 10 Runbooks polish.
 ```
 
 ## Quick start

@@ -15,25 +15,13 @@ This file is the primary handoff for any Cursor agent working in this repository
 
 Validate unique 8-digit customer promocodes at cashier points, close them safely, reconcile against Granit ERP sales, reduce cashier fraud, and give admin/viewer visibility with Telegram alerts.
 
-## Current status (as of 2026-07-28)
+## Current status (as of 2026-07-29)
 
 - Project root: `D:\CursorProjects\promocode-checker`
 - GitHub: https://github.com/IvanBondarenkoIT/promocode-checker
-- Stage 1 bootstrap: **done**
-- Stage 2 data layer: **done**
-- Stage 3 cashier API: **done**
-- Stage 4 ERP reconcile + Telegram: **done** (local/mock)
-- Stage 5 Cashier PWA: **done** — supervisor **PASS**
-  - Vite/React PWA, autofocus, debounce, redeem, audio, point_id, heartbeat
-  - tests: backend **29 passed**, frontend **8 passed**
-  - report: `docs/reports/stage-05-cashier-pwa.md`
-  - supervisor: `docs/reports/supervisor-audit-stage5-2026-07-28.md`
-- Stage 5.1 concurrent redeem lock: **done**
-- Stage 6 Admin UI: **done**
-- Stage 6.1 cashier polish: **done**
-- Stage 7 Desktop wrapper: **done**
-- Stage 8 Docker deploy: **done** — report `docs/reports/stage-08-deploy.md`
-- Next: **Stage 9 — CI/CD**
+- Stages **1–9 done** (incl. 5.1, 6.1)
+- Stage 9 CI/CD: **done** — `.github/workflows/ci.yml`, report `docs/reports/stage-09-cicd.md`
+- Next: **Stage 10 — Runbooks polish**
 
 ## Hard process rules
 
@@ -44,15 +32,15 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 - **Do not ask whether to commit/push** — at stage end always commit on `feature/*`, merge to `develop`, push both (see [`docs/branching.md`](docs/branching.md)).
 - Do not invent ERP schema assumptions beyond the documented coffee beans whitelist and proxy/direct modes.
 - Do not re-ask locked decisions from `docs/decisions.md`.
-- **UI language: English only** for all user-facing strings (cashier, admin, desktop). No i18n / no mixed locales in the product UI.
+- Product UI language is **English only** (cashier + admin).
 
 ## Environments
 
 | Env | Purpose | Notes |
 |-----|---------|-------|
 | `local` | Development and tests | Postgres via `infra/docker-compose.yml` on port `5433` |
-| `railway-demo` | Leadership demo | Intermediate showcase |
-| `server-prod` | Real cashiers over RDP | Docker on Windows Server |
+| `railway-demo` | Leadership demo | Railway + CI on branch `railway-demo` |
+| `server-prod` | Real cashiers over RDP | Docker on Windows Server from `main` |
 
 ## Neighbor reference projects
 

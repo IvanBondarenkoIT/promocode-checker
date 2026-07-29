@@ -4,15 +4,21 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–8 закрыты. Следующий: Stage 9 CI/CD.
-Docker stack: docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build
+Этапы 1–9 закрыты. Следующий: Stage 10 Runbooks polish.
+CI: .github/workflows/ci.yml (ruff + pytest+Postgres + frontend test/build).
+Прочитай AGENTS.md, docs/branching.md, docs/reports/stage-09-cicd.md.
 ```
 
 ## Done
 
-- Stages 1–8 — see `docs/reports/`
+- Stages 1–9 — see `docs/reports/`
+- Stage 9: GitHub Actions CI + branch→env docs
 
-## Next: Stage 9 — CI/CD
+## Next: Stage 10 — Runbooks polish
+
+- local / railway / server docs complete
+- env matrix finalized
+- employee launch instructions
 
 ## Commands
 
@@ -22,4 +28,10 @@ cd D:\CursorProjects\promocode-checker
 docker compose -f infra/docker-compose.yml up -d
 uvicorn app.main:app --app-dir backend --reload
 cd frontend; npm run dev
+```
+
+Full stack:
+
+```powershell
+docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build
 ```

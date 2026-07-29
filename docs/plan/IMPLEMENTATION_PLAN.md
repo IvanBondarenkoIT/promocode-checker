@@ -121,7 +121,7 @@ Deferred (resolved by Stage 5/6 gate):
 - [x] Row lock / safe close on redeem and shared close path
 - [x] Tests for double-redeem race (sequential + concurrent)
 - [x] Report `docs/reports/stage-05-1-redeem-lock.md`
-- [ ] Supervisor PASS before Stage 6
+- [x] Supervisor PASS before Stage 6 (process closed; Stage 6 already DONE)
 
 ### Stage 6 — Admin UI — DONE
 
@@ -144,14 +144,14 @@ Deferred (resolved by Stage 5/6 gate):
 - [x] Healthchecks, restart policies, reconcile worker, startup crash alert
 - [x] Report `docs/reports/stage-08-deploy.md`
 
-### Stage 9 — CI/CD — NEXT
+### Stage 9 — CI/CD — DONE
 
-- [ ] GitHub Actions lint/tests
-- [ ] Branch → environment mapping
-- [ ] Optional Railway/image deploy wiring
-- [ ] Docs + report
+- [x] GitHub Actions lint/tests (`.github/workflows/ci.yml`)
+- [x] Branch → environment mapping (`docs/branching.md`)
+- [x] Railway/prod deploy documented (native Railway + server Docker; no GHCR in this stage)
+- [x] Docs + report (`docs/reports/stage-09-cicd.md`)
 
-### Stage 10 — Runbooks polish
+### Stage 10 — Runbooks polish — NEXT
 
 - [ ] local / railway / server docs complete
 - [ ] env matrix finalized

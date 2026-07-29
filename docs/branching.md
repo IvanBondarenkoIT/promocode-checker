@@ -2,34 +2,43 @@
 
 ## Main branches
 
-- `develop` - primary development branch.
-- `railway-demo` - demonstration branch for Railway deployment.
-- `main` - stable production branch for Windows Server Docker deployment.
+| Branch | Environment | Deploy |
+|--------|-------------|--------|
+| `develop` | local / integration | CI only (lint + tests) |
+| `railway-demo` | Railway demo | Railway native GitHub deploy + [`infra/railway.toml`](../infra/railway.toml) |
+| `main` | Windows Server production | Docker Compose on server (`infra/docker-compose.prod.yml`); no force-push |
 
 ## Feature branches
 
-Use one branch per focused task:
+Use one branch per focused task, for example:
 
-- `feature/bootstrap-repo`
-- `feature/backend-core`
-- `feature/erp-reconcile`
-- `feature/frontend-pwa`
+- `feature/cicd`
 - `feature/admin-ui`
-- `feature/desktop-shell`
-- `feature/deploy-cicd`
+- `feature/deploy`
 
 ## Flow
 
 1. Start from `develop`.
-2. Implement one stage or sub-stage in a `feature/*` branch.
-3. Run the relevant tests for that stage.
-4. Do a short stage review and write a brief report into `docs/reports/`.
-5. Merge into `develop` only after the stage gate is closed.
-6. Promote selected changes into `railway-demo` for showcase deployment.
-7. Merge validated production-ready changes into `main`.
+2. Implement one stage in a `feature/*` branch.
+3. Run tests; write `docs/reports/stage-XX-....md`.
+4. Commit on `feature/*`, merge into `develop`, push both.
+5. Promote to `railway-demo` when demo needs update.
+6. Merge validated production-ready changes into `main`.
+
+## CI mapping (Stage 9)
+
+GitHub Actions [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs on `push` and `pull_request` to `develop`, `railway-demo`, and `main`:
+
+- backend: `ruff` + `pytest` with Postgres service
+- frontend: `npm test` + `npm run build`
+
+Deploy is **not** done by Actions in Stage 9:
+
+- Railway watches `railway-demo` via project GitHub connection
+- Production stays manual/server Docker from `main`
 
 ## Notes
 
 - Do not skip stage reports.
-- Do not mix infrastructure, UI, and ERP logic in one branch unless the task truly requires it.
-- Keep branch names short and readable so the deployment history is easy to understand.
+- Keep branch names short and readable.
+- Do not force-push `main`.

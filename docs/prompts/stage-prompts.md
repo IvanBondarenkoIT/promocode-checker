@@ -87,23 +87,15 @@ Report: [`reports/stage-08-deploy.md`](reports/stage-08-deploy.md)
 
 ## Stage 9 — CI/CD — NEXT
 
-```text
-Этап 9: GitHub Actions + branch→env mapping.
-Сначала прочитай AGENTS.md, docs/decisions.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/reports/stage-08-deploy.md.
-develop / railway-demo / main.
-Не расползаться на новые фичи. UI language stays English only.
+## Stage 9 — CI/CD — DONE
 
-STAGE-GATE (обязательно):
-- проверить CI на PR/ветках
-- ревью
-- docs/reports/stage-09-cicd.md
-- обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
-- короткий доклад: сделано / проверки / упущения / вопросы до Stage 10 (runbooks)
-- commit + push feature branch and develop
-- следующий этап только после OK
-```
+Already delivered:
 
-## Stage 10 — Runbooks polish
+- `.github/workflows/ci.yml` — ruff + pytest (Postgres service) + frontend test/build
+- `docs/branching.md` — branch→env mapping
+- report: `docs/reports/stage-09-cicd.md`
+
+## Stage 10 — Runbooks polish — NEXT
 
 ```text
 Этап 10: runbooks polish.
@@ -117,5 +109,5 @@ STAGE-GATE (обязательно):
 - docs/reports/stage-10-runbooks.md
 - обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
 - короткий доклад: сделано / проверки / упущения / открытые вопросы
-- коммиты только по явной просьбе
+- commit + push feature branch and develop
 ```

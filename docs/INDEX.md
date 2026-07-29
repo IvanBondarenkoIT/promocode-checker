@@ -34,12 +34,14 @@
 - [`reports/stage-06-1-cashier-polish.md`](reports/stage-06-1-cashier-polish.md)
 - [`reports/stage-07-desktop-wrapper.md`](reports/stage-07-desktop-wrapper.md)
 - [`reports/stage-08-deploy.md`](reports/stage-08-deploy.md)
+- [`reports/stage-09-cicd.md`](reports/stage-09-cicd.md)
 
 ## Supervisor
 
 - [`reports/supervisor-audit-2026-07-28.md`](reports/supervisor-audit-2026-07-28.md)
 - [`reports/supervisor-gate-stage5-2026-07-28.md`](reports/supervisor-gate-stage5-2026-07-28.md)
-- [`reports/supervisor-audit-stage5-2026-07-28.md`](reports/supervisor-audit-stage5-2026-07-28.md) — Stage 5 PASS; next 5.1 then 6
+- [`reports/supervisor-audit-stage5-2026-07-28.md`](reports/supervisor-audit-stage5-2026-07-28.md) — Stage 5 PASS
+- Stages 5.1–9 DONE; next Stage 10 runbooks
 
 ## Config
 
