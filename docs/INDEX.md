@@ -44,6 +44,7 @@
 - [`reports/stage-08-deploy.md`](reports/stage-08-deploy.md)
 - [`reports/stage-09-cicd.md`](reports/stage-09-cicd.md)
 - [`reports/stage-10-runbooks.md`](reports/stage-10-runbooks.md)
+- [`reports/verification-2026-07-29.md`](reports/verification-2026-07-29.md) — post Stage 10 full audit PASS
 
 ## Supervisor
 
