@@ -45,7 +45,9 @@ You are working in `promocode-checker`.
 - Stage 6.1 done (cashier polish)
 - Stage 7 done (desktop wrapper)
 - Stage 8 done (Docker / Railway / prod compose)
-- Next: Stage 9 CI/CD
+- Stage 9 done (CI/CD)
+- Stage 10 done (runbooks)
+- Next: maintenance / follow-ups (Stage 4.1 live ERP SQL, TLS, optional GHCR)
 
 ## Coding expectations
 

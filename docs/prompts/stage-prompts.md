@@ -95,19 +95,12 @@ Already delivered:
 - `docs/branching.md` — branch→env mapping
 - report: `docs/reports/stage-09-cicd.md`
 
-## Stage 10 — Runbooks polish — NEXT
+## Stage 10 — Runbooks polish — DONE
 
-```text
-Этап 10: runbooks polish.
-Сначала прочитай AGENTS.md, docs/decisions.md, docs/plan/IMPLEMENTATION_PLAN.md, docs/reports/stage-09-cicd.md.
-local / railway / server docs complete, env matrix finalized, employee launch instructions.
-Runbooks may be bilingual; product UI instructions must state English-only interface.
+Already delivered:
 
-STAGE-GATE (обязательно):
-- проверка ссылок/инструкций
-- ревью
-- docs/reports/stage-10-runbooks.md
-- обновить AGENTS.md + context-handoff + IMPLEMENTATION_PLAN + INDEX + этот файл
-- короткий доклад: сделано / проверки / упущения / открытые вопросы
-- commit + push feature branch and develop
-```
+- `docs/runbooks/` — local, railway, server-prod, employee-cashier
+- `docs/env-matrix.md` finalized
+- report: `docs/reports/stage-10-runbooks.md`
+
+Implementation plan stages **1–10 complete**. Further work is maintenance / deferred follow-ups (e.g. Stage 4.1 live ERP SQL).

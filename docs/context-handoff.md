@@ -4,21 +4,24 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–9 закрыты. Следующий: Stage 10 Runbooks polish.
-CI: .github/workflows/ci.yml (ruff + pytest+Postgres + frontend test/build).
-Прочитай AGENTS.md, docs/branching.md, docs/reports/stage-09-cicd.md.
+Этапы 1–10 закрыты (план реализации выполнен).
+Runbooks: docs/runbooks/ (local / railway / server-prod / employee-cashier).
+CI: .github/workflows/ci.yml. Env: docs/env-matrix.md.
+Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
 ## Done
 
-- Stages 1–9 — see `docs/reports/`
+- Stages 1–10 — see `docs/reports/`
 - Stage 9: GitHub Actions CI + branch→env docs
+- Stage 10: runbooks + finalized env matrix + employee cashier guide
 
-## Next: Stage 10 — Runbooks polish
+## Next (maintenance / follow-ups)
 
-- local / railway / server docs complete
-- env matrix finalized
-- employee launch instructions
+- Stage 4.1 live Granit SQL validation (deferred)
+- Optional TLS / reverse proxy on server-prod
+- Optional GHCR image publish
+- Confirm Railway project connected to `railway-demo`
 
 ## Commands
 

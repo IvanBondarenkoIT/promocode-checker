@@ -16,6 +16,14 @@
 - [`local-development.md`](local-development.md)
 - [`env-matrix.md`](env-matrix.md)
 
+## Runbooks (Stage 10)
+
+- [`runbooks/README.md`](runbooks/README.md) — index
+- [`runbooks/local.md`](runbooks/local.md)
+- [`runbooks/railway.md`](runbooks/railway.md)
+- [`runbooks/server-prod.md`](runbooks/server-prod.md)
+- [`runbooks/employee-cashier.md`](runbooks/employee-cashier.md) — cashier launch (English UI)
+
 ## Prompts
 
 - [`prompts/README.md`](prompts/README.md)
@@ -35,13 +43,14 @@
 - [`reports/stage-07-desktop-wrapper.md`](reports/stage-07-desktop-wrapper.md)
 - [`reports/stage-08-deploy.md`](reports/stage-08-deploy.md)
 - [`reports/stage-09-cicd.md`](reports/stage-09-cicd.md)
+- [`reports/stage-10-runbooks.md`](reports/stage-10-runbooks.md)
 
 ## Supervisor
 
 - [`reports/supervisor-audit-2026-07-28.md`](reports/supervisor-audit-2026-07-28.md)
 - [`reports/supervisor-gate-stage5-2026-07-28.md`](reports/supervisor-gate-stage5-2026-07-28.md)
 - [`reports/supervisor-audit-stage5-2026-07-28.md`](reports/supervisor-audit-stage5-2026-07-28.md) — Stage 5 PASS
-- Stages 5.1–9 DONE; next Stage 10 runbooks
+- Stages 1–10 DONE (implementation plan complete)
 
 ## Config
 

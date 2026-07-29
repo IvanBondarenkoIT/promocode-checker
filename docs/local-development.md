@@ -1,5 +1,7 @@
 # Local Development
 
+Operational runbooks (local / Railway / server / employees): [`runbooks/`](runbooks/README.md).
+
 ## Requirements
 
 - Python `3.11+`

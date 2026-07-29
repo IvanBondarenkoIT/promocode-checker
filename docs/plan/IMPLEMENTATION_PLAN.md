@@ -151,11 +151,12 @@ Deferred (resolved by Stage 5/6 gate):
 - [x] Railway/prod deploy documented (native Railway + server Docker; no GHCR in this stage)
 - [x] Docs + report (`docs/reports/stage-09-cicd.md`)
 
-### Stage 10 — Runbooks polish — NEXT
+### Stage 10 — Runbooks polish — DONE
 
-- [ ] local / railway / server docs complete
-- [ ] env matrix finalized
-- [ ] employee launch instructions
+- [x] local / railway / server docs (`docs/runbooks/`)
+- [x] env matrix finalized (`docs/env-matrix.md`)
+- [x] employee launch instructions (`docs/runbooks/employee-cashier.md`)
+- [x] Report `docs/reports/stage-10-runbooks.md`
 
 ## Business tables (checker Postgres)
 

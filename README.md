@@ -32,17 +32,19 @@
 
 ## Current status
 
-- Stages **1–9** complete (CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+- Stages **1–10** complete (implementation plan done).
+- **Runbooks:** [`docs/runbooks/`](docs/runbooks/README.md) (local / Railway / server-prod / employee)
+- **CI:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 - **Docker stack:** `docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build` → `http://localhost:8000`
 - **Dev (Vite):** `http://localhost:5173/?point_id=shop_01`
 - **Desktop:** `desktop/launch-cashier.ps1`
-- Next: **Stage 10 — Runbooks polish**
+- Next: maintenance / deferred follow-ups (see [`docs/context-handoff.md`](docs/context-handoff.md))
 
 ## Continue in a new Cursor chat
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–9 закрыты. Следующий: Stage 10 Runbooks polish.
+Этапы 1–10 закрыты. Runbooks: docs/runbooks/.
 ```
 
 ## Quick start

@@ -7,14 +7,15 @@ This chat acts as the **external supervisor** for `D:\CursorProjects\promocode-c
 ```text
 Надзиратель: проверь Stage N.
 Сверь docs/reports/stage-0N-*.md, код и docs/plan/IMPLEMENTATION_PLAN.md + docs/decisions.md.
+Проверь, что продуктовый UI на английском (English only, без i18n).
 Дай вердикт PASS / PARTIAL / FAIL, отклонения, блокеры до следующего этапа.
 ```
 
 ## Current green light
 
-- Stages 1–9: closed (Stage 9 CI/CD done — subject to supervisor check)
-- **Next: Stage 10 Runbooks polish**
+- Stages 1–10: closed (implementation plan complete)
+- **Next:** maintenance / deferred follow-ups (Stage 4.1 live Granit SQL, TLS, optional GHCR)
 
 ## Audits / reports
 
-See `docs/reports/` including `stage-09-cicd.md`.
+See `docs/reports/` including `stage-09-cicd.md`, `stage-10-runbooks.md`.

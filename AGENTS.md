@@ -10,6 +10,7 @@ This file is the primary handoff for any Cursor agent working in this repository
 4. [`docs/business-requirements.md`](docs/business-requirements.md) — original business flow
 5. [`docs/prompts/`](docs/prompts/) — reusable prompts for stage work, reviews, and antifraud
 6. [`docs/reports/`](docs/reports/) — completed stage reports
+7. [`docs/runbooks/`](docs/runbooks/) — local / Railway / server-prod / employee guides
 
 ## Project in one sentence
 
@@ -19,9 +20,10 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 
 - Project root: `D:\CursorProjects\promocode-checker`
 - GitHub: https://github.com/IvanBondarenkoIT/promocode-checker
-- Stages **1–9 done** (incl. 5.1, 6.1)
+- Stages **1–10 done** (incl. 5.1, 6.1)
 - Stage 9 CI/CD: **done** — `.github/workflows/ci.yml`, report `docs/reports/stage-09-cicd.md`
-- Next: **Stage 10 — Runbooks polish**
+- Stage 10 Runbooks: **done** — `docs/runbooks/`, report `docs/reports/stage-10-runbooks.md`
+- Next: **maintenance / follow-ups** (e.g. Stage 4.1 live Granit SQL, TLS/proxy, optional GHCR)
 
 ## Hard process rules
 
@@ -38,9 +40,9 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 
 | Env | Purpose | Notes |
 |-----|---------|-------|
-| `local` | Development and tests | Postgres via `infra/docker-compose.yml` on port `5433` |
-| `railway-demo` | Leadership demo | Railway + CI on branch `railway-demo` |
-| `server-prod` | Real cashiers over RDP | Docker on Windows Server from `main` |
+| `local` | Development and tests | Postgres via `infra/docker-compose.yml` on port `5433` — [runbooks/local.md](docs/runbooks/local.md) |
+| `railway-demo` | Leadership demo | Railway + CI on branch `railway-demo` — [runbooks/railway.md](docs/runbooks/railway.md) |
+| `server-prod` | Real cashiers over RDP | Docker on Windows Server from `main` — [runbooks/server-prod.md](docs/runbooks/server-prod.md) |
 
 ## Neighbor reference projects
 
