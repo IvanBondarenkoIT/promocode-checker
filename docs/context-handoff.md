@@ -17,9 +17,11 @@ Runbooks: docs/runbooks/ (incl. campaign-import.md).
 - Stage 11a: cashier User badge, status instructions, 20 dummy ACTIVE codes, barcode PNG export (`docs/reports/stage-11a-cashier-user-dummy-barcodes.md`)
 - Stage 11b: campaigns schema + CSV import (`docs/reports/stage-11b-campaigns-import.md`)
 - Stage 11c: campaign display on cashier + admin (`docs/reports/stage-11c-campaign-ui.md`)
+- Stage 11d: DEMO_LOCAL seed + server rollout checklist (`docs/reports/stage-11d-server-rollout.md`)
 
 ## Next (maintenance / follow-ups)
 
+- Apply Stage 11d on Windows Server (pull / rebuild / seed)
 - Real campaign CSV import on server-prod
 - Stage 4.1 live Granit SQL validation (deferred)
 - Optional TLS / reverse proxy on server-prod
