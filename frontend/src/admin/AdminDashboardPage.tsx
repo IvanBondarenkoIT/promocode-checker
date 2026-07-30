@@ -6,6 +6,7 @@ import { useAdminSession } from "./AdminContext";
 
 const TABLES = [
   "promocodes",
+  "campaigns",
   "checker_logs",
   "fraud_warnings",
   "admin_audit_logs",

@@ -242,6 +242,13 @@ body,
   margin-right: auto;
 }
 
+.status-campaign {
+  margin-top: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
 .status-detail {
   margin-top: 0.4rem;
   font-size: 0.85rem;

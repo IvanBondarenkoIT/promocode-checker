@@ -14,6 +14,9 @@ export type CashierCodeResponse = {
   expires_at: string | null;
   redeemed_at: string | null;
   log_id: number | null;
+  campaign_code?: string | null;
+  campaign_name?: string | null;
+  campaign_ends_at?: string | null;
 };
 
 export type HeartbeatResponse = {
