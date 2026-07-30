@@ -62,6 +62,27 @@ cd C:\Projects\promocode-checker\infra
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
+After Stages 11a–11c (User badge, status hints, campaigns), also seed demo codes once:
+
+```powershell
+cd C:\Projects\promocode-checker\infra
+Invoke-RestMethod http://127.0.0.1:8020/health
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec app python /app/scripts/seed_promocodes.py
+```
+
+Then refresh cashier launcher (`desktop\config.json`: `cashierBaseUrl` = `http://127.0.0.1:8020`, `fullscreen` = `false`).  
+Expect: **User** in badge, instruction under status, scan `10000001` → **ACTIVE** + **Campaign: Local demo wave**.  
+Admin → tables → `campaigns` / `promocodes` (campaign columns).
+
+Real promo wave CSV: [campaign-import.md](campaign-import.md).
+
+Barcode PNGs (from a machine with Python/repo or via API):
+
+```powershell
+# API example
+Invoke-WebRequest http://127.0.0.1:8020/api/v1/cashier/barcode/10000001 -OutFile 10000001.png
+```
+
 ## ERP and Telegram
 
 | Setting | Production |
