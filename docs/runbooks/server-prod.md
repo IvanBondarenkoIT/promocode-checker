@@ -2,6 +2,7 @@
 
 Real cashier points over RDP. Source of truth branch: **`main`**. Do not force-push `main`.
 
+**Deploy root:** `C:\Projects\promocode-checker`  
 **UI language:** English only.
 
 ## Architecture
@@ -18,31 +19,48 @@ Compose: [`../../infra/docker-compose.prod.yml`](../../infra/docker-compose.prod
 Env template: [`../../infra/.env.prod.example`](../../infra/.env.prod.example)  
 Deploy notes: [`../reports/stage-08-deploy.md`](../reports/stage-08-deploy.md)
 
-## Deploy / update
+## Deploy (first time)
 
-1. On the server, clone or pull `main` into the deploy directory.
-2. Prepare env:
+In PowerShell on the server (admin if Docker requires it):
 
 ```powershell
-cd infra
+cd C:\Projects
+git clone https://github.com/IvanBondarenkoIT/promocode-checker.git promocode-checker
+cd C:\Projects\promocode-checker
+git checkout main
+git pull origin main
+
+cd C:\Projects\promocode-checker\infra
 Copy-Item .env.prod.example .env.prod
-# Edit secrets: POSTGRES_PASSWORD, APP_SECRET_KEY, ADMIN_*, VIEWER_*, PROXY_API_TOKEN, TELEGRAM_*
-# Set FRONTEND_BASE_URL and PUBLIC_HTTP_PORT to the host cashiers will open
-```
+notepad .env.prod
+# Change CRITICAL: APP_SECRET_KEY, POSTGRES_PASSWORD, ADMIN_PASSWORD, VIEWER_PASSWORD,
+# PROXY_API_TOKEN, TELEGRAM_BOT_TOKEN, TELEGRAM_ALERT_CHAT_ID
+# Keep AUTO_SEED_PROMOCODES=0
 
-3. Start stack:
-
-```powershell
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
-4. Smoke:
+Wait for migrations (entrypoint). Smoke:
 
-- `http://<host>:<PUBLIC_HTTP_PORT>/health` → `status` / `database` / `schema` = ok
-- Admin login with prod `ADMIN_*`
-- Cashier URL with a real shop `point_id`
+```powershell
+Invoke-RestMethod http://127.0.0.1:8020/health
+# expect: status=ok, database=ok, schema=ok
+```
 
-Entrypoint runs Alembic migrations on app start. Keep `AUTO_SEED_PROMOCODES=0` in prod.
+Browser on the server (default prod port **8020** — avoids clash with other apps on 8000):
+
+- Cashier: `http://127.0.0.1:8020/?point_id=shop_01`
+- Admin: `http://127.0.0.1:8020/admin/login`
+
+## Update (later)
+
+```powershell
+cd C:\Projects\promocode-checker
+git checkout main
+git pull origin main
+cd C:\Projects\promocode-checker\infra
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+```
 
 ## ERP and Telegram
 
@@ -58,22 +76,36 @@ Reconcile service: `scripts/run_reconcile_loop.py` (hourly). Startup migration f
 
 See [`../../desktop/README.md`](../../desktop/README.md).
 
-1. Copy `desktop/config.example.json` → `desktop/config.json` **on each shop machine** (or shared template with per-shop overrides).
-2. Set:
+On each RDP session (or shared profile template):
+
+```powershell
+cd C:\Projects\promocode-checker\desktop
+Copy-Item config.example.json config.json
+notepad config.json
+```
+
+Example when Docker runs on the **same** Windows Server:
 
 ```json
 {
-  "cashierBaseUrl": "http://<server-host>:<port>",
-  "pointId": "<real_shop_id>",
+  "cashierBaseUrl": "http://127.0.0.1:8020",
+  "pointId": "shop_01",
   "fullscreen": true,
   "browser": "auto"
 }
 ```
 
-3. Pin a shortcut to `desktop/launch-cashier.ps1`.
-4. Verify hardware scanner (keyboard wedge + Enter) in app mode before go-live.
+`pointId` must be unique per shop. Launch:
 
-**Do not** point `cashierBaseUrl` at `localhost` on the RDP client unless the stack runs on that same machine.
+```powershell
+cd C:\Projects\promocode-checker\desktop
+.\launch-cashier.ps1
+```
+
+Pin a desktop shortcut to `C:\Projects\promocode-checker\desktop\launch-cashier.ps1`.  
+Verify hardware scanner (keyboard wedge + Enter) in app mode before go-live.
+
+**Do not** point `cashierBaseUrl` at `localhost` on a remote RDP client unless the stack runs on that same machine.
 
 ## Employee instructions
 

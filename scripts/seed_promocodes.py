@@ -1,4 +1,4 @@
-"""Seed dummy promocodes for local cashier/admin testing."""
+"""Seed dummy promocodes for local / server cashier testing."""
 
 from __future__ import annotations
 
@@ -27,31 +27,48 @@ class DummyPromocode:
     redeemed: bool = False
 
 
-# Fixed codes for predictable local testing (scan / admin browse).
-DUMMY_PROMOCODES: tuple[DummyPromocode, ...] = (
-    DummyPromocode("DEMO-ACTIVE-1", "10000001", PromocodeStatus.ACTIVE, "ACTIVE - redeem OK"),
-    DummyPromocode("DEMO-ACTIVE-2", "10000002", PromocodeStatus.ACTIVE, "ACTIVE - redeem OK"),
-    DummyPromocode("DEMO-ACTIVE-3", "10000003", PromocodeStatus.ACTIVE, "ACTIVE - redeem OK"),
-    DummyPromocode(
-        "DEMO-USED-1", "20000001", PromocodeStatus.USED, "USED - already closed", redeemed=True
-    ),
-    DummyPromocode(
-        "DEMO-USED-2", "20000002", PromocodeStatus.USED, "USED - already closed", redeemed=True
-    ),
-    DummyPromocode(
-        "DEMO-EXPIRED-1",
-        "30000001",
-        PromocodeStatus.ACTIVE,
-        "EXPIRED — past TTL",
-        expires_offset_days=-1,
-    ),
-    DummyPromocode(
-        "DEMO-EXPIRED-2",
-        "30000002",
-        PromocodeStatus.ACTIVE,
-        "EXPIRED — past TTL",
-        expires_offset_days=-7,
-    ),
+def _build_dummy_list() -> tuple[DummyPromocode, ...]:
+    active = tuple(
+        DummyPromocode(
+            f"DEMO-ACTIVE-{i}",
+            f"{10_000_000 + i}",
+            PromocodeStatus.ACTIVE,
+            "ACTIVE - redeem OK",
+        )
+        for i in range(1, 21)
+    )
+    used = (
+        DummyPromocode(
+            "DEMO-USED-1", "20000001", PromocodeStatus.USED, "USED - already closed", redeemed=True
+        ),
+        DummyPromocode(
+            "DEMO-USED-2", "20000002", PromocodeStatus.USED, "USED - already closed", redeemed=True
+        ),
+    )
+    expired = (
+        DummyPromocode(
+            "DEMO-EXPIRED-1",
+            "30000001",
+            PromocodeStatus.ACTIVE,
+            "EXPIRED — past TTL",
+            expires_offset_days=-1,
+        ),
+        DummyPromocode(
+            "DEMO-EXPIRED-2",
+            "30000002",
+            PromocodeStatus.ACTIVE,
+            "EXPIRED — past TTL",
+            expires_offset_days=-7,
+        ),
+    )
+    return active + used + expired
+
+
+# Fixed codes for predictable testing (scan / admin browse / barcode PNGs).
+DUMMY_PROMOCODES: tuple[DummyPromocode, ...] = _build_dummy_list()
+
+ACTIVE_DUMMY_CODES: tuple[str, ...] = tuple(
+    item.promocode for item in DUMMY_PROMOCODES if item.note.startswith("ACTIVE")
 )
 
 
@@ -90,11 +107,12 @@ def main() -> None:
             printed.append((item, row.promocode, row.status.value, row.customer_erp_id))
         db.commit()
 
-    print("Dummy promocodes for local testing:")
+    print("Dummy promocodes for testing:")
     print(f"{'code':<10}\t{'status':<8}\t{'customer':<16}\tnote")
     for item, code, status, customer in printed:
         print(f"{code:<10}\t{status:<8}\t{customer:<16}\t{item.note}")
     print()
+    print(f"ACTIVE pool: {ACTIVE_DUMMY_CODES[0]}–{ACTIVE_DUMMY_CODES[-1]} ({len(ACTIVE_DUMMY_CODES)} codes)")
     print("NOT_FOUND test: scan any other 8-digit code, e.g. 99999999")
 
 

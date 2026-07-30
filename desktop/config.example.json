@@ -1,6 +1,7 @@
 {
   "cashierBaseUrl": "http://127.0.0.1:5173",
   "pointId": "shop_01",
+  "username": "",
   "fullscreen": true,
   "browser": "auto"
 }
