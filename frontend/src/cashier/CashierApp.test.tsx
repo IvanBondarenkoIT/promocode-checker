@@ -50,9 +50,16 @@ describe("CashierApp", () => {
     render(<CashierApp />);
 
     expect(screen.getByTestId("point-id")).toHaveTextContent("shop_test");
+    expect(screen.getByTestId("status-instruction")).toHaveTextContent(/Scan the customer/i);
     const input = screen.getByTestId("promocode-input");
     await user.type(input, "12ab34");
     expect(input).toHaveValue("1234");
+  });
+
+  it("shows operator name from username query", () => {
+    window.history.pushState({}, "", "/?point_id=shop_test&username=cashier_anna");
+    render(<CashierApp />);
+    expect(screen.getByTestId("operator-name")).toHaveTextContent("cashier_anna");
   });
 
   it("auto-submits on 8 digits and enables redeem for valid", async () => {
@@ -75,7 +82,28 @@ describe("CashierApp", () => {
       expect(checkPromocode).toHaveBeenCalledWith("12345678", "shop_test");
     });
     expect(screen.getByTestId("status-panel")).toHaveTextContent("ACTIVE");
+    expect(screen.getByTestId("status-instruction")).toHaveTextContent(/Apply discount/i);
     expect(screen.getByTestId("redeem-button")).not.toBeDisabled();
+  });
+
+  it("shows used instruction after used scan", async () => {
+    const user = userEvent.setup();
+    checkPromocode.mockResolvedValue({
+      result: "used",
+      code: "20000001",
+      point_id: "shop_test",
+      status: "USED",
+      expires_at: null,
+      redeemed_at: null,
+      log_id: 3,
+    });
+
+    render(<CashierApp />);
+    await user.type(screen.getByTestId("promocode-input"), "20000001");
+
+    await waitFor(() => expect(checkPromocode).toHaveBeenCalled());
+    expect(screen.getByTestId("status-panel")).toHaveTextContent("USED");
+    expect(screen.getByTestId("status-instruction")).toHaveTextContent(/already used/i);
   });
 
   it("locks input for 1.5s after check", async () => {

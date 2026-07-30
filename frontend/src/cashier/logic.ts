@@ -46,6 +46,29 @@ export function resultLabel(result: string | null): string {
   }
 }
 
+/** Plain-English what-to-do line under the status label. */
+export function resultInstruction(result: string | null, isError = false): string {
+  if (isError) {
+    return "Something went wrong with the connection. Wait a moment and try again, or call support.";
+  }
+  switch (result) {
+    case "valid":
+      return "This code is good. Give the discount in the cash register, then press Apply discount here.";
+    case "redeemed":
+      return "Discount recorded. You can scan the next customer.";
+    case "used":
+      return "This code was already used. Do not give the discount again.";
+    case "expired":
+      return "This code is too old and no longer valid. Do not accept it.";
+    case "not_found":
+      return "We do not have this code. Check the barcode or ask a supervisor.";
+    case "invalid_format":
+      return "Codes must be exactly 8 digits. Scan again or re-enter carefully.";
+    default:
+      return "Scan the customer’s 8-digit barcode, or type it and press Enter.";
+  }
+}
+
 export function isSuccessResult(result: string | null): boolean {
   return result === "valid" || result === "redeemed";
 }
