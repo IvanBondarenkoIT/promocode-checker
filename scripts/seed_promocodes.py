@@ -112,7 +112,9 @@ def main() -> None:
     for item, code, status, customer in printed:
         print(f"{code:<10}\t{status:<8}\t{customer:<16}\t{item.note}")
     print()
-    print(f"ACTIVE pool: {ACTIVE_DUMMY_CODES[0]}–{ACTIVE_DUMMY_CODES[-1]} ({len(ACTIVE_DUMMY_CODES)} codes)")
+    first = ACTIVE_DUMMY_CODES[0]
+    last = ACTIVE_DUMMY_CODES[-1]
+    print(f"ACTIVE pool: {first}–{last} ({len(ACTIVE_DUMMY_CODES)} codes)")
     print("NOT_FOUND test: scan any other 8-digit code, e.g. 99999999")
 
 
