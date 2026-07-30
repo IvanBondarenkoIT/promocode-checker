@@ -20,9 +20,11 @@ import {
   digitsOnly,
   isCompleteCode,
   isSuccessResult,
+  resultInstruction,
   resultLabel,
   resultToTone,
 } from "./logic";
+import { resolveOperatorName } from "./operatorName";
 import { heartbeatIntervalMs, resolvePointId } from "./pointId";
 import type { CashierCodeResponse } from "./types";
 
@@ -32,6 +34,7 @@ export function CashierApp() {
   const inputRef = useRef<HTMLInputElement>(null);
   const lockTimerRef = useRef<number | null>(null);
   const [pointId] = useState(() => resolvePointId());
+  const [operatorName] = useState(() => resolveOperatorName());
   const [code, setCode] = useState("");
   const [locked, setLocked] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -221,6 +224,7 @@ export function CashierApp() {
 
   const tone = errorMessage ? "error" : resultToTone(lastResponse?.result ?? null);
   const statusText = errorMessage ? "ERROR" : resultLabel(lastResponse?.result ?? null);
+  const instruction = resultInstruction(lastResponse?.result ?? null, Boolean(errorMessage));
   const canRedeem = systemHealth.ready && !busy && lastResponse?.result === "valid";
   const lampClass =
     systemHealth.state === "ready"
@@ -237,6 +241,14 @@ export function CashierApp() {
           <div className="meta-value" data-testid="point-id">
             {pointId}
           </div>
+          {operatorName ? (
+            <>
+              <div className="meta-label meta-label--secondary">User</div>
+              <div className="meta-value meta-value--secondary" data-testid="operator-name">
+                {operatorName}
+              </div>
+            </>
+          ) : null}
         </div>
         <div
           className={`ready-indicator ${lampClass}`}
@@ -260,6 +272,9 @@ export function CashierApp() {
         >
           <div className="status-label">{statusText}</div>
           <div className="status-code">{lastResponse?.code || code || "—"}</div>
+          <div className="status-instruction" data-testid="status-instruction">
+            {instruction}
+          </div>
           {errorMessage ? <div className="status-detail">{errorMessage}</div> : null}
         </div>
 

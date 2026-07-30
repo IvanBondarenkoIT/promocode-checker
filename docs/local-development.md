@@ -66,7 +66,7 @@ Dummy codes (fixed, idempotent — safe to re-run):
 
 | Code | Expected result |
 |------|-----------------|
-| `10000001`–`10000003` | ACTIVE |
+| `10000001`–`10000020` | ACTIVE |
 | `20000001`–`20000002` | USED |
 | `30000001`–`30000002` | EXPIRED |
 | `99999999` | NOT_FOUND (not in DB) |

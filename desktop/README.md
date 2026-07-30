@@ -7,17 +7,21 @@ Lightweight Windows launcher for RDP cashiers. Opens the cashier PWA in a dedica
 1. Copy config:
 
 ```powershell
-cd D:\CursorProjects\promocode-checker\desktop
+# Server prod:
+cd C:\Projects\promocode-checker\desktop
+# Local dev:
+# cd D:\CursorProjects\promocode-checker\desktop
 Copy-Item config.example.json config.json
 ```
 
-2. Edit `config.json`:
+2. Edit `config.json` (for server prod you can start from `config.prod.example.json`):
 
 | Field | Description |
 |-------|-------------|
-| `cashierBaseUrl` | Cashier UI base URL (prod: your server URL) |
+| `cashierBaseUrl` | Cashier UI base URL (prod same host: `http://127.0.0.1:8020`) |
 | `pointId` | Shop / point identifier passed as `?point_id=` |
-| `fullscreen` | Start in fullscreen app mode |
+| `username` | Optional display name for **User** badge; empty → Windows `$env:USERNAME` |
+| `fullscreen` | Start in fullscreen app mode (`true` / `false` for windowed) |
 | `browser` | `auto`, `edge`, or `chrome` |
 
 3. Ensure backend + frontend (or prod static) are running.

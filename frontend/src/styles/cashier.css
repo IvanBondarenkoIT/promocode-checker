@@ -56,10 +56,20 @@ body,
   letter-spacing: 0.04em;
 }
 
+.meta-label--secondary {
+  margin-top: 0.55rem;
+}
+
 .meta-value {
   margin-top: 0.2rem;
   font-size: 1.05rem;
   font-weight: 700;
+}
+
+.meta-value--secondary {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #cbd5e1;
 }
 
 .ready-indicator {
@@ -222,8 +232,19 @@ body,
   color: #e2e8f0;
 }
 
+.status-instruction {
+  margin-top: 0.65rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: #cbd5e1;
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .status-detail {
-  font-size: 0.9rem;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
   color: var(--muted);
 }
 

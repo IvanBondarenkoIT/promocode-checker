@@ -37,10 +37,19 @@ Seed is on by default via `AUTO_SEED_PROMOCODES=1` in the app compose overlay.
 
 | Code | Expected |
 |------|----------|
-| `10000001`–`10000003` | ACTIVE |
+| `10000001`–`10000020` | ACTIVE |
 | `20000001`–`20000002` | USED |
 | `30000001`–`30000002` | EXPIRED |
 | `99999999` | NOT FOUND |
+
+Barcode PNGs for those codes:
+
+```powershell
+python scripts/export_dummy_barcodes.py
+# → artifacts/dummy-barcodes/*.png
+```
+
+Or via API: `GET /api/v1/cashier/barcode/10000001`
 
 ## Admin / viewer
 

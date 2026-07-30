@@ -59,11 +59,17 @@ function Resolve-BrowserExecutable {
 function Build-CashierUrl {
     param(
         [string]$BaseUrl,
-        [string]$ShopPointId
+        [string]$ShopPointId,
+        [string]$OperatorName
     )
     $trimmed = $BaseUrl.TrimEnd("/")
     $encodedPoint = [uri]::EscapeDataString($ShopPointId)
-    return "$trimmed/?point_id=$encodedPoint"
+    $url = "$trimmed/?point_id=$encodedPoint"
+    if (-not [string]::IsNullOrWhiteSpace($OperatorName)) {
+        $encodedUser = [uri]::EscapeDataString($OperatorName)
+        $url = "$url&username=$encodedUser"
+    }
+    return $url
 }
 
 $config = Read-Config -Path $ConfigPath
@@ -71,6 +77,11 @@ $shopPoint = if ($PSBoundParameters.ContainsKey("PointId")) { $PointId } else { 
 $baseUrl = if ($PSBoundParameters.ContainsKey("CashierBaseUrl")) { $CashierBaseUrl } else { [string]$config.cashierBaseUrl }
 $fullscreen = [bool]$config.fullscreen
 $browserPref = if ($config.browser) { [string]$config.browser } else { "auto" }
+$configUsername = ""
+if ($null -ne $config.PSObject.Properties["username"] -and $config.username) {
+    $configUsername = [string]$config.username
+}
+$operatorName = if (-not [string]::IsNullOrWhiteSpace($configUsername)) { $configUsername.Trim() } else { [string]$env:USERNAME }
 
 if ([string]::IsNullOrWhiteSpace($shopPoint)) {
     throw "pointId is required in config.json or -PointId."
@@ -79,7 +90,7 @@ if ([string]::IsNullOrWhiteSpace($baseUrl)) {
     throw "cashierBaseUrl is required in config.json or -CashierBaseUrl."
 }
 
-$cashierUrl = Build-CashierUrl -BaseUrl $baseUrl -ShopPointId $shopPoint
+$cashierUrl = Build-CashierUrl -BaseUrl $baseUrl -ShopPointId $shopPoint -OperatorName $operatorName
 $browser = Resolve-BrowserExecutable -Preference $browserPref
 
 $args = @("--app=$cashierUrl")
@@ -88,6 +99,9 @@ if ($fullscreen) {
 }
 
 Write-Host "Launching cashier for shop '$shopPoint'"
+if (-not [string]::IsNullOrWhiteSpace($operatorName)) {
+    Write-Host "User: $operatorName"
+}
 Write-Host "URL: $cashierUrl"
 Write-Host "Browser: $browser"
 

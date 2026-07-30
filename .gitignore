@@ -40,3 +40,4 @@ desktop/config.json
 logs/
 data/
 tmp/
+artifacts/
