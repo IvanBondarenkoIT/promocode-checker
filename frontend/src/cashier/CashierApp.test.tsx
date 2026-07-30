@@ -106,6 +106,28 @@ describe("CashierApp", () => {
     expect(screen.getByTestId("status-instruction")).toHaveTextContent(/already used/i);
   });
 
+  it("shows campaign line when response includes campaign_name", async () => {
+    const user = userEvent.setup();
+    checkPromocode.mockResolvedValue({
+      result: "valid",
+      code: "11000001",
+      point_id: "shop_test",
+      status: "ACTIVE",
+      expires_at: null,
+      redeemed_at: null,
+      log_id: 4,
+      campaign_code: "beans_wave",
+      campaign_name: "Coffee beans Aug 2026",
+      campaign_ends_at: "2026-08-31T00:00:00Z",
+    });
+
+    render(<CashierApp />);
+    await user.type(screen.getByTestId("promocode-input"), "11000001");
+
+    await waitFor(() => expect(checkPromocode).toHaveBeenCalled());
+    expect(screen.getByTestId("status-campaign")).toHaveTextContent(/Coffee beans Aug 2026/);
+  });
+
   it("locks input for 1.5s after check", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });

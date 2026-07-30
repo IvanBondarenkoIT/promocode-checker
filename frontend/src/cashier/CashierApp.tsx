@@ -275,6 +275,14 @@ export function CashierApp() {
           <div className="status-instruction" data-testid="status-instruction">
             {instruction}
           </div>
+          {lastResponse?.campaign_name ? (
+            <div className="status-campaign" data-testid="status-campaign">
+              Campaign: {lastResponse.campaign_name}
+              {lastResponse.campaign_ends_at
+                ? ` (ends ${new Date(lastResponse.campaign_ends_at).toLocaleDateString("en-US")})`
+                : ""}
+            </div>
+          ) : null}
           {errorMessage ? <div className="status-detail">{errorMessage}</div> : null}
         </div>
 

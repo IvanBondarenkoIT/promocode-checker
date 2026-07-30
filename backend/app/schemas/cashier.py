@@ -26,3 +26,6 @@ class CashierCodeResponse(BaseModel):
     expires_at: datetime | None = None
     redeemed_at: datetime | None = None
     log_id: int | None = None
+    campaign_code: str | None = None
+    campaign_name: str | None = None
+    campaign_ends_at: datetime | None = None

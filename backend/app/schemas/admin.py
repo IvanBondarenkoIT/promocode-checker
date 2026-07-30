@@ -58,6 +58,7 @@ class AdminMutationResponse(BaseModel):
 
 class AdminTableName(StrEnum):
     PROMOCODES = "promocodes"
+    CAMPAIGNS = "campaigns"
     CHECKER_LOGS = "checker_logs"
     FRAUD_WARNINGS = "fraud_warnings"
     ADMIN_AUDIT_LOGS = "admin_audit_logs"
