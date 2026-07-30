@@ -13,8 +13,12 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.core.config import get_settings  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
 from app.models import Promocode, PromocodeStatus  # noqa: E402
+from app.services.campaign_import import upsert_campaign  # noqa: E402
 from app.services.promocode_generator import calculate_expires_at  # noqa: E402
 from sqlalchemy import select  # noqa: E402
+
+DEMO_CAMPAIGN_CODE = "DEMO_LOCAL"
+DEMO_CAMPAIGN_NAME = "Local demo wave"
 
 
 @dataclass(frozen=True)
@@ -72,9 +76,12 @@ ACTIVE_DUMMY_CODES: tuple[str, ...] = tuple(
 )
 
 
-def upsert_dummy(db, item: DummyPromocode, *, ttl_days: int) -> Promocode:
+def upsert_dummy(db, item: DummyPromocode, *, ttl_days: int, campaign_id) -> Promocode:
     existing = db.scalar(select(Promocode).where(Promocode.promocode == item.promocode))
     if existing is not None:
+        if existing.campaign_id is None and campaign_id is not None:
+            existing.campaign_id = campaign_id
+            db.flush()
         return existing
 
     now = datetime.now(UTC)
@@ -89,6 +96,7 @@ def upsert_dummy(db, item: DummyPromocode, *, ttl_days: int) -> Promocode:
         customer_erp_id=item.customer_erp_id,
         promocode=item.promocode,
         status=item.status,
+        campaign_id=campaign_id,
         created_at=created_at,
         expires_at=expires_at,
         redeemed_at=now if item.redeemed else None,
@@ -102,12 +110,26 @@ def main() -> None:
     settings = get_settings()
     printed: list[tuple[DummyPromocode, str, str, str]] = []
     with SessionLocal() as db:
+        campaign = upsert_campaign(
+            db,
+            code=DEMO_CAMPAIGN_CODE,
+            name=DEMO_CAMPAIGN_NAME,
+            starts_at=datetime.now(UTC),
+            ends_at=None,
+            notes="Dummy codes for cashier tryouts",
+        )
         for item in DUMMY_PROMOCODES:
-            row = upsert_dummy(db, item, ttl_days=settings.promocode_ttl_days)
+            row = upsert_dummy(
+                db,
+                item,
+                ttl_days=settings.promocode_ttl_days,
+                campaign_id=campaign.id,
+            )
             printed.append((item, row.promocode, row.status.value, row.customer_erp_id))
         db.commit()
 
     print("Dummy promocodes for testing:")
+    print(f"Campaign: {DEMO_CAMPAIGN_CODE} ({DEMO_CAMPAIGN_NAME})")
     print(f"{'code':<10}\t{'status':<8}\t{'customer':<16}\tnote")
     for item, code, status, customer in printed:
         print(f"{code:<10}\t{status:<8}\t{customer:<16}\t{item.note}")
