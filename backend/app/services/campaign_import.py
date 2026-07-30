@@ -1,0 +1,112 @@
+"""Campaign upsert and CSV row import helpers."""
+
+from __future__ import annotations
+
+import uuid
+from datetime import UTC, datetime
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.models import Campaign, CampaignStatus, Promocode, PromocodeStatus
+from app.services.promocode_generator import calculate_expires_at, is_valid_promocode
+
+
+def parse_optional_datetime(value: str | None) -> datetime | None:
+    if not value or not value.strip():
+        return None
+    raw = value.strip().replace("Z", "+00:00")
+    dt = datetime.fromisoformat(raw)
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt
+
+
+def upsert_campaign(
+    db: Session,
+    *,
+    code: str,
+    name: str,
+    starts_at: datetime | None,
+    ends_at: datetime | None,
+    notes: str | None,
+) -> Campaign:
+    existing = db.scalar(select(Campaign).where(Campaign.code == code))
+    if existing is not None:
+        existing.name = name
+        if starts_at is not None:
+            existing.starts_at = starts_at
+        if ends_at is not None:
+            existing.ends_at = ends_at
+        if notes is not None:
+            existing.notes = notes
+        if existing.status == CampaignStatus.DRAFT:
+            existing.status = CampaignStatus.ACTIVE
+        db.flush()
+        return existing
+
+    campaign = Campaign(
+        id=uuid.uuid4(),
+        code=code,
+        name=name,
+        status=CampaignStatus.ACTIVE,
+        starts_at=starts_at,
+        ends_at=ends_at,
+        notes=notes,
+    )
+    db.add(campaign)
+    db.flush()
+    return campaign
+
+
+def close_campaign(db: Session, code: str) -> Campaign | None:
+    campaign = db.scalar(select(Campaign).where(Campaign.code == code))
+    if campaign is None:
+        return None
+    campaign.status = CampaignStatus.CLOSED
+    db.flush()
+    return campaign
+
+
+def import_campaign_rows(
+    db: Session,
+    *,
+    campaign: Campaign,
+    rows: list[dict[str, str]],
+    ttl_days: int,
+) -> tuple[int, int, list[str]]:
+    inserted = 0
+    skipped = 0
+    errors: list[str] = []
+    now = datetime.now(UTC)
+
+    for index, row in enumerate(rows, start=2):
+        customer = (row.get("customer_erp_id") or "").strip()
+        code = (row.get("promocode") or "").strip()
+        if not customer or not code:
+            errors.append(f"line {index}: missing customer_erp_id or promocode")
+            continue
+        if not is_valid_promocode(code):
+            errors.append(f"line {index}: invalid promocode '{code}' (need 8 digits)")
+            continue
+
+        existing = db.scalar(select(Promocode).where(Promocode.promocode == code))
+        if existing is not None:
+            skipped += 1
+            continue
+
+        db.add(
+            Promocode(
+                id=uuid.uuid4(),
+                customer_erp_id=customer,
+                promocode=code,
+                status=PromocodeStatus.ACTIVE,
+                campaign_id=campaign.id,
+                created_at=now,
+                expires_at=calculate_expires_at(now, ttl_days),
+            )
+        )
+        inserted += 1
+
+    db.flush()
+    return inserted, skipped, errors

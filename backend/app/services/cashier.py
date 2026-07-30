@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models import CheckerActionType, CheckerLog, Promocode, PromocodeStatus
 from app.schemas.cashier import CashierCodeResponse, CashierResult
@@ -39,6 +39,7 @@ def _build_response(
     promocode: Promocode | None = None,
     log_id: int | None = None,
 ) -> CashierCodeResponse:
+    campaign = promocode.campaign if promocode is not None else None
     return CashierCodeResponse(
         result=result,
         code=code,
@@ -47,11 +48,18 @@ def _build_response(
         expires_at=promocode.expires_at if promocode is not None else None,
         redeemed_at=promocode.redeemed_at if promocode is not None else None,
         log_id=log_id,
+        campaign_code=campaign.code if campaign is not None else None,
+        campaign_name=campaign.name if campaign is not None else None,
+        campaign_ends_at=campaign.ends_at if campaign is not None else None,
     )
 
 
 def _get_promocode(db: Session, code: str) -> Promocode | None:
-    return db.scalar(select(Promocode).where(Promocode.promocode == code))
+    return db.scalar(
+        select(Promocode)
+        .options(joinedload(Promocode.campaign))
+        .where(Promocode.promocode == code)
+    )
 
 
 def _write_log(

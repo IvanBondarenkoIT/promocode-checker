@@ -5,10 +5,11 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models import (
     AdminAuditLog,
+    Campaign,
     CheckerLog,
     FraudWarning,
     Promocode,
@@ -34,8 +35,17 @@ def _row_to_dict(row) -> dict[str, Any]:
     }
 
 
+def _promocode_row_to_dict(row: Promocode) -> dict[str, Any]:
+    payload = _row_to_dict(row)
+    campaign = row.campaign
+    payload["campaign_code"] = campaign.code if campaign is not None else None
+    payload["campaign_name"] = campaign.name if campaign is not None else None
+    return payload
+
+
 _TABLE_MODELS = {
     AdminTableName.PROMOCODES: Promocode,
+    AdminTableName.CAMPAIGNS: Campaign,
     AdminTableName.CHECKER_LOGS: CheckerLog,
     AdminTableName.FRAUD_WARNINGS: FraudWarning,
     AdminTableName.ADMIN_AUDIT_LOGS: AdminAuditLog,
@@ -52,15 +62,19 @@ def list_table_rows(
 ) -> TableListResponse:
     model = _TABLE_MODELS[table]
     total = db.scalar(select(func.count()).select_from(model)) or 0
-    rows = list(
-        db.scalars(
-            select(model).order_by(model.id.desc()).limit(limit).offset(offset)  # type: ignore[attr-defined]
-        ).all()
+    query = select(model).order_by(model.id.desc()).limit(limit).offset(offset)  # type: ignore[attr-defined]
+    if table == AdminTableName.PROMOCODES:
+        query = query.options(joinedload(Promocode.campaign))
+    rows = list(db.scalars(query).unique().all())
+    serialized = (
+        [_promocode_row_to_dict(row) for row in rows]
+        if table == AdminTableName.PROMOCODES
+        else [_row_to_dict(row) for row in rows]
     )
     return TableListResponse(
         table=table.value,
         total=total,
         limit=limit,
         offset=offset,
-        rows=[_row_to_dict(row) for row in rows],
+        rows=serialized,
     )

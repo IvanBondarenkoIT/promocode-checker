@@ -6,6 +6,12 @@ class PromocodeStatus(StrEnum):
     USED = "USED"
 
 
+class CampaignStatus(StrEnum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    CLOSED = "CLOSED"
+
+
 class CheckerActionType(StrEnum):
     SCAN_CHECK = "SCAN_CHECK"
     MANUAL_CLOSE = "MANUAL_CLOSE"

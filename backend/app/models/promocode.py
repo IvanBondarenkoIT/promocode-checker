@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, Enum, Index, String, func
+from sqlalchemy import CheckConstraint, DateTime, Enum, ForeignKey, Index, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,6 +17,7 @@ class Promocode(Base):
         Index("ix_promocodes_promocode", "promocode"),
         Index("ix_promocodes_status", "status"),
         Index("ix_promocodes_expires_at", "expires_at"),
+        Index("ix_promocodes_campaign_id", "campaign_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -31,6 +32,11 @@ class Promocode(Base):
         nullable=False,
         default=PromocodeStatus.ACTIVE,
     )
+    campaign_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("campaigns.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -39,4 +45,5 @@ class Promocode(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     redeemed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    campaign = relationship("Campaign", back_populates="promocodes")
     checker_logs = relationship("CheckerLog", back_populates="promocode")

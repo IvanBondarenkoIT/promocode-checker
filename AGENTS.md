@@ -24,7 +24,9 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 - Stage 9 CI/CD: **done** — `.github/workflows/ci.yml`, report `docs/reports/stage-09-cicd.md`
 - Stage 10 Runbooks: **done** — `docs/runbooks/`, report `docs/reports/stage-10-runbooks.md`
 - Stage 11a: **done** — User badge, status instructions, dummy×20 + barcode export (`docs/reports/stage-11a-cashier-user-dummy-barcodes.md`)
-- Next: **Stage 11b** campaigns + import; then 11c UI; also Stage 4.1 / TLS / GHCR follow-ups
+- Stage 11b: **done** — campaigns + CSV import (`docs/reports/stage-11b-campaigns-import.md`)
+- Stage 11c: **done** — campaign on cashier/admin UI (`docs/reports/stage-11c-campaign-ui.md`)
+- Next: Stage 4.1 live Granit SQL / TLS / GHCR follow-ups; real campaign CSV on server
 
 ## Hard process rules
 
