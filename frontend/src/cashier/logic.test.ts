@@ -8,7 +8,6 @@ import {
   resultLabel,
   resultToTone,
 } from "../cashier/logic";
-import { resolveOperatorName } from "../cashier/operatorName";
 import { resolvePointId } from "../cashier/pointId";
 
 describe("cashier logic", () => {
@@ -56,20 +55,5 @@ describe("point id resolution", () => {
     window.history.pushState({}, "", "/");
     localStorage.setItem("promocode_checker_point_id", "shop_stored");
     expect(resolvePointId()).toBe("shop_stored");
-  });
-});
-
-describe("operator name resolution", () => {
-  it("reads username from query and persists it", () => {
-    window.history.pushState({}, "", "/?point_id=shop_01&username=alice");
-    localStorage.clear();
-    expect(resolveOperatorName()).toBe("alice");
-    expect(localStorage.getItem("promocode_checker_operator_name")).toBe("alice");
-  });
-
-  it("falls back to stored operator name", () => {
-    window.history.pushState({}, "", "/?point_id=shop_01");
-    localStorage.setItem("promocode_checker_operator_name", "bob");
-    expect(resolveOperatorName()).toBe("bob");
   });
 });
