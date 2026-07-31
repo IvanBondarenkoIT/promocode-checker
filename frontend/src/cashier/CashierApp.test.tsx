@@ -56,12 +56,6 @@ describe("CashierApp", () => {
     expect(input).toHaveValue("1234");
   });
 
-  it("shows operator name from username query", () => {
-    window.history.pushState({}, "", "/?point_id=shop_test&username=cashier_anna");
-    render(<CashierApp />);
-    expect(screen.getByTestId("operator-name")).toHaveTextContent("cashier_anna");
-  });
-
   it("auto-submits on 8 digits and enables redeem for valid", async () => {
     const user = userEvent.setup();
     checkPromocode.mockResolvedValue({

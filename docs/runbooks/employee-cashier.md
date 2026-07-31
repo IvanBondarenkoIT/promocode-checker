@@ -11,9 +11,7 @@
 
 1. На рабочем столе RDP откройте ярлык **Promocode Checker**  
    (или запустите `desktop\launch-cashier.ps1` — см. IT / [`../../desktop/README.md`](../../desktop/README.md)).
-2. Вверху слева:
-   - **Shop** — код точки (например `shop_01`)
-   - **User** — имя Windows-сессии RDP (или значение из config), чтобы было видно, кто за кассой
+2. Вверху слева **Shop** — имя Windows-аккаунта RDP этой точки (оно же `point_id`). Отдельного **User** нет.
 3. Вверху справа лампочка:
    - **Ready** (зелёная) — можно работать
    - **DB not initialized** / **Check failed** / **API unavailable** (жёлтая) — вызовите IT
