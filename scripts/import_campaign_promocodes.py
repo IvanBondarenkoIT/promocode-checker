@@ -8,11 +8,22 @@ from __future__ import annotations
 
 import argparse
 import csv
+import os
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
+
+if not os.getenv("DATABASE_URL") and os.getenv("POSTGRES_PASSWORD"):
+    user = os.getenv("POSTGRES_USER", "postgres")
+    password = os.environ["POSTGRES_PASSWORD"]
+    host = os.getenv("POSTGRES_HOST", "db")
+    port = os.getenv("POSTGRES_PORT", "5432")
+    db_name = os.getenv("POSTGRES_DB", "promocode_checker")
+    os.environ["DATABASE_URL"] = (
+        f"postgresql+psycopg://{user}:{password}@{host}:{port}/{db_name}"
+    )
 
 from app.core.config import get_settings  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
