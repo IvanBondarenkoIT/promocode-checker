@@ -62,7 +62,7 @@ cd C:\Projects\promocode-checker\infra
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
-After Stages 11a–11c (User badge, status hints, campaigns), also seed demo codes once:
+After Stages 11a–11c (status hints, campaigns), also seed demo codes once:
 
 ```powershell
 cd C:\Projects\promocode-checker\infra
@@ -70,8 +70,8 @@ Invoke-RestMethod http://127.0.0.1:8020/health
 docker compose --env-file .env.prod -f docker-compose.prod.yml exec app python /app/scripts/seed_promocodes.py
 ```
 
-Then refresh cashier launcher (`desktop\config.json`: `cashierBaseUrl` = `http://127.0.0.1:8020`, `fullscreen` = `false`).  
-Expect: **User** in badge, instruction under status, scan `10000001` → **ACTIVE** + **Campaign: Local demo wave**.  
+Then refresh cashier launcher (`desktop\config.json`: `cashierBaseUrl` = `http://127.0.0.1:8020`, empty `pointId`, `fullscreen` = `false`).  
+Expect: **Shop** = Windows username of the RDP session, instruction under status, scan `10000001` → **ACTIVE** + **Campaign: Local demo wave**.  
 Admin → tables → `campaigns` / `promocodes` (campaign columns).
 
 Real promo wave CSV: [campaign-import.md](campaign-import.md).
@@ -110,13 +110,13 @@ Example when Docker runs on the **same** Windows Server:
 ```json
 {
   "cashierBaseUrl": "http://127.0.0.1:8020",
-  "pointId": "shop_01",
-  "fullscreen": true,
+  "pointId": "",
+  "fullscreen": false,
   "browser": "auto"
 }
 ```
 
-`pointId` must be unique per shop. Launch:
+Leave `pointId` empty — launcher uses the Windows RDP username as **Shop** / `point_id` (one Windows account per shop). Override `pointId` only for local tests.
 
 ```powershell
 cd C:\Projects\promocode-checker\desktop

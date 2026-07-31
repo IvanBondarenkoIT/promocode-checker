@@ -19,8 +19,7 @@ Copy-Item config.example.json config.json
 | Field | Description |
 |-------|-------------|
 | `cashierBaseUrl` | Cashier UI base URL (prod same host: `http://127.0.0.1:8020`) |
-| `pointId` | Shop / point identifier passed as `?point_id=` |
-| `username` | Optional display name for **User** badge; empty → Windows `$env:USERNAME` |
+| `pointId` | Optional override. **Empty** → Windows `$env:USERNAME` (shop RDP account = point of sale name) |
 | `fullscreen` | Start in fullscreen app mode (`true` / `false` for windowed) |
 | `browser` | `auto`, `edge`, or `chrome` |
 

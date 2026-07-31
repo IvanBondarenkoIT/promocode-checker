@@ -2,6 +2,7 @@
 <#
 .SYNOPSIS
   Launch Promocode Checker cashier UI in Edge/Chrome app mode for RDP cashiers.
+  Shop / point_id defaults to the Windows session username (shop account name).
 #>
 param(
     [string]$ConfigPath = (Join-Path $PSScriptRoot "config.json"),
@@ -16,7 +17,7 @@ $ErrorActionPreference = "Stop"
 function Read-Config {
     param([string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) {
-        throw "Config not found: $Path. Copy config.example.json to config.json and edit pointId / cashierBaseUrl."
+        throw "Config not found: $Path. Copy config.example.json to config.json and edit cashierBaseUrl."
     }
     $raw = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
     return $raw | ConvertFrom-Json
@@ -59,38 +60,41 @@ function Resolve-BrowserExecutable {
 function Build-CashierUrl {
     param(
         [string]$BaseUrl,
-        [string]$ShopPointId,
-        [string]$OperatorName
+        [string]$ShopPointId
     )
     $trimmed = $BaseUrl.TrimEnd("/")
     $encodedPoint = [uri]::EscapeDataString($ShopPointId)
-    $url = "$trimmed/?point_id=$encodedPoint"
-    if (-not [string]::IsNullOrWhiteSpace($OperatorName)) {
-        $encodedUser = [uri]::EscapeDataString($OperatorName)
-        $url = "$url&username=$encodedUser"
-    }
-    return $url
+    return "$trimmed/?point_id=$encodedPoint"
 }
 
 $config = Read-Config -Path $ConfigPath
-$shopPoint = if ($PSBoundParameters.ContainsKey("PointId")) { $PointId } else { [string]$config.pointId }
+$configPoint = ""
+if ($null -ne $config.PSObject.Properties["pointId"] -and $config.pointId) {
+    $configPoint = [string]$config.pointId
+}
+# Shop name = Windows RDP account (point of sale). Optional config/CLI override for local tests.
+if ($PSBoundParameters.ContainsKey("PointId") -and -not [string]::IsNullOrWhiteSpace($PointId)) {
+    $shopPoint = $PointId.Trim()
+}
+elseif (-not [string]::IsNullOrWhiteSpace($configPoint)) {
+    $shopPoint = $configPoint.Trim()
+}
+else {
+    $shopPoint = [string]$env:USERNAME
+}
+
 $baseUrl = if ($PSBoundParameters.ContainsKey("CashierBaseUrl")) { $CashierBaseUrl } else { [string]$config.cashierBaseUrl }
 $fullscreen = [bool]$config.fullscreen
 $browserPref = if ($config.browser) { [string]$config.browser } else { "auto" }
-$configUsername = ""
-if ($null -ne $config.PSObject.Properties["username"] -and $config.username) {
-    $configUsername = [string]$config.username
-}
-$operatorName = if (-not [string]::IsNullOrWhiteSpace($configUsername)) { $configUsername.Trim() } else { [string]$env:USERNAME }
 
 if ([string]::IsNullOrWhiteSpace($shopPoint)) {
-    throw "pointId is required in config.json or -PointId."
+    throw "Could not resolve shop point_id (set config.pointId or use a Windows username)."
 }
 if ([string]::IsNullOrWhiteSpace($baseUrl)) {
     throw "cashierBaseUrl is required in config.json or -CashierBaseUrl."
 }
 
-$cashierUrl = Build-CashierUrl -BaseUrl $baseUrl -ShopPointId $shopPoint -OperatorName $operatorName
+$cashierUrl = Build-CashierUrl -BaseUrl $baseUrl -ShopPointId $shopPoint
 $browser = Resolve-BrowserExecutable -Preference $browserPref
 
 $args = @("--app=$cashierUrl")
@@ -98,10 +102,7 @@ if ($fullscreen) {
     $args += "--start-fullscreen"
 }
 
-Write-Host "Launching cashier for shop '$shopPoint'"
-if (-not [string]::IsNullOrWhiteSpace($operatorName)) {
-    Write-Host "User: $operatorName"
-}
+Write-Host "Launching cashier for shop '$shopPoint' (Windows user / point of sale)"
 Write-Host "URL: $cashierUrl"
 Write-Host "Browser: $browser"
 
