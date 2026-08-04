@@ -175,8 +175,13 @@ def fetch_all_coffee(
     """Probe path: coffee sales for any customer, capped with FIRST n."""
     adapter = get_erp_adapter(settings)
     # Unwrap FallbackErpAdapter → proxy/direct that has _execute_query
-    for candidate in (adapter, getattr(adapter, "_primary", None), getattr(adapter, "_fallback", None)):
-        execute = getattr(candidate, "_execute_query", None) if candidate is not None else None
+    candidates = (
+        adapter,
+        getattr(adapter, "_primary", None),
+        getattr(adapter, "_fallback", None),
+    )
+    for candidate in candidates:
+        execute = getattr(candidate, "_execute_query", None) if candidate else None
         if execute is not None:
             break
     else:
