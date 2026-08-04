@@ -95,6 +95,17 @@ flowchart LR
 - [x] Telegram alerts for changes/fraud/crashes
 - [x] Tests + report (`docs/reports/stage-04-erp-reconcile.md`, 28 passed)
 
+### Stage 4.1 — ERP coffee sales probe + live SQL — DONE (probe)
+
+Report: `docs/reports/stage-41-erp-probe.md` · Runbook: `docs/runbooks/erp-probe.md`
+
+- [x] Rewrite coffee sales SQL to ORGN / STORZAKAZDT / STORZDTGDS / GOODS
+- [x] `ERP_PAID_STATUSES` + shop-card catalog `config/test_shop_cards.json`
+- [x] Probe CLI → `artifacts/erp-probe/` CSV/JSON (`--mode mock` for CI)
+- [x] Env examples: local proxy / server-prod direct Firebird
+- [ ] Owner visual OK on live proxy CSV (human gate)
+- [ ] Optional AUTO_CLOSE demo after OK (seed ACTIVE + `run_reconcile`)
+
 ### Stage 5 — Cashier PWA — DONE
 
 Gate: `docs/reports/supervisor-gate-stage5-2026-07-28.md`
@@ -113,7 +124,7 @@ Report: `docs/reports/stage-05-cashier-pwa.md`
 Deferred (resolved by Stage 5/6 gate):
 
 - concurrent redeem row-lock → **Stage 5.1 before Stage 6**
-- live Granit SQL validation → Stage 4.1
+- live Granit SQL validation → Stage 4.1 (**probe done** — see below)
 - Telegram per-code auto-close → use run summary instead
 
 ### Stage 5.1 — Concurrent redeem lock — DONE

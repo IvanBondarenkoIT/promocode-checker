@@ -16,17 +16,13 @@ This file is the primary handoff for any Cursor agent working in this repository
 
 Validate unique 8-digit customer promocodes at cashier points, close them safely, reconcile against Granit ERP sales, reduce cashier fraud, and give admin/viewer visibility with Telegram alerts.
 
-## Current status (as of 2026-07-29)
+## Current status (as of 2026-08-04)
 
 - Project root: `D:\CursorProjects\promocode-checker`
 - GitHub: https://github.com/IvanBondarenkoIT/promocode-checker
-- Stages **1–10 done** (incl. 5.1, 6.1)
-- Stage 9 CI/CD: **done** — `.github/workflows/ci.yml`, report `docs/reports/stage-09-cicd.md`
-- Stage 10 Runbooks: **done** — `docs/runbooks/`, report `docs/reports/stage-10-runbooks.md`
-- Stage 11a: **done** — User badge, status instructions, dummy×20 + barcode export (`docs/reports/stage-11a-cashier-user-dummy-barcodes.md`)
-- Stage 11b: **done** — campaigns + CSV import (`docs/reports/stage-11b-campaigns-import.md`)
-- Stage 11c: **done** — campaign on cashier/admin UI (`docs/reports/stage-11c-campaign-ui.md`)
-- Next: Stage 4.1 live Granit SQL / TLS / GHCR follow-ups; real campaign CSV on server
+- Stages **1–10 done** (incl. 5.1, 6.1); Stages **11a–11d** done
+- Stage 4.1 ERP probe: **done** — Granit SQL + shop cards + probe CLI (`docs/reports/stage-41-erp-probe.md`, runbook `docs/runbooks/erp-probe.md`)
+- Next: owner visual OK on live probe CSV; then optional reconcile AUTO_CLOSE demo; TLS / GHCR follow-ups
 
 ## Hard process rules
 

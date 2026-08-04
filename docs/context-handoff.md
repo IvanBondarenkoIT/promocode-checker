@@ -4,8 +4,8 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–10 + 11a/11b/11c закрыты (User, status hints, campaigns).
-Runbooks: docs/runbooks/ (incl. campaign-import.md).
+Этапы 1–10 + 11a–11d + Stage 4.1 ERP probe закрыты.
+Probe: docs/runbooks/erp-probe.md — owner visual OK CSV before reconcile live demo.
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
@@ -18,12 +18,14 @@ Runbooks: docs/runbooks/ (incl. campaign-import.md).
 - Stage 11b: campaigns schema + CSV import (`docs/reports/stage-11b-campaigns-import.md`)
 - Stage 11c: campaign display on cashier + admin (`docs/reports/stage-11c-campaign-ui.md`)
 - Stage 11d: DEMO_LOCAL seed + server rollout checklist (`docs/reports/stage-11d-server-rollout.md`)
+- Stage 4.1: Granit coffee SQL + shop cards + probe CLI (`docs/reports/stage-41-erp-probe.md`)
 
 ## Next (maintenance / follow-ups)
 
-- Apply Stage 11d on Windows Server (pull / rebuild / seed)
+- Owner visual OK of live proxy probe CSV (`artifacts/erp-probe/`)
+- After OK: optional AUTO_CLOSE demo with seeded ACTIVE codes for shop cards that sold coffee
+- Apply Stage 11d on Windows Server (pull / rebuild / seed) if not done
 - Real campaign CSV import on server-prod
-- Stage 4.1 live Granit SQL validation (deferred)
 - Optional TLS / reverse proxy on server-prod
 - Optional GHCR image publish
 - Confirm Railway project connected to `railway-demo`

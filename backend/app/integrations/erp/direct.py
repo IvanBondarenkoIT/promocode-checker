@@ -10,6 +10,7 @@ from app.integrations.erp.base import ErpError
 from app.integrations.erp.queries import (
     build_coffee_sales_query,
     parse_coffee_group_ids,
+    parse_paid_statuses,
     rows_to_matches,
 )
 from app.integrations.erp.types import CoffeeSaleMatch
@@ -21,6 +22,7 @@ class DirectErpAdapter:
         self._user = (settings.firebird_user or "").strip()
         self._password = (settings.firebird_password or "").strip()
         self._group_ids = parse_coffee_group_ids(settings.coffee_beans_group_ids)
+        self._paid_statuses = parse_paid_statuses(settings.erp_paid_statuses)
 
         if not self._dsn:
             raise ErpError("FIREBIRD_DSN is not set (direct mode)")
@@ -41,6 +43,7 @@ class DirectErpAdapter:
             customer_erp_ids=customer_erp_ids,
             since=since,
             until=until,
+            paid_statuses=self._paid_statuses,
         )
         rows = self._execute_query(query, params)
         return rows_to_matches(rows)

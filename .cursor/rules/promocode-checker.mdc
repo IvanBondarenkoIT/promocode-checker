@@ -47,7 +47,8 @@ You are working in `promocode-checker`.
 - Stage 8 done (Docker / Railway / prod compose)
 - Stage 9 done (CI/CD)
 - Stage 10 done (runbooks)
-- Next: maintenance / follow-ups (Stage 4.1 live ERP SQL, TLS, optional GHCR)
+- Stage 4.1 done (ERP coffee probe SQL + CLI; owner CSV gate before reconcile live demo)
+- Next: maintenance / follow-ups (owner probe OK → AUTO_CLOSE demo, TLS, optional GHCR)
 
 ## Coding expectations
 

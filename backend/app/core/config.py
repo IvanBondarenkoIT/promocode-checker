@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     coffee_beans_group_ids: str = Field(default="11077,16276,16279", alias="COFFEE_BEANS_GROUP_IDS")
     coffee_beans_param_id: int = Field(default=2, alias="COFFEE_BEANS_PARAM_ID")
     coffee_beans_param_value_id: int = Field(default=4, alias="COFFEE_BEANS_PARAM_VALUE_ID")
+    erp_paid_statuses: str = Field(default="1,2,3,5", alias="ERP_PAID_STATUSES")
 
     default_point_id: str = Field(default="shop_01", alias="DEFAULT_POINT_ID")
     cashier_session_heartbeat_seconds: int = Field(

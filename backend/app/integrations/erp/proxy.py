@@ -13,6 +13,7 @@ from app.integrations.erp.base import ErpError
 from app.integrations.erp.queries import (
     build_coffee_sales_query,
     parse_coffee_group_ids,
+    parse_paid_statuses,
     rows_to_matches,
 )
 from app.integrations.erp.types import CoffeeSaleMatch
@@ -28,6 +29,7 @@ class ProxyErpAdapter:
         self._timeout = settings.proxy_api_timeout
         self._max_retries = max(1, settings.proxy_api_max_retries)
         self._group_ids = parse_coffee_group_ids(settings.coffee_beans_group_ids)
+        self._paid_statuses = parse_paid_statuses(settings.erp_paid_statuses)
 
     def find_coffee_sales(
         self,
@@ -46,6 +48,7 @@ class ProxyErpAdapter:
             customer_erp_ids=customer_erp_ids,
             since=since,
             until=until,
+            paid_statuses=self._paid_statuses,
         )
         rows = self._execute_query(query, params)
         return rows_to_matches(rows)

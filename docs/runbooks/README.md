@@ -16,6 +16,10 @@ Operational guides for local development, Railway demo, Windows Server productio
 
 - [employee-cashier.md](employee-cashier.md) — how to open the cashier app and redeem a promocode
 
+## ERP probe
+
+- [erp-probe.md](erp-probe.md) — Stage 4.1 coffee sales CSV via Proxy (local) or direct Firebird (server)
+
 ## Related
 
 - Env variables: [`../env-matrix.md`](../env-matrix.md)

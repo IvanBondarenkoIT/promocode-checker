@@ -10,3 +10,5 @@ class CoffeeSaleMatch:
     sold_at: datetime
     group_id: int
     product_name: str | None = None
+    customer_name: str | None = None
+    order_id: str | None = None

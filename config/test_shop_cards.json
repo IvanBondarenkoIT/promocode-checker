@@ -1,0 +1,19 @@
+{
+  "description": "Practice ORGN shop cards for ERP coffee-sales probe (not promocode values).",
+  "cards": [
+    {"id": "12523", "name": "КЛИЕНТ PALIASHVILI"},
+    {"id": "21470", "name": "КЛИЕНТ DK BATUMI"},
+    {"id": "18961", "name": "КЛИЕНТ CITYMALL"},
+    {"id": "14661", "name": "BATUMI MALL"},
+    {"id": "17306", "name": "КЛИЕНТ EAST POINT"},
+    {"id": "18957", "name": "lali machaidze"},
+    {"id": "27541", "name": "Алла"},
+    {"id": "28383", "name": "zanda"},
+    {"id": "28590", "name": "marya"},
+    {"id": "28591", "name": "heand shot"},
+    {"id": "28600", "name": "daniyel"},
+    {"id": "29067", "name": "mariam jashiashvili"},
+    {"id": "29077", "name": "Giorgi Abashishvili"},
+    {"id": "29079", "name": "Isabelle Noulard"}
+  ]
+}

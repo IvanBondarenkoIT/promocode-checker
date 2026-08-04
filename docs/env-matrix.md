@@ -35,14 +35,14 @@ How-to guides: [`runbooks/`](runbooks/README.md). Templates: [`.env.example`](..
 
 | Variable | Local | Railway demo | Server prod | Notes |
 |----------|-------|--------------|-------------|-------|
-| `ERP_ACCESS_MODE` | `mock` or `proxy` | usually `mock` | `proxy` (+ direct fallback if set) | |
-| `PROXY_API_URL` | optional | if proxy | required | |
-| `PROXY_API_TOKEN` | optional | if proxy | **secret** | |
+| `ERP_ACCESS_MODE` | `proxy` (probe) or `mock` | usually `mock` | `direct` (primary) | probe: [runbooks/erp-probe.md](runbooks/erp-probe.md) |
+| `PROXY_API_URL` | required for proxy | if proxy | optional fallback | e.g. `http://178.63.72.227:8010` |
+| `PROXY_API_TOKEN` | **secret** if proxy | if proxy | optional **secret** | |
 | `PROXY_API_TIMEOUT` | `60` | `60` | `60` | |
 | `PROXY_API_MAX_RETRIES` | `3` | `3` | `3` | |
-| `FIREBIRD_DSN` | empty | empty | optional direct | server fallback |
-| `FIREBIRD_USER` | empty | empty | optional | |
-| `FIREBIRD_PASSWORD` | empty | empty | optional **secret** | |
+| `FIREBIRD_DSN` | empty | empty | `127.0.0.1/3055:DK_GEORGIA` | same host as firebird-db-proxy |
+| `FIREBIRD_USER` | empty | empty | readonly user | |
+| `FIREBIRD_PASSWORD` | empty | empty | **secret** | never commit |
 
 ## Coffee matching
 
@@ -51,6 +51,7 @@ How-to guides: [`runbooks/`](runbooks/README.md). Templates: [`.env.example`](..
 | `COFFEE_BEANS_GROUP_IDS` | `11077,16276,16279` | same | same | also `config/coffee_beans_groups.json` |
 | `COFFEE_BEANS_PARAM_ID` | `2` | same | same | |
 | `COFFEE_BEANS_PARAM_VALUE_ID` | `4` | same | same | |
+| `ERP_PAID_STATUSES` | `1,2,3,5` | same | same | STORZAKAZDT paid statuses |
 
 ## Cashier / desktop
 

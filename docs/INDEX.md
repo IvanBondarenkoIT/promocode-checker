@@ -22,6 +22,7 @@
 - [`runbooks/local.md`](runbooks/local.md)
 - [`runbooks/railway.md`](runbooks/railway.md)
 - [`runbooks/server-prod.md`](runbooks/server-prod.md)
+- [`runbooks/erp-probe.md`](runbooks/erp-probe.md) — Stage 4.1 coffee sales probe
 - [`runbooks/employee-cashier.md`](runbooks/employee-cashier.md) — cashier launch (English UI)
 
 ## Prompts
@@ -44,6 +45,7 @@
 - [`reports/stage-08-deploy.md`](reports/stage-08-deploy.md)
 - [`reports/stage-09-cicd.md`](reports/stage-09-cicd.md)
 - [`reports/stage-10-runbooks.md`](reports/stage-10-runbooks.md)
+- [`reports/stage-41-erp-probe.md`](reports/stage-41-erp-probe.md)
 - [`reports/verification-2026-07-29.md`](reports/verification-2026-07-29.md) — post Stage 10 full audit PASS
 
 ## Supervisor
@@ -51,8 +53,9 @@
 - [`reports/supervisor-audit-2026-07-28.md`](reports/supervisor-audit-2026-07-28.md)
 - [`reports/supervisor-gate-stage5-2026-07-28.md`](reports/supervisor-gate-stage5-2026-07-28.md)
 - [`reports/supervisor-audit-stage5-2026-07-28.md`](reports/supervisor-audit-stage5-2026-07-28.md) — Stage 5 PASS
-- Stages 1–10 DONE (implementation plan complete)
+- Stages 1–10 DONE; Stage 4.1 probe DONE (CSV human gate open)
 
 ## Config
 
 - [`../config/coffee_beans_groups.json`](../config/coffee_beans_groups.json)
+- [`../config/test_shop_cards.json`](../config/test_shop_cards.json) — Stage 4.1 practice ORGN cards

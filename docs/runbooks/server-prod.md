@@ -87,9 +87,12 @@ Invoke-WebRequest http://127.0.0.1:8020/api/v1/cashier/barcode/10000001 -OutFile
 
 | Setting | Production |
 |---------|------------|
-| `ERP_ACCESS_MODE` | `proxy` (primary); direct Firebird fallback only if configured |
-| `PROXY_API_URL` / `PROXY_API_TOKEN` | Required for live reconcile |
+| `ERP_ACCESS_MODE` | `direct` (preferred on Windows Server with local Firebird) |
+| `FIREBIRD_DSN` / user / password | `127.0.0.1/3055:DK_GEORGIA` + readonly credentials |
+| `PROXY_API_*` | Optional fallback if direct is unavailable |
 | Telegram | Required for fraud / crash / reconcile summary alerts |
+
+Coffee sales probe (validate SQL before trusting auto-close): [erp-probe.md](erp-probe.md).
 
 Reconcile service: `scripts/run_reconcile_loop.py` (hourly). Startup migration failure can notify via `scripts/notify_startup_failure.py` when Telegram is configured.
 

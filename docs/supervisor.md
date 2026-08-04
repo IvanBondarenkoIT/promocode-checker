@@ -14,7 +14,7 @@ This chat acts as the **external supervisor** for `D:\CursorProjects\promocode-c
 ## Current green light
 
 - Stages 1–10: closed (implementation plan complete)
-- **Next:** maintenance / deferred follow-ups (Stage 4.1 live Granit SQL, TLS, optional GHCR)
+- **Next:** owner visual OK on Stage 4.1 probe CSV; then optional AUTO_CLOSE demo; TLS / GHCR
 
 ## Audits / reports
 
