@@ -12,3 +12,4 @@ class CoffeeSaleMatch:
     product_name: str | None = None
     customer_name: str | None = None
     order_id: str | None = None
+    unit_price: float | None = None

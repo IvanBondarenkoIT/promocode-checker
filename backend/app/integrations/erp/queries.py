@@ -79,7 +79,8 @@ SELECT {first_clause}
     G.OWNER AS GROUP_ID,
     G.NAME AS PRODUCT_NAME,
     COALESCE(NULLIF(TRIM(O.FULLNAME), ''), O.NAME) AS CUSTOMER_NAME,
-    CAST(S.ID AS VARCHAR(64)) AS ORDER_ID
+    CAST(S.ID AS VARCHAR(64)) AS ORDER_ID,
+    I.PRICE AS UNIT_PRICE
 FROM STORZAKAZDT S
 JOIN STORZDTGDS I ON I.SZID = S.ID
 JOIN GOODS G ON G.ID = I.GODSID
@@ -113,6 +114,12 @@ def rows_to_matches(rows: list[dict]) -> list[CoffeeSaleMatch]:
         product = normalized.get("PRODUCT_NAME")
         customer_name = normalized.get("CUSTOMER_NAME")
         order_id = normalized.get("ORDER_ID")
+        price_raw = normalized.get("UNIT_PRICE")
+        unit_price: float | None
+        try:
+            unit_price = float(price_raw) if price_raw is not None else None
+        except (TypeError, ValueError):
+            unit_price = None
         matches.append(
             CoffeeSaleMatch(
                 customer_erp_id=str(customer),
@@ -121,6 +128,7 @@ def rows_to_matches(rows: list[dict]) -> list[CoffeeSaleMatch]:
                 product_name=str(product) if product is not None else None,
                 customer_name=str(customer_name) if customer_name is not None else None,
                 order_id=str(order_id) if order_id is not None else None,
+                unit_price=unit_price,
             )
         )
     return matches

@@ -59,8 +59,11 @@ class Settings(BaseSettings):
 
     telegram_bot_token: str = Field(default="", alias="TELEGRAM_BOT_TOKEN")
     telegram_alert_chat_id: str = Field(default="", alias="TELEGRAM_ALERT_CHAT_ID")
+    telegram_chat_ids: str = Field(default="", alias="TELEGRAM_CHAT_IDS")
+    telegram_subscribe_keyword: str = Field(default="promo", alias="TELEGRAM_SUBSCRIBE_KEYWORD")
     telegram_notify_ok: int = Field(default=0, alias="TELEGRAM_NOTIFY_OK")
     telegram_dedup_window_seconds: int = Field(default=900, alias="TELEGRAM_DEDUP_WINDOW_SECONDS")
+    telegram_disable_ssl_verify: int = Field(default=0, alias="TELEGRAM_DISABLE_SSL_VERIFY")
 
     frontend_base_url: str = Field(default="http://localhost:8000", alias="FRONTEND_BASE_URL")
     static_dir: str = Field(default="", alias="STATIC_DIR")

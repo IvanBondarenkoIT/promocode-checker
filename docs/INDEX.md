@@ -23,7 +23,8 @@
 - [`runbooks/railway.md`](runbooks/railway.md)
 - [`runbooks/server-prod.md`](runbooks/server-prod.md)
 - [`runbooks/erp-probe.md`](runbooks/erp-probe.md) — Stage 4.1 coffee sales probe
-- [`runbooks/telegram-alerts.md`](runbooks/telegram-alerts.md) — ops Telegram bot
+- [`runbooks/telegram-alerts.md`](runbooks/telegram-alerts.md) — ops Telegram bot (subscribe + DEMO)
+- [`reports/stage-t-telegram-ops.md`](reports/stage-t-telegram-ops.md)
 - [`runbooks/employee-cashier.md`](runbooks/employee-cashier.md) — cashier launch (English UI)
 - [`coffee-beans-whitelist.txt`](coffee-beans-whitelist.txt) — coffee groups + products
 ## Prompts

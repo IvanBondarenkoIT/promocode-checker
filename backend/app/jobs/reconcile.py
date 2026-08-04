@@ -23,6 +23,7 @@ from app.models import (
 )
 from app.services.promocode_close import close_promocode, lock_promocode_by_id
 from app.services.telegram import send_alert
+from app.services.telegram_messages import msg_auto_close, msg_fraud_no_sale
 
 logger = logging.getLogger(__name__)
 
@@ -55,15 +56,39 @@ def _sales_by_customer(
     return grouped
 
 
+def _first_sale_in_window(
+    sales: list[CoffeeSaleMatch],
+    *,
+    since: datetime,
+    until: datetime,
+) -> CoffeeSaleMatch | None:
+    since_aware = _ensure_aware(since)
+    until_aware = _ensure_aware(until)
+    for sale in sales:
+        if since_aware <= _ensure_aware(sale.sold_at) <= until_aware:
+            return sale
+    return None
+
+
 def _has_sale_in_window(
     sales: list[CoffeeSaleMatch],
     *,
     since: datetime,
     until: datetime,
 ) -> bool:
-    since_aware = _ensure_aware(since)
-    until_aware = _ensure_aware(until)
-    return any(since_aware <= _ensure_aware(sale.sold_at) <= until_aware for sale in sales)
+    return _first_sale_in_window(sales, since=since, until=until) is not None
+
+
+def _prior_scan(db: Session, promocode_id) -> CheckerLog | None:
+    return db.scalar(
+        select(CheckerLog)
+        .where(
+            CheckerLog.promocode_id == promocode_id,
+            CheckerLog.action_type == CheckerActionType.SCAN_CHECK,
+        )
+        .order_by(CheckerLog.scan_time.desc())
+        .limit(1)
+    )
 
 
 def _auto_close_active(
@@ -93,7 +118,8 @@ def _auto_close_active(
     for promo in active_rows:
         created = _ensure_aware(promo.created_at)
         customer_sales = by_customer.get(promo.customer_erp_id, [])
-        if not _has_sale_in_window(customer_sales, since=created, until=now):
+        matched_sale = _first_sale_in_window(customer_sales, since=created, until=now)
+        if matched_sale is None:
             continue
 
         locked = lock_promocode_by_id(db, promo.id)
@@ -102,6 +128,7 @@ def _auto_close_active(
         if _is_expired(locked, now=now):
             continue
 
+        prior = _prior_scan(db, locked.id)
         close_promocode(
             db,
             locked,
@@ -112,18 +139,21 @@ def _auto_close_active(
         )
         result.auto_closed.append(locked.promocode)
 
-    # Decisions: one summary Telegram message per reconcile run (not per code).
-    if result.auto_closed:
-        codes = ", ".join(result.auto_closed[:30])
-        more = len(result.auto_closed) - 30
-        suffix = f" (+{more} more)" if more > 0 else ""
         send_alert(
             db,
             event_type="reconcile_auto_close",
-            dedup_key=f"auto_close_summary:{now.date().isoformat()}:{now.strftime('%H%M')}",
-            message=(
-                f"Reconcile AUTO_CLOSE count={len(result.auto_closed)} "
-                f"codes={codes}{suffix}"
+            dedup_key=f"auto_close:{locked.promocode}:{now.date().isoformat()}",
+            message=msg_auto_close(
+                code=locked.promocode,
+                customer_erp_id=locked.customer_erp_id,
+                customer_name=matched_sale.customer_name,
+                product_name=matched_sale.product_name,
+                unit_price=matched_sale.unit_price,
+                order_id=matched_sale.order_id,
+                sold_at=matched_sale.sold_at,
+                prior_scan_point_id=prior.point_id if prior else None,
+                prior_scan_at=prior.scan_time if prior else None,
+                tz_name=settings.app_timezone,
             ),
             settings=settings,
         )
@@ -217,7 +247,15 @@ def _fraud_check_manual_closes(
             db,
             event_type="fraud_warning",
             dedup_key=f"fraud:{promo.promocode}:{log.id}",
-            message=warning.message,
+            message=msg_fraud_no_sale(
+                code=promo.promocode,
+                point_id=log.point_id,
+                customer_erp_id=promo.customer_erp_id,
+                customer_name=None,
+                fraud_window_hours=settings.fraud_match_window_hours,
+                checked_at=now,
+                tz_name=settings.app_timezone,
+            ),
             settings=settings,
         )
 

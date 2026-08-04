@@ -85,7 +85,16 @@ This repo provides:
 - `GET /api/v1/cashier/barcode/{code}` — generate PNG on the fly
 - Campaign CSV import + seed scripts
 
-A separate marketing / CRM Telegram bot (other project) may call the barcode API or export PNGs. Ops alerts use a **different** bot token (`TELEGRAM_*` above).
+A separate marketing / CRM Telegram bot (other project) may call the barcode API or export PNGs.
+
+### Ops alert bot (locked 2026-08-04)
+
+- Bot `@dimkava_promo_alerts_bot` with **self-subscribe**: `/start` → keyword `promo` → `/stop`
+- Recipients = DB subscribers ∪ `TELEGRAM_ALERT_CHAT_ID` ∪ `TELEGRAM_CHAT_IDS`
+- Human Russian messages for scan, manual close, AUTO_CLOSE (with sale/price/prior scan), fraud
+- Calibration: `/demo` or `scripts/send_telegram_message_samples.py`
+- Runbook: [`docs/runbooks/telegram-alerts.md`](runbooks/telegram-alerts.md)
+- AUTO_CLOSE ops alerts are **per code** (human detail); not a single dry summary dump
 
 ## Stage 4 / Stage 5 gate (locked 2026-07-28)
 

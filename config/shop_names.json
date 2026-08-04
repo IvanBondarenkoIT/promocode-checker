@@ -1,0 +1,7 @@
+{
+  "description": "Optional map of cashier point_id (Windows username) to display name for Telegram.",
+  "shops": {
+    "IVAN": "IVAN",
+    "reconcile": "Автозакрытие (система)"
+  }
+}

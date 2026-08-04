@@ -87,8 +87,10 @@ def test_reconcile_auto_close_one_telegram_summary(db_session: Session) -> None:
             )
         ).all()
     )
-    assert len(tg_logs) == 1
-    assert "count=2" in tg_logs[0].message
+    assert len(tg_logs) == 2
+    assert all("Продажа кофе" in row.message for row in tg_logs)
+    bodies = " ".join(row.message for row in tg_logs)
+    assert "10000011" in bodies and "10000012" in bodies
 
 
 def test_reconcile_auto_closes_active_with_sale(db_session: Session) -> None:
@@ -139,8 +141,8 @@ def test_reconcile_auto_closes_active_with_sale(db_session: Session) -> None:
         ).all()
     )
     assert len(tg_logs) == 1
-    assert "count=1" in tg_logs[0].message
     assert "10000001" in tg_logs[0].message
+    assert "Продажа кофе" in tg_logs[0].message
 
 
 def test_reconcile_fraud_when_manual_close_without_sale(db_session: Session) -> None:

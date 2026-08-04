@@ -3,10 +3,13 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.config import get_settings
 from app.models import CheckerActionType, CheckerLog, Promocode, PromocodeStatus
 from app.schemas.cashier import CashierCodeResponse, CashierResult
 from app.services.promocode_close import close_promocode, lock_promocode_by_code
 from app.services.promocode_generator import is_valid_promocode
+from app.services.telegram import send_alert
+from app.services.telegram_messages import msg_manual_close, msg_scan
 
 
 def _now() -> datetime:
@@ -99,13 +102,15 @@ def check_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeResp
         point_id=point_id,
         promocode_id=promocode.id if promocode is not None else None,
     )
-    return _build_response(
+    response = _build_response(
         result=result,
         code=code,
         point_id=point_id,
         promocode=promocode,
         log_id=log.id,
     )
+    _notify_scan(db, response=response, promocode=promocode, when=log.scan_time)
+    return response
 
 
 def redeem_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeResponse:
@@ -134,10 +139,73 @@ def redeem_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeRes
         point_id=point_id,
         erp_sale_matched=False,
     )
-    return _build_response(
+    response = _build_response(
         result=CashierResult.REDEEMED,
         code=code,
         point_id=point_id,
         promocode=promocode,
         log_id=log.id,
+    )
+    _notify_manual_close(db, promocode=promocode, point_id=point_id, when=log.scan_time)
+    return response
+
+
+def _status_label(result: CashierResult) -> str:
+    mapping = {
+        CashierResult.VALID: "ACTIVE",
+        CashierResult.USED: "USED",
+        CashierResult.EXPIRED: "EXPIRED",
+        CashierResult.NOT_FOUND: "NOT FOUND",
+        CashierResult.REDEEMED: "APPLIED",
+        CashierResult.INVALID_FORMAT: "INVALID",
+    }
+    return mapping.get(result, result.value)
+
+
+def _notify_scan(
+    db: Session,
+    *,
+    response: CashierCodeResponse,
+    promocode: Promocode | None,
+    when: datetime,
+) -> None:
+    settings = get_settings()
+    send_alert(
+        db,
+        event_type="cashier_scan",
+        dedup_key=f"scan:{response.code}:{response.point_id}:{when.isoformat()}",
+        message=msg_scan(
+            code=response.code,
+            status_label=_status_label(response.result),
+            point_id=response.point_id,
+            when=when,
+            customer_erp_id=promocode.customer_erp_id if promocode else None,
+            campaign_name=response.campaign_name,
+            tz_name=settings.app_timezone,
+        ),
+        settings=settings,
+    )
+
+
+def _notify_manual_close(
+    db: Session,
+    *,
+    promocode: Promocode,
+    point_id: str,
+    when: datetime,
+) -> None:
+    settings = get_settings()
+    send_alert(
+        db,
+        event_type="cashier_manual_close",
+        dedup_key=f"manual_close:{promocode.promocode}:{when.isoformat()}",
+        message=msg_manual_close(
+            code=promocode.promocode,
+            point_id=point_id,
+            when=when,
+            customer_erp_id=promocode.customer_erp_id,
+            fraud_window_hours=settings.fraud_match_window_hours,
+            tz_name=settings.app_timezone,
+        ),
+        settings=settings,
     )
