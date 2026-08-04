@@ -97,10 +97,16 @@ class ProxyErpAdapter:
 
 
 def _json_safe_params(params: list[object]) -> list[object]:
+    """Serialize params for Proxy API JSON body.
+
+    Firebird via fdb rejects / mis-compares ISO timestamps with offsets
+    (e.g. ``2026-08-04T00:00:00+04:00``). Send naive ``YYYY-MM-DD HH:MM:SS``.
+    """
     out: list[object] = []
     for value in params:
         if isinstance(value, datetime):
-            out.append(value.isoformat())
+            naive = value.replace(tzinfo=None) if value.tzinfo is not None else value
+            out.append(naive.strftime("%Y-%m-%d %H:%M:%S"))
         else:
             out.append(value)
     return out

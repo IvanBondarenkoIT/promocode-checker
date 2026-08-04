@@ -70,7 +70,8 @@ class DirectErpAdapter:
         try:
             cur = conn.cursor()
             try:
-                cur.execute(query, tuple(params) if params else ())
+                fb_params = tuple(_firebird_params(params)) if params else ()
+                cur.execute(query, fb_params)
                 cols = [d[0] for d in (cur.description or [])]
                 rows = cur.fetchall()
                 return [{cols[i]: row[i] for i in range(len(cols))} for row in rows]
@@ -85,3 +86,14 @@ class DirectErpAdapter:
                 conn.close()
             except Exception:  # noqa: BLE001
                 pass
+
+
+def _firebird_params(params: list[object]) -> list[object]:
+    """Strip tzinfo so Firebird timestamp compare matches DAT_."""
+    out: list[object] = []
+    for value in params:
+        if isinstance(value, datetime) and value.tzinfo is not None:
+            out.append(value.replace(tzinfo=None))
+        else:
+            out.append(value)
+    return out

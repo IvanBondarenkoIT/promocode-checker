@@ -174,6 +174,17 @@ def fetch_all_coffee(
 ) -> list[CoffeeSaleMatch]:
     """Probe path: coffee sales for any customer, capped with FIRST n."""
     adapter = get_erp_adapter(settings)
+    # Unwrap FallbackErpAdapter → proxy/direct that has _execute_query
+    for candidate in (adapter, getattr(adapter, "_primary", None), getattr(adapter, "_fallback", None)):
+        execute = getattr(candidate, "_execute_query", None) if candidate is not None else None
+        if execute is not None:
+            break
+    else:
+        raise SystemExit(
+            f"Adapter {type(adapter).__name__} cannot run --all-coffee "
+            "(needs proxy/direct with _execute_query)"
+        )
+
     group_ids = parse_coffee_group_ids(settings.coffee_beans_group_ids)
     paid = parse_paid_statuses(settings.erp_paid_statuses)
     query, params = build_coffee_sales_query(
@@ -185,13 +196,6 @@ def fetch_all_coffee(
         all_customers=True,
         row_limit=limit,
     )
-    # Adapters only expose find_coffee_sales; call private execute when available.
-    execute = getattr(adapter, "_execute_query", None)
-    if execute is None:
-        raise SystemExit(
-            f"Adapter {type(adapter).__name__} cannot run --all-coffee "
-            "(needs proxy/direct with _execute_query)"
-        )
     rows = execute(query, params)
     return rows_to_matches(rows)
 

@@ -107,3 +107,12 @@ def test_mock_still_filters() -> None:
     )
     assert len(found) == 1
     assert found[0].product_name == "ok"
+
+
+def test_proxy_json_safe_params_strips_tz() -> None:
+    from app.integrations.erp.proxy import _json_safe_params
+
+    aware = datetime(2026, 8, 4, 0, 0, tzinfo=UTC)
+    out = _json_safe_params([aware, "12523", 11077])
+    assert out[0] == "2026-08-04 00:00:00"
+    assert out[1:] == ["12523", 11077]
