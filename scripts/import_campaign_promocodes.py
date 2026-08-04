@@ -95,9 +95,12 @@ def main() -> None:
             rows=rows,
             ttl_days=settings.promocode_ttl_days,
         )
+        campaign_code = campaign.code
+        campaign_name = campaign.name
+        campaign_id = campaign.id
         db.commit()
 
-    print(f"Campaign: {campaign.code} ({campaign.name}) id={campaign.id}")
+    print(f"Campaign: {campaign_code} ({campaign_name}) id={campaign_id}")
     print(f"Inserted: {inserted}")
     print(f"Skipped (already exist): {skipped}")
     if errors:

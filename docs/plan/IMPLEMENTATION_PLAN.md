@@ -103,8 +103,8 @@ Report: `docs/reports/stage-41-erp-probe.md` · Runbook: `docs/runbooks/erp-prob
 - [x] `ERP_PAID_STATUSES` + shop-card catalog `config/test_shop_cards.json`
 - [x] Probe CLI → `artifacts/erp-probe/` CSV/JSON (`--mode mock` for CI)
 - [x] Env examples: local proxy / server-prod direct Firebird
-- [ ] Owner visual OK on live proxy CSV (human gate)
-- [ ] Optional AUTO_CLOSE demo after OK (seed ACTIVE + `run_reconcile`)
+- [x] Owner visual OK on live proxy CSV
+- [x] Optional AUTO_CLOSE demo after OK (seed ACTIVE + `run_reconcile`)
 
 ### Stage 5 — Cashier PWA — DONE
 

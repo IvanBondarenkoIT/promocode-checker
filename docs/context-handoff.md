@@ -18,12 +18,11 @@ Probe: docs/runbooks/erp-probe.md — owner visual OK CSV before reconcile live 
 - Stage 11b: campaigns schema + CSV import (`docs/reports/stage-11b-campaigns-import.md`)
 - Stage 11c: campaign display on cashier + admin (`docs/reports/stage-11c-campaign-ui.md`)
 - Stage 11d: DEMO_LOCAL seed + server rollout checklist (`docs/reports/stage-11d-server-rollout.md`)
-- Stage 4.1: Granit coffee SQL + shop cards + probe CLI (`docs/reports/stage-41-erp-probe.md`)
+- Stage 4.1: Granit coffee SQL + shop cards + probe CLI + live AUTO_CLOSE demo (`docs/reports/stage-41-erp-probe.md`)
 
 ## Next (maintenance / follow-ups)
 
-- Owner visual OK of live proxy probe CSV (`artifacts/erp-probe/`)
-- After OK: optional AUTO_CLOSE demo with seeded ACTIVE codes for shop cards that sold coffee
+- Server-prod ERP: `direct` Firebird + optional probe on server
 - Apply Stage 11d on Windows Server (pull / rebuild / seed) if not done
 - Real campaign CSV import on server-prod
 - Optional TLS / reverse proxy on server-prod

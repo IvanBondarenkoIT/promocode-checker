@@ -106,7 +106,7 @@ def rows_to_matches(rows: list[dict]) -> list[CoffeeSaleMatch]:
     for row in rows:
         normalized = {str(k).upper(): v for k, v in row.items()}
         customer = normalized.get("CUSTOMER_ERP_ID")
-        sold_at = normalized.get("SOLD_AT")
+        sold_at = _parse_sold_at(normalized.get("SOLD_AT"))
         group_id = normalized.get("GROUP_ID")
         if customer is None or sold_at is None or group_id is None:
             continue
@@ -124,3 +124,25 @@ def rows_to_matches(rows: list[dict]) -> list[CoffeeSaleMatch]:
             )
         )
     return matches
+
+
+def _parse_sold_at(value: object) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    # Proxy often returns ``2026-08-04T00:00:00`` (naive) or with offset.
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+            try:
+                return datetime.strptime(text, fmt)
+            except ValueError:
+                continue
+    return None

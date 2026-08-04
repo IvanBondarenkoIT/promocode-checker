@@ -90,6 +90,21 @@ def test_rows_to_matches_optional_fields() -> None:
     )
 
 
+def test_rows_to_matches_parses_string_sold_at() -> None:
+    matches = rows_to_matches(
+        [
+            {
+                "CUSTOMER_ERP_ID": "12523",
+                "SOLD_AT": "2026-08-04T00:00:00",
+                "GROUP_ID": 11077,
+                "PRODUCT_NAME": "blend",
+            }
+        ]
+    )
+    assert len(matches) == 1
+    assert matches[0].sold_at == datetime(2026, 8, 4, 0, 0, 0)
+
+
 def test_mock_still_filters() -> None:
     from app.integrations.erp.mock import MockErpAdapter
 

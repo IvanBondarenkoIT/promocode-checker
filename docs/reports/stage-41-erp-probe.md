@@ -7,50 +7,57 @@
 - Probe CLI writing CSV/JSON under `artifacts/erp-probe/`
 - Document local=proxy vs server-prod=direct
 - Unit tests for query builder + mock probe
-
-**Out of scope until owner OK on probe CSV:** full promocode↔sale reconcile auto-close validation with live data.
+- After owner CSV OK: live AUTO_CLOSE demo via reconcile
 
 ## Implementation
 
 | Path | Role |
 |------|------|
 | [`config/test_shop_cards.json`](../../config/test_shop_cards.json) | 14 unique practice ORGN cards |
-| [`backend/app/integrations/erp/queries.py`](../../backend/app/integrations/erp/queries.py) | Granit SQL + paid statuses + optional `--all-coffee` FIRST n |
-| [`backend/app/integrations/erp/types.py`](../../backend/app/integrations/erp/types.py) | Optional `customer_name`, `order_id` on matches |
-| [`scripts/probe_erp_coffee_sales.py`](../../scripts/probe_erp_coffee_sales.py) | Probe CLI (`--mode mock` / settings / `--all-coffee`) |
-| [`docs/runbooks/erp-probe.md`](../runbooks/erp-probe.md) | How to run and read CSV |
+| [`backend/app/integrations/erp/queries.py`](../../backend/app/integrations/erp/queries.py) | Granit SQL + paid statuses + string `sold_at` parse |
+| [`backend/app/integrations/erp/proxy.py`](../../backend/app/integrations/erp/proxy.py) | Naive `YYYY-MM-DD HH:MM:SS` params (Firebird-safe) |
+| [`scripts/probe_erp_coffee_sales.py`](../../scripts/probe_erp_coffee_sales.py) | Probe CLI |
+| [`docs/runbooks/erp-probe.md`](../runbooks/erp-probe.md) | How to run / read CSV / AUTO_CLOSE demo |
 | `.env.example` / `infra/.env.prod.example` | proxy local; direct Firebird prod template |
-| `tests/backend/test_erp_queries.py` / `test_probe_erp_coffee_sales.py` | Unit coverage |
-
-`ERP_PAID_STATUSES` (default `1,2,3,5`) added to Settings; proxy/direct adapters pass it into the query builder.
 
 ## Verification
 
 ```powershell
-python -m pytest tests/backend/test_erp_queries.py tests/backend/test_probe_erp_coffee_sales.py tests/backend/test_erp_mock_adapter.py -q
+python -m pytest tests/backend/test_erp_queries.py tests/backend/test_probe_erp_coffee_sales.py -q
 python scripts/probe_erp_coffee_sales.py --mode mock --out artifacts/erp-probe/
 ```
 
-Live proxy probe (owner):
+### Live proxy probe (2026-08-04)
 
-```powershell
-# .env: ERP_ACCESS_MODE=proxy + PROXY_API_TOKEN
-python scripts/probe_erp_coffee_sales.py --day today --customers config/test_shop_cards.json
+Owner OK on CSV. Shop cards with coffee that day: **21470** (4), **12523** (2), **14661** (2), **17306** (1) — 9 lines total.
+
+### Live AUTO_CLOSE demo (same day)
+
+1. Imported ACTIVE codes `41000001`–`41000004` for those four ORGN IDs (campaign `auto_close_demo`).
+2. Backdated `created_at` to `2026-08-03` so today’s ERP sales fall in the match window (`created_at ≤ sold_at ≤ now`).
+3. `python scripts/run_reconcile.py` with `ERP_ACCESS_MODE=proxy`:
+
+```text
+reconcile ok auto_closed=4 fraud_warnings=1
+auto_closed: 41000001, 41000002, 41000003, 41000004
 ```
+
+4. DB check: all four `USED`; `checker_logs` rows `AUTO_CLOSE` / `point_id=reconcile` / `erp_sale_matched=true`.
+
+(The extra `fraud_warnings: 10000003` is from an older MANUAL_CLOSE dummy seed — unrelated to the demo codes.)
 
 ## Review notes
 
 - Draft DOCHEAD/DOCLINE/CLIENTS SQL removed from the live path
-- Reconcile job already uses `get_erp_adapter()` → same SQL once env points at proxy/direct
-- Do not treat empty shop-card days as failures
+- Reconcile uses the same adapter/SQL as the probe
+- Empty shop-card days are OK
 
 ## Risks / follow-ups / open questions
 
-1. Owner visual OK on real proxy CSV for today.
-2. After OK: optional seed ACTIVE promocodes with `customer_erp_id` from cards that sold coffee → `run_reconcile` AUTO_CLOSE demo.
-3. Confirm `CSDTKTHBID` paid status list on live data if probe returns zero rows unexpectedly.
-4. Server: install `fdb` in prod image / host if using `ERP_ACCESS_MODE=direct`.
+1. Server-prod: set `ERP_ACCESS_MODE=direct` + Firebird creds; optional one-shot probe on server.
+2. Ensure `fdb` available in prod image/host for direct mode.
+3. Campaign import: remember to backdate `created_at` when demoing against sales that already happened today.
 
 ## Open questions
 
-- None blocking stage close for the probe deliverable; live CSV review is the next human gate.
+- None blocking Stage 4.1 close.

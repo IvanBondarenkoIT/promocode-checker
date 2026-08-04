@@ -21,8 +21,8 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 - Project root: `D:\CursorProjects\promocode-checker`
 - GitHub: https://github.com/IvanBondarenkoIT/promocode-checker
 - Stages **1–10 done** (incl. 5.1, 6.1); Stages **11a–11d** done
-- Stage 4.1 ERP probe: **done** — Granit SQL + shop cards + probe CLI (`docs/reports/stage-41-erp-probe.md`, runbook `docs/runbooks/erp-probe.md`)
-- Next: owner visual OK on live probe CSV; then optional reconcile AUTO_CLOSE demo; TLS / GHCR follow-ups
+- Stage 4.1 ERP probe: **done** — live CSV OK + AUTO_CLOSE demo (`docs/reports/stage-41-erp-probe.md`)
+- Next: server-prod direct Firebird; TLS / GHCR follow-ups; real campaign CSV on server
 
 ## Hard process rules
 

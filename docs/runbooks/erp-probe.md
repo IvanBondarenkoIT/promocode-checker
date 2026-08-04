@@ -123,3 +123,28 @@ Live query uses Granit tables: `ORGN`, `STORZAKAZDT`, `STORZDTGDS`, `GOODS` (`OW
 - Env matrix: [`../env-matrix.md`](../env-matrix.md)
 - Stage report: [`../reports/stage-41-erp-probe.md`](../reports/stage-41-erp-probe.md)
 - Server deploy: [`server-prod.md`](server-prod.md)
+
+## After CSV OK — AUTO_CLOSE demo
+
+1. Import ACTIVE codes for shop cards that had coffee today (codes must be unique 8-digit):
+
+```powershell
+# artifacts/auto_close_demo.csv: customer_erp_id,promocode
+python scripts/import_campaign_promocodes.py --file artifacts/auto_close_demo.csv --campaign-code auto_close_demo --campaign-name "AUTO_CLOSE demo"
+```
+
+2. Backdate `created_at` so ERP sales for today are after code creation (reconcile requires `created_at ≤ sold_at ≤ now`):
+
+```sql
+UPDATE promocodes
+SET created_at = TIMESTAMPTZ '2026-08-03 00:00:00+00'
+WHERE promocode IN ('41000001','41000002','41000003','41000004');
+```
+
+3. Run:
+
+```powershell
+python scripts/run_reconcile.py
+```
+
+4. Expect `auto_closed: …` and `checker_logs.action_type = AUTO_CLOSE` with `erp_sale_matched = true`.
