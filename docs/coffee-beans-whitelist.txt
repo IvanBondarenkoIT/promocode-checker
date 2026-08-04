@@ -1,0 +1,57 @@
+Promocode Checker — coffee beans whitelist (ERP reconcile / probe)
+Source: GOODS.OWNER IN COFFEE_BEANS_GROUP_IDS
+Env default: COFFEE_BEANS_GROUP_IDS=11077,16276,16279
+Match rule: any paid sale line of a product in these groups (statuses 1,2,3,5).
+Discount column is NOT used.
+
+=== GROUPS ===
+11077	Coffee Blasecafe blend (250 g)
+16276	Coffee Blasercafe singl origin  (250г)
+16279	Coffee  Blasercafe blend (1kg)
+
+=== PRODUCTS (live Granit snapshot) ===
+group_id	product_id	product_name
+11077	23713	Coffee  "Blaser" Verde" (250g)
+11077	26614	Coffee "Blaser Purista"(250g)
+11077	20636	Coffee "Blaser" Ballerina (250 g)
+11077	20627	Coffee "Blaser" Cote d'azur (250 g)
+11077	17588	Coffee "Blaser" Crema (250 g)
+11077	20575	Coffee "Blaser" Lilla & Rose (250 g)
+11077	23227	Coffee "Blaser" Lussuria (250 g)
+11077	20628	Coffee "Blaser" Rosso & Nero (250 g)
+11077	22184	Coffee "Blaser" Sera (250 g)
+11077	25620	Coffee"Blaser" Classico (250 g)
+11077	23712	Coffee"Blaser" Marrone" (250 g)
+11077	20601	Кофе "Blaser" Barista d'arte (250 г)
+11077	23925	Кофе "Blaser" Italia (250 г)
+11077	23337	Кофе "Blaser" Jubile" (250 г)
+11077	20578	Кофе "Blaser" Opera (250 г)
+11077	20604	Кофе "Blaser" Orient (250 г)
+11077	20579	Кофе "Blaser" Romand (250 г)
+11077	21721	Кофе "Blaser" Saint Tropez (250 г)
+11077	20605	Кофе "Blaser" Servus Amadeus (250 г)
+11077	20606	Кофе "Blaser" Symphony (250 г)
+11077	23228	Кофе "Blaser"Melodie" (250г)
+11077	19879	Кофе Gourmets` Plaisir (250г)
+16276	20654	Coffee  "Blaser" Java (250 g)
+16276	23229	Coffee "Blaser" Brasil (250 g)
+16276	20637	Coffee "Blaser" Columbia (250 g)
+16276	20647	Coffee "Blaser" Ethiopia Sidamo (250 g)
+16276	21938	Coffee "Blaser" Pura Vida (250 g)
+16276	26442	Coffee "Blaser"Terra Vita (250g)
+16276	11233	Кофе "Blaser" Galapagos (250 г)
+16276	20610	Кофе "Blaser" Hawaii  (250 г)
+16276	11231	Кофе "Blaser" Jamaica Blue Mount.(250 г)
+16276	19378	Кофе "Blaser" Kopi Luwak (250 г)
+16276	20648	Кофе "Blaser" Nepal (250 г)
+16276	20247	Кофе "Blaser" OCOA Santo Domingo (250 г)
+16279	11211	Coffee "Blasecafer" Ballerina (1kg)
+16279	27063	Coffee "Blasecafer" Marrone (1kg)
+16279	27064	Coffee "Blasecafer"Classico (1kg)
+16279	20655	Coffee "Blaser" Lilla & Rose (1кг)
+16279	25022	Coffee "Blaser" Lussuria (1кг)
+16279	20574	Кофе "Blaser" Cote d`azur (1кг)
+16279	11209	Кофе "Blaser" Opera (1кг)
+16279	20649	Кофе "Blaser" Orient (1кг)
+
+Total products: 42

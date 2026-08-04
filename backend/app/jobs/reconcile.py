@@ -112,14 +112,18 @@ def _auto_close_active(
         )
         result.auto_closed.append(locked.promocode)
 
-        # Decisions: alerts for reconcile changes are mandatory.
+    # Decisions: one summary Telegram message per reconcile run (not per code).
+    if result.auto_closed:
+        codes = ", ".join(result.auto_closed[:30])
+        more = len(result.auto_closed) - 30
+        suffix = f" (+{more} more)" if more > 0 else ""
         send_alert(
             db,
             event_type="reconcile_auto_close",
-            dedup_key=f"auto_close:{locked.promocode}:{now.date().isoformat()}",
+            dedup_key=f"auto_close_summary:{now.date().isoformat()}:{now.strftime('%H%M')}",
             message=(
-                f"AUTO_CLOSE promocode={locked.promocode} "
-                f"customer_erp_id={locked.customer_erp_id}"
+                f"Reconcile AUTO_CLOSE count={len(result.auto_closed)} "
+                f"codes={codes}{suffix}"
             ),
             settings=settings,
         )

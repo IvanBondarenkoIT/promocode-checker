@@ -22,17 +22,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
+    && apt-get install -y --no-install-recommends ca-certificates libfbclient2 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml README.md /app/
 COPY backend /app/backend
 COPY scripts /app/scripts
 COPY config /app/config
+COPY docs/coffee-beans-whitelist.txt /app/docs/coffee-beans-whitelist.txt
 COPY infra/docker-entrypoint.sh /app/infra/docker-entrypoint.sh
 COPY infra/docker-worker-entrypoint.sh /app/infra/docker-worker-entrypoint.sh
 
-RUN pip install .
+RUN pip install ".[erp-direct]"
 
 COPY --from=frontend-build /frontend/dist /app/static
 

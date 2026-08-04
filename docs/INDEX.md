@@ -23,8 +23,9 @@
 - [`runbooks/railway.md`](runbooks/railway.md)
 - [`runbooks/server-prod.md`](runbooks/server-prod.md)
 - [`runbooks/erp-probe.md`](runbooks/erp-probe.md) — Stage 4.1 coffee sales probe
+- [`runbooks/telegram-alerts.md`](runbooks/telegram-alerts.md) — ops Telegram bot
 - [`runbooks/employee-cashier.md`](runbooks/employee-cashier.md) — cashier launch (English UI)
-
+- [`coffee-beans-whitelist.txt`](coffee-beans-whitelist.txt) — coffee groups + products
 ## Prompts
 
 - [`prompts/README.md`](prompts/README.md)
@@ -46,6 +47,7 @@
 - [`reports/stage-09-cicd.md`](reports/stage-09-cicd.md)
 - [`reports/stage-10-runbooks.md`](reports/stage-10-runbooks.md)
 - [`reports/stage-41-erp-probe.md`](reports/stage-41-erp-probe.md)
+- [`reports/gap-checklist-2026-08-04.md`](reports/gap-checklist-2026-08-04.md)
 - [`reports/verification-2026-07-29.md`](reports/verification-2026-07-29.md) — post Stage 10 full audit PASS
 
 ## Supervisor

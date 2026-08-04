@@ -25,11 +25,13 @@ Copy-Item config.example.json config.json
 
 3. Ensure backend + frontend (or prod static) are running.
 
-## Launch
+## Update production stack
 
 ```powershell
-.\launch-cashier.ps1
+.\update-prod.ps1
 ```
+
+Pulls `main`, rebuilds Docker Compose prod, prints `/health` and recent reconcile logs.
 
 Optional override for one-off testing:
 

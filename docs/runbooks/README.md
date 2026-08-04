@@ -20,11 +20,17 @@ Operational guides for local development, Railway demo, Windows Server productio
 
 - [erp-probe.md](erp-probe.md) — Stage 4.1 coffee sales CSV via Proxy (local) or direct Firebird (server)
 
+## Telegram
+
+- [telegram-alerts.md](telegram-alerts.md) — ops alert bot (not customer barcode bot)
+
 ## Related
 
 - Env variables: [`../env-matrix.md`](../env-matrix.md)
+- Coffee whitelist text: [`../coffee-beans-whitelist.txt`](../coffee-beans-whitelist.txt)
 - Branch / CI / deploy: [`../branching.md`](../branching.md)
 - Deploy report: [`../reports/stage-08-deploy.md`](../reports/stage-08-deploy.md)
 - CI report: [`../reports/stage-09-cicd.md`](../reports/stage-09-cicd.md)
 - Desktop launcher: [`../../desktop/README.md`](../../desktop/README.md)
+- Prod update script: [`../../desktop/update-prod.ps1`](../../desktop/update-prod.ps1)
 - Detailed local setup: [`../local-development.md`](../local-development.md)

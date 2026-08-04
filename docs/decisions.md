@@ -74,6 +74,19 @@ Telegram auto-close delivery mode:
 - **one summary message per reconcile run** (not one alert per closed code)
 - fraud warnings and job crashes remain event alerts with dedup
 
+Setup runbook: [`docs/runbooks/telegram-alerts.md`](runbooks/telegram-alerts.md).
+
+### Customer barcode Telegram bot (locked 2026-08-04)
+
+Sending Code 128 images **to customers** is **out of scope** for `promocode-checker`.
+
+This repo provides:
+
+- `GET /api/v1/cashier/barcode/{code}` — generate PNG on the fly
+- Campaign CSV import + seed scripts
+
+A separate marketing / CRM Telegram bot (other project) may call the barcode API or export PNGs. Ops alerts use a **different** bot token (`TELEGRAM_*` above).
+
 ## Stage 4 / Stage 5 gate (locked 2026-07-28)
 
 Supervisor gate before Cashier PWA:

@@ -55,6 +55,42 @@ def _create_active(
     return promo
 
 
+def test_reconcile_auto_close_one_telegram_summary(db_session: Session) -> None:
+    """Two AUTO_CLOSEs → one reconcile_auto_close Telegram row (summary)."""
+    now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
+    _create_active(
+        db_session, code="10000011", customer="CUST-A", created_at=now - timedelta(hours=3)
+    )
+    _create_active(
+        db_session, code="10000012", customer="CUST-B", created_at=now - timedelta(hours=3)
+    )
+    adapter = MockErpAdapter(
+        [
+            CoffeeSaleMatch("CUST-A", now - timedelta(hours=1), 11077, "a"),
+            CoffeeSaleMatch("CUST-B", now - timedelta(hours=1), 11077, "b"),
+        ]
+    )
+    result = run_reconcile(
+        db_session,
+        settings=_settings(),
+        adapter=adapter,
+        now=now,
+    )
+    assert sorted(result.auto_closed) == ["10000011", "10000012"]
+
+    from app.models import TelegramNotificationLog
+
+    tg_logs = list(
+        db_session.scalars(
+            select(TelegramNotificationLog).where(
+                TelegramNotificationLog.event_type == "reconcile_auto_close"
+            )
+        ).all()
+    )
+    assert len(tg_logs) == 1
+    assert "count=2" in tg_logs[0].message
+
+
 def test_reconcile_auto_closes_active_with_sale(db_session: Session) -> None:
     now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
     promo = _create_active(
@@ -92,6 +128,19 @@ def test_reconcile_auto_closes_active_with_sale(db_session: Session) -> None:
     assert log is not None
     assert log.erp_sale_matched is True
     assert log.point_id == "reconcile"
+
+    from app.models import TelegramNotificationLog
+
+    tg_logs = list(
+        db_session.scalars(
+            select(TelegramNotificationLog).where(
+                TelegramNotificationLog.event_type == "reconcile_auto_close"
+            )
+        ).all()
+    )
+    assert len(tg_logs) == 1
+    assert "count=1" in tg_logs[0].message
+    assert "10000001" in tg_logs[0].message
 
 
 def test_reconcile_fraud_when_manual_close_without_sale(db_session: Session) -> None:

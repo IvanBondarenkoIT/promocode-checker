@@ -22,7 +22,8 @@ Validate unique 8-digit customer promocodes at cashier points, close them safely
 - GitHub: https://github.com/IvanBondarenkoIT/promocode-checker
 - Stages **1–10 done** (incl. 5.1, 6.1); Stages **11a–11d** done
 - Stage 4.1 ERP probe: **done** — live CSV OK + AUTO_CLOSE demo (`docs/reports/stage-41-erp-probe.md`)
-- Next: server-prod direct Firebird; TLS / GHCR follow-ups; real campaign CSV on server
+- Gap checklist 2026-08-04: **done** (`docs/reports/gap-checklist-2026-08-04.md`)
+- Next: owner ops on server (Telegram, ERP mode, `desktop/update-prod.ps1`); optional Railway/TLS/GHCR
 
 ## Hard process rules
 

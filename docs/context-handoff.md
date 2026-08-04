@@ -4,8 +4,8 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–10 + 11a–11d + Stage 4.1 ERP probe закрыты.
-Probe: docs/runbooks/erp-probe.md — owner visual OK CSV before reconcile live demo.
+Этапы 1–10 + 11a–11d + Stage 4.1 + gap checklist 2026-08-04 закрыты.
+Owner ops: Telegram + ERP на server-prod; desktop/update-prod.ps1.
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
@@ -19,12 +19,12 @@ Probe: docs/runbooks/erp-probe.md — owner visual OK CSV before reconcile live 
 - Stage 11c: campaign display on cashier + admin (`docs/reports/stage-11c-campaign-ui.md`)
 - Stage 11d: DEMO_LOCAL seed + server rollout checklist (`docs/reports/stage-11d-server-rollout.md`)
 - Stage 4.1: Granit coffee SQL + shop cards + probe CLI + live AUTO_CLOSE demo (`docs/reports/stage-41-erp-probe.md`)
+- Gap checklist: TG summary + ops runbook + fdb/proxy notes + update-prod (`docs/reports/gap-checklist-2026-08-04.md`)
 
 ## Next (maintenance / follow-ups)
 
-- Server-prod ERP: `direct` Firebird + optional probe on server
-- Apply Stage 11d on Windows Server (pull / rebuild / seed) if not done
-- Real campaign CSV import on server-prod
+- Server-prod: fill Telegram + confirm ERP mode; `desktop\update-prod.ps1`
+- Real campaign CSV import on server-prod when marketing ready
 - Optional TLS / reverse proxy on server-prod
 - Optional GHCR image publish
 - Confirm Railway project connected to `railway-demo`

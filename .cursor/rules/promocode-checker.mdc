@@ -48,7 +48,8 @@ You are working in `promocode-checker`.
 - Stage 9 done (CI/CD)
 - Stage 10 done (runbooks)
 - Stage 4.1 done (ERP coffee probe + live AUTO_CLOSE demo)
-- Next: maintenance / follow-ups (server direct Firebird, TLS, optional GHCR)
+- Gap checklist 2026-08-04 done (TG summary, ops runbook, fdb/proxy notes, update-prod)
+- Next: owner server ops (Telegram/ERP); optional TLS / GHCR
 
 ## Coding expectations
 

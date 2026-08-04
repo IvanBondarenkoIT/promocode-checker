@@ -49,18 +49,8 @@ Invoke-RestMethod http://127.0.0.1:8020/health
 
 Browser on the server (default prod port **8020** — avoids clash with other apps on 8000):
 
-- Cashier: `http://127.0.0.1:8020/?point_id=shop_01`
+- Cashier: `http://127.0.0.1:8020/` (use desktop launcher so Shop = Windows username)
 - Admin: `http://127.0.0.1:8020/admin/login`
-
-## Update (later)
-
-```powershell
-cd C:\Projects\promocode-checker
-git checkout main
-git pull origin main
-cd C:\Projects\promocode-checker\infra
-docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
-```
 
 After Stages 11a–11c (status hints, campaigns), also seed demo codes once:
 
@@ -87,14 +77,39 @@ Invoke-WebRequest http://127.0.0.1:8020/api/v1/cashier/barcode/10000001 -OutFile
 
 | Setting | Production |
 |---------|------------|
-| `ERP_ACCESS_MODE` | `direct` (preferred on Windows Server with local Firebird) |
-| `FIREBIRD_DSN` / user / password | `127.0.0.1/3055:DK_GEORGIA` + readonly credentials |
-| `PROXY_API_*` | Optional fallback if direct is unavailable |
-| Telegram | Required for fraud / crash / reconcile summary alerts |
+| `ERP_ACCESS_MODE` | Prefer **`proxy`** from Docker (LAN Proxy API). Use `direct` only with `FIREBIRD_DSN=host.docker.internal/3055:DK_GEORGIA` + `fdb` in image |
+| `FIREBIRD_*` | Readonly user; **do not** use `127.0.0.1` inside the container (that is not the Windows host) |
+| `PROXY_API_*` | Required when mode=`proxy` |
+| Telegram | Required — see [telegram-alerts.md](telegram-alerts.md) |
 
-Coffee sales probe (validate SQL before trusting auto-close): [erp-probe.md](erp-probe.md).
+Coffee groups/products list: [`../coffee-beans-whitelist.txt`](../coffee-beans-whitelist.txt).  
+Probe: [erp-probe.md](erp-probe.md).
 
-Reconcile service: `scripts/run_reconcile_loop.py` (hourly). Startup migration failure can notify via `scripts/notify_startup_failure.py` when Telegram is configured.
+Reconcile: hourly `run_reconcile_loop.py`. Smoke:
+
+```powershell
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec reconcile python /app/scripts/run_reconcile.py
+docker compose --env-file .env.prod -f docker-compose.prod.yml logs --tail 30 reconcile
+```
+
+## Update (later)
+
+One-shot script (preferred):
+
+```powershell
+cd C:\Projects\promocode-checker\desktop
+.\update-prod.ps1
+```
+
+Manual:
+
+```powershell
+cd C:\Projects\promocode-checker
+git checkout main
+git pull origin main
+cd C:\Projects\promocode-checker\infra
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+```
 
 ## Desktop launcher (RDP cashiers)
 
