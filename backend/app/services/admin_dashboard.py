@@ -15,6 +15,7 @@ from app.models import (
     TelegramNotificationLog,
 )
 from app.schemas.admin import DashboardResponse
+from app.services.campaign_scope import get_active_kind, scoped_promocode_query
 
 
 def _now() -> datetime:
@@ -24,23 +25,18 @@ def _now() -> datetime:
 def get_dashboard(db: Session) -> DashboardResponse:
     now = _now()
     since = now - timedelta(hours=24)
+    active_kind = get_active_kind(db)
 
-    active = db.scalar(
-        select(func.count())
-        .select_from(Promocode)
-        .where(Promocode.status == PromocodeStatus.ACTIVE)
-    ) or 0
-    used = db.scalar(
-        select(func.count()).select_from(Promocode).where(Promocode.status == PromocodeStatus.USED)
-    ) or 0
-    expired = db.scalar(
-        select(func.count())
-        .select_from(Promocode)
-        .where(
-            Promocode.status == PromocodeStatus.ACTIVE,
-            Promocode.expires_at <= now,
-        )
-    ) or 0
+    def _count_scoped(*conditions) -> int:
+        query = scoped_promocode_query(db, kind=active_kind).where(*conditions)
+        return len(set(db.scalars(query).unique().all()))
+
+    active = _count_scoped(Promocode.status == PromocodeStatus.ACTIVE)
+    used = _count_scoped(Promocode.status == PromocodeStatus.USED)
+    expired = _count_scoped(
+        Promocode.status == PromocodeStatus.ACTIVE,
+        Promocode.expires_at <= now,
+    )
     scans_24h = db.scalar(
         select(func.count())
         .select_from(CheckerLog)
@@ -73,4 +69,5 @@ def get_dashboard(db: Session) -> DashboardResponse:
         auto_closes_total=auto_closes,
         fraud_open=fraud_open,
         telegram_sent_last_24h=telegram_24h,
+        active_campaign_kind=active_kind.value,
     )

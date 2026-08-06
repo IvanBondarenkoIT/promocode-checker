@@ -12,6 +12,13 @@ class CampaignStatus(StrEnum):
     CLOSED = "CLOSED"
 
 
+class CampaignKind(StrEnum):
+    """Data scope of a campaign: test data vs real customers."""
+
+    TEST = "TEST"
+    LIVE = "LIVE"
+
+
 class CheckerActionType(StrEnum):
     SCAN_CHECK = "SCAN_CHECK"
     MANUAL_CLOSE = "MANUAL_CLOSE"

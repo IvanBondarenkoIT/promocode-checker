@@ -26,12 +26,16 @@ class FallbackErpAdapter:
         *,
         since: datetime,
         until: datetime,
+        all_customers: bool = False,
+        row_limit: int | None = None,
     ) -> list[CoffeeSaleMatch]:
         try:
             return self._primary.find_coffee_sales(
                 customer_erp_ids,
                 since=since,
                 until=until,
+                all_customers=all_customers,
+                row_limit=row_limit,
             )
         except ErpError as primary_error:
             if self._fallback is None:
@@ -41,6 +45,8 @@ class FallbackErpAdapter:
                 customer_erp_ids,
                 since=since,
                 until=until,
+                all_customers=all_customers,
+                row_limit=row_limit,
             )
 
 

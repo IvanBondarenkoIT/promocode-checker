@@ -146,6 +146,63 @@ Verify hardware scanner (keyboard wedge + Enter) in app mode before go-live.
 
 **Do not** point `cashierBaseUrl` at `localhost` on a remote RDP client unless the stack runs on that same machine.
 
+## Campaign rollout (pre-production go-live)
+
+Order matters: the global scope stays `TEST` until the data is verified.
+
+```powershell
+# 1. Back up before any import
+cd C:\Projects\promocode-checker\infra
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec db `
+  pg_dump -U postgres promocode_checker > C:\Projects\backups\promocode_checker_$(Get-Date -Format yyyyMMdd-HHmm).sql
+
+# 2. Update code and schema (migration 005 adds campaign kind + app_settings)
+cd C:\Projects\promocode-checker\desktop
+.\update-prod.ps1
+
+# 3. Copy the segment in and dry-run
+cd C:\Projects\promocode-checker\infra
+docker compose --env-file .env.prod -f docker-compose.prod.yml cp `
+  C:\Projects\segments\segment.csv app:/app/data/input/segment.csv
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec app `
+  python /app/scripts/import_segment_promocodes.py --file /app/data/input/segment.csv `
+  --campaign-code beans_1_2kg_preprod --campaign-name "Coffee beans 1-2kg" `
+  --kind LIVE --code-prefix 5 --dry-run
+```
+
+Then run the same command without `--dry-run`, copy the issued CSV out of the container
+for the mailout, and only after checking the admin tables switch **Working data** to
+`LIVE` on the dashboard ([campaign-scope.md](campaign-scope.md)).
+
+Rollback of untouched codes: `python /app/scripts/import_segment_promocodes.py --rollback-campaign <code>`.
+
+## General smoke / regression (prod server)
+
+Run this after local OK and each promote to `main`. Prefer `desktop\update-prod.ps1` first.
+
+```powershell
+cd C:\Projects\promocode-checker\desktop
+.\update-prod.ps1
+```
+
+Checklist:
+
+1. **Health** — `Invoke-RestMethod http://127.0.0.1:8020/health` → `status=ok`, `database=ok`, `schema=ok`
+2. **Cashier launch** — `.\launch-cashier.ps1`; **Shop** = Windows RDP username (`pointId` empty in `config.json`)
+3. **Scan flows** — ACTIVE code → success UI; USED / EXPIRED / NOT FOUND show clear status
+4. **Manual close** — close one ACTIVE; confirm USED; if Telegram configured, alert arrives for subscribers
+5. **Admin** — login at `/admin/login`; lists / campaigns load
+6. **Reconcile** — one-shot then logs:
+   ```powershell
+   cd C:\Projects\promocode-checker\infra
+   docker compose --env-file .env.prod -f docker-compose.prod.yml exec reconcile python /app/scripts/run_reconcile.py
+   docker compose --env-file .env.prod -f docker-compose.prod.yml logs --tail 40 reconcile
+   ```
+7. **Telegram** — `/start` → keyword `promo` → `/demo` against the **prod** bot token; confirm subscribe + sample types
+8. **Scope guard** — with **Working data = TEST**, scan a `LIVE` customer code: the cashier must show `OTHER CAMPAIGN` and leave the code `ACTIVE`
+
+Record pass/fail per item before handing cashiers a new build.
+
 ## Employee instructions
 
 Give cashiers [`employee-cashier.md`](employee-cashier.md). UI labels are English (`Shop`, `Ready`, `Apply discount`, …).

@@ -17,7 +17,7 @@
 - Separate external PostgreSQL database for checker state, logs, admin actions, and analytics.
 - ERP reconciliation through Proxy API first, with direct read-only fallback for server deployments.
 - Admin and viewer interfaces for visibility, manual correction, reporting, and alert handling.
-- Local-first development, Railway demo deployment, and Windows Server Docker production.
+- Local-first development and Windows Server Docker production (general smoke on server-prod). No Railway.
 
 ## Repository layout
 
@@ -33,7 +33,7 @@
 ## Current status
 
 - Stages **1–10** complete (implementation plan done).
-- **Runbooks:** [`docs/runbooks/`](docs/runbooks/README.md) (local / Railway / server-prod / employee)
+- **Runbooks:** [`docs/runbooks/`](docs/runbooks/README.md) (local / server-prod / employee)
 - **CI:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 - **Docker stack:** `docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --build` → `http://localhost:8000`
 - **Dev (Vite):** `http://localhost:5173/?point_id=shop_01`
@@ -44,7 +44,7 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–10 закрыты. Runbooks: docs/runbooks/.
+Этапы 1–10 закрыты. Envs: local + server-prod. Runbooks: docs/runbooks/.
 ```
 
 ## Quick start

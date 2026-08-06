@@ -17,6 +17,10 @@ class ErpAdapter(Protocol):
         *,
         since: datetime,
         until: datetime,
+        all_customers: bool = False,
+        row_limit: int | None = None,
     ) -> list[CoffeeSaleMatch]:
-        """Return coffee-beans sales for customers in [since, until]."""
-...
+        """Return coffee-beans sales for customers in [since, until].
+
+        When ``all_customers`` is True, ignore customer filter (day digests).
+        """

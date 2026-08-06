@@ -8,8 +8,15 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Campaign, CampaignStatus, Promocode, PromocodeStatus
+from app.models import Campaign, CampaignKind, CampaignStatus, Promocode, PromocodeStatus
 from app.services.promocode_generator import calculate_expires_at, is_valid_promocode
+
+
+def resolve_expires_at(campaign: Campaign, now: datetime, ttl_days: int) -> datetime:
+    """Campaign end wins over TTL so a wave cannot outlive its campaign."""
+    if campaign.ends_at is not None:
+        return campaign.ends_at
+    return calculate_expires_at(now, ttl_days)
 
 
 def parse_optional_datetime(value: str | None) -> datetime | None:
@@ -30,6 +37,8 @@ def upsert_campaign(
     starts_at: datetime | None,
     ends_at: datetime | None,
     notes: str | None,
+    kind: CampaignKind = CampaignKind.TEST,
+    code_prefix: str | None = None,
 ) -> Campaign:
     existing = db.scalar(select(Campaign).where(Campaign.code == code))
     if existing is not None:
@@ -40,6 +49,20 @@ def upsert_campaign(
             existing.ends_at = ends_at
         if notes is not None:
             existing.notes = notes
+        if code_prefix is not None and existing.code_prefix != code_prefix:
+            if existing.code_prefix and db.scalar(
+                select(Promocode.id).where(Promocode.campaign_id == existing.id).limit(1)
+            ):
+                raise ValueError(
+                    f"Campaign '{code}' already issued codes with prefix "
+                    f"'{existing.code_prefix}'; refusing to change it to '{code_prefix}'"
+                )
+            existing.code_prefix = code_prefix
+        if existing.kind != kind:
+            raise ValueError(
+                f"Campaign '{code}' already exists with kind {existing.kind.value}; "
+                f"refusing to switch to {kind.value}"
+            )
         if existing.status == CampaignStatus.DRAFT:
             existing.status = CampaignStatus.ACTIVE
         db.flush()
@@ -50,6 +73,8 @@ def upsert_campaign(
         code=code,
         name=name,
         status=CampaignStatus.ACTIVE,
+        kind=kind,
+        code_prefix=code_prefix,
         starts_at=starts_at,
         ends_at=ends_at,
         notes=notes,
@@ -95,6 +120,16 @@ def import_campaign_rows(
             skipped += 1
             continue
 
+        already_in_campaign = db.scalar(
+            select(Promocode.id).where(
+                Promocode.campaign_id == campaign.id,
+                Promocode.customer_erp_id == customer,
+            )
+        )
+        if already_in_campaign is not None:
+            skipped += 1
+            continue
+
         db.add(
             Promocode(
                 id=uuid.uuid4(),
@@ -103,7 +138,7 @@ def import_campaign_rows(
                 status=PromocodeStatus.ACTIVE,
                 campaign_id=campaign.id,
                 created_at=now,
-                expires_at=calculate_expires_at(now, ttl_days),
+                expires_at=resolve_expires_at(campaign, now, ttl_days),
             )
         )
         inserted += 1

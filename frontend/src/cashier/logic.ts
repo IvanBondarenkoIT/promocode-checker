@@ -21,6 +21,7 @@ export function resultToTone(result: string | null): StatusTone {
     case "not_found":
       return "missing";
     case "invalid_format":
+    case "out_of_scope":
       return "error";
     default:
       return "idle";
@@ -41,6 +42,8 @@ export function resultLabel(result: string | null): string {
       return "NOT FOUND";
     case "invalid_format":
       return "INVALID FORMAT";
+    case "out_of_scope":
+      return "OTHER CAMPAIGN";
     default:
       return "READY TO SCAN";
   }
@@ -64,6 +67,8 @@ export function resultInstruction(result: string | null, isError = false): strin
       return "We do not have this code. Check the barcode or ask a supervisor.";
     case "invalid_format":
       return "Codes must be exactly 8 digits. Scan again or re-enter carefully.";
+    case "out_of_scope":
+      return "This code belongs to another campaign that is not running now. Do not give the discount; call a supervisor.";
     default:
       return "Scan the customer’s 8-digit barcode, or type it and press Enter.";
   }

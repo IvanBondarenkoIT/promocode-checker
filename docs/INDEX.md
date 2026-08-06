@@ -20,11 +20,16 @@
 
 - [`runbooks/README.md`](runbooks/README.md) — index
 - [`runbooks/local.md`](runbooks/local.md)
-- [`runbooks/railway.md`](runbooks/railway.md)
-- [`runbooks/server-prod.md`](runbooks/server-prod.md)
+- [`runbooks/server-prod.md`](runbooks/server-prod.md) — deploy + general smoke
+- [`runbooks/campaign-import.md`](runbooks/campaign-import.md) — segment and wave imports
+- [`runbooks/campaign-scope.md`](runbooks/campaign-scope.md) — TEST / LIVE global switch
+- [`runbooks/preprod-calibration.md`](runbooks/preprod-calibration.md) — shop-card auto-close rehearsal
 - [`runbooks/erp-probe.md`](runbooks/erp-probe.md) — Stage 4.1 coffee sales probe
 - [`runbooks/telegram-alerts.md`](runbooks/telegram-alerts.md) — ops Telegram bot (subscribe + DEMO)
 - [`reports/stage-t-telegram-ops.md`](reports/stage-t-telegram-ops.md)
+- [`reports/stage-u-telegram-daily.md`](reports/stage-u-telegram-daily.md)
+- [`reports/stage-v-preprod-segment.md`](reports/stage-v-preprod-segment.md)
+- [`reports/drop-railway-2026-08-04.md`](reports/drop-railway-2026-08-04.md)
 - [`runbooks/employee-cashier.md`](runbooks/employee-cashier.md) — cashier launch (English UI)
 - [`coffee-beans-whitelist.txt`](coffee-beans-whitelist.txt) — coffee groups + products
 ## Prompts

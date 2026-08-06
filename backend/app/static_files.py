@@ -1,4 +1,4 @@
-"""Optional static frontend mount for production Docker / Railway."""
+"""Optional static frontend mount for production Docker."""
 
 from __future__ import annotations
 

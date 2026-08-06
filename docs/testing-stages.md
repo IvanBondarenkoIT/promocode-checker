@@ -55,10 +55,11 @@ Each stage must end with:
 ## Stage 8
 
 - Build and run Docker locally.
-- Validate Railway demo configuration.
 - Verify healthchecks and restart policies.
+- Confirm server-prod compose assets (no cloud demo env).
 
 ## Stage 9
 
 - Validate CI runs on pull requests.
-- Verify deployment mapping for `develop`, `railway-demo`, and `main`.
+- Verify deployment mapping for `develop` and `main`.
+- After promote to `main`, run general smoke on server-prod.

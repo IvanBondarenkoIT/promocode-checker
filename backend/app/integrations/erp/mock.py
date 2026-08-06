@@ -23,13 +23,18 @@ class MockErpAdapter:
         *,
         since: datetime,
         until: datetime,
+        all_customers: bool = False,
+        row_limit: int | None = None,
     ) -> list[CoffeeSaleMatch]:
         wanted = set(customer_erp_ids)
         since_aware = _ensure_aware(since)
         until_aware = _ensure_aware(until)
-        return [
+        matches = [
             sale
             for sale in self.sales
-            if sale.customer_erp_id in wanted
+            if (all_customers or sale.customer_erp_id in wanted)
             and since_aware <= _ensure_aware(sale.sold_at) <= until_aware
         ]
+        if row_limit and row_limit > 0:
+            return matches[:row_limit]
+        return matches

@@ -14,6 +14,8 @@ from app.integrations.erp.base import ErpAdapter
 from app.integrations.erp.factory import get_erp_adapter
 from app.integrations.erp.types import CoffeeSaleMatch
 from app.models import (
+    Campaign,
+    CampaignStatus,
     CheckerActionType,
     CheckerLog,
     FraudWarning,
@@ -21,6 +23,7 @@ from app.models import (
     Promocode,
     PromocodeStatus,
 )
+from app.services.campaign_scope import get_active_kind, in_scope, scoped_promocode_query
 from app.services.promocode_close import close_promocode, lock_promocode_by_id
 from app.services.telegram import send_alert
 from app.services.telegram_messages import msg_auto_close, msg_fraud_no_sale
@@ -101,11 +104,15 @@ def _auto_close_active(
 ) -> None:
     active_rows = list(
         db.scalars(
-            select(Promocode).where(
+            scoped_promocode_query(db)
+            .where(
                 Promocode.status == PromocodeStatus.ACTIVE,
                 Promocode.expires_at > now,
             )
-        ).all()
+            .where((Campaign.id.is_(None)) | (Campaign.status != CampaignStatus.CLOSED))
+        )
+        .unique()
+        .all()
     )
     if not active_rows:
         return
@@ -156,6 +163,7 @@ def _auto_close_active(
                 tz_name=settings.app_timezone,
             ),
             settings=settings,
+            audience="events",
         )
 
 
@@ -192,6 +200,7 @@ def _fraud_check_manual_closes(
         ).all()
     }
 
+    active_kind = get_active_kind(db)
     candidates: list[tuple[CheckerLog, Promocode]] = []
     for log in manual_logs:
         if log.id in existing_warning_log_ids:
@@ -200,6 +209,8 @@ def _fraud_check_manual_closes(
             continue
         promo = db.get(Promocode, log.promocode_id)
         if promo is None or promo.redeemed_at is None:
+            continue
+        if not in_scope(promo, active_kind):
             continue
         redeemed_at = _ensure_aware(promo.redeemed_at)
         if redeemed_at > amnesty_cutoff:
@@ -257,6 +268,7 @@ def _fraud_check_manual_closes(
                 tz_name=settings.app_timezone,
             ),
             settings=settings,
+            audience="events",
         )
 
 
@@ -286,6 +298,7 @@ def run_reconcile(
                 dedup_key=f"job_crash:reconcile:{current.strftime('%Y%m%d%H')}",
                 message=f"Reconcile job failed: {type(exc).__name__}: {exc}",
                 settings=cfg,
+                audience="errors",
             )
             db.flush()
         except Exception:  # noqa: BLE001 — never mask original failure

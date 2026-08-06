@@ -28,6 +28,7 @@ class DashboardResponse(BaseModel):
     auto_closes_total: int
     fraud_open: int
     telegram_sent_last_24h: int
+    active_campaign_kind: str = "TEST"
 
 
 class TableListResponse(BaseModel):
@@ -46,6 +47,25 @@ class PromocodePatchRequest(BaseModel):
 
 class FraudWarningPatchRequest(BaseModel):
     status: str = Field(min_length=1, max_length=32)
+    reason: str = Field(min_length=3, max_length=2000)
+
+
+class CampaignSummary(BaseModel):
+    code: str
+    name: str
+    kind: str
+    status: str
+    issued: int
+    used: int
+
+
+class ActiveScopeResponse(BaseModel):
+    active_campaign_kind: str
+    campaigns: list[CampaignSummary] = []
+
+
+class ActiveScopeUpdateRequest(BaseModel):
+    active_campaign_kind: str = Field(min_length=1, max_length=16)
     reason: str = Field(min_length=3, max_length=2000)
 
 

@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.models.enums import CampaignStatus
+from app.models.enums import CampaignKind, CampaignStatus
 
 
 class Campaign(Base):
@@ -14,6 +14,7 @@ class Campaign(Base):
     __table_args__ = (
         Index("ix_campaigns_code", "code", unique=True),
         Index("ix_campaigns_status", "status"),
+        Index("ix_campaigns_kind", "kind"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -28,6 +29,13 @@ class Campaign(Base):
         nullable=False,
         default=CampaignStatus.ACTIVE,
     )
+    kind: Mapped[CampaignKind] = mapped_column(
+        Enum(CampaignKind, name="campaign_kind"),
+        nullable=False,
+        default=CampaignKind.TEST,
+        server_default=CampaignKind.TEST.value,
+    )
+    code_prefix: Mapped[str | None] = mapped_column(String(1), nullable=True)
     starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)

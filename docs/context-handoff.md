@@ -4,8 +4,10 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–10 + 11a–11d + Stage 4.1 + gap checklist 2026-08-04 закрыты.
-Owner ops: Telegram + ERP на server-prod; desktop/update-prod.ps1.
+Этапы 1–10 + 11a–11d + Stage 4.1 + gap checklist + Stage T + Stage U + Stage V закрыты.
+Railway убран: только local + server-prod.
+Кампании делятся на TEST/LIVE, глобальный переключатель в админке.
+Owner: выкат на сервер (backup → migrate 005 → импорт сегмента → scope LIVE).
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
@@ -21,15 +23,19 @@ Owner ops: Telegram + ERP на server-prod; desktop/update-prod.ps1.
 - Stage 4.1: Granit coffee SQL + shop cards + probe CLI + live AUTO_CLOSE demo (`docs/reports/stage-41-erp-probe.md`)
 - Gap checklist: TG summary + ops runbook + fdb/proxy notes + update-prod (`docs/reports/gap-checklist-2026-08-04.md`)
 - Stage T: Telegram subscribe bot + human RU alerts + `/demo` calibration (`docs/reports/stage-t-telegram-ops.md`)
+- Drop Railway (2026-08-04): local + server-prod only (`docs/reports/drop-railway-2026-08-04.md`)
+- Stage U: daily digests 10:00/22:00 + alert modes full/digest (`docs/reports/stage-u-telegram-daily.md`)
+- Stage V: segment import + TEST/LIVE scope + admin scope switch (`docs/reports/stage-v-preprod-segment.md`)
 
-## Next (maintenance / follow-ups)
+## Next (launch preparation)
 
-- Owner: `/start` → `promo` → `/demo` on @dimkava_promo_alerts_bot; tweak copy if needed
-- Server-prod: Telegram token + `update-prod.ps1`
-- Real campaign CSV import on server-prod when marketing ready
-- Optional TLS / reverse proxy on server-prod
-- Optional GHCR image publish
-- Confirm Railway project connected to `railway-demo`
+- Server-prod: backup → `TELEGRAM_BOT_TOKEN` in `infra/.env.prod` → migrate **005** → `desktop/update-prod.ps1`
+- Import the segment on the server with `--dry-run` first, then switch scope to `LIVE` in the admin UI
+- Fill `data/input/staff_cards.csv` with shop-card ERP ids and run [runbooks/preprod-calibration.md](runbooks/preprod-calibration.md)
+- Decide how issued codes reach customers (export CSV is ready)
+- Owner decision: auto-close when the customer never showed the code
+- Run **general smoke / regression** on server — [runbooks/server-prod.md](runbooks/server-prod.md)
+- Optional TLS / reverse proxy, GHCR image publish
 
 ## Commands
 

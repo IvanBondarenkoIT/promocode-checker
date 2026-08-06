@@ -4,7 +4,7 @@ Canonical project plan. Keep this updated when stage outcomes change decisions.
 
 ## Goal
 
-Build a monorepo for validating unique customer promocodes, closing them at cashier points, reconciling usage against ERP sales, and surfacing admin/fraud visibility, with three environments: `local`, `railway-demo`, `server-prod`.
+Build a monorepo for validating unique customer promocodes, closing them at cashier points, reconciling usage against ERP sales, and surfacing admin/fraud visibility, with two environments: `local` and `server-prod`.
 
 ## Stack
 
@@ -12,7 +12,7 @@ Build a monorepo for validating unique customer promocodes, closing them at cash
 - Frontend: React/Vite PWA (cashier + admin)
 - Desktop: lightweight Windows/RDP wrapper over the same UI
 - **UI language: English only** — all user-facing strings; no i18n for MVP
-- Deploy: Docker Compose locally/prod, Railway for demo, GitHub Actions CI/CD
+- Deploy: Docker Compose locally + Windows Server prod; GitHub Actions CI; general smoke on server-prod (Railway dropped 2026-08-04)
 
 ## Architecture
 
@@ -39,7 +39,7 @@ flowchart LR
 - `backend/` — FastAPI, models, migrations, services, ERP adapters, jobs
 - `frontend/` — cashier PWA + admin UI
 - `desktop/` — RDP-friendly desktop shell
-- `infra/` — Docker, Compose, Railway, CI configs
+- `infra/` — Docker, Compose, CI configs
 - `docs/` — plan, decisions, prompts, reports, runbooks
 - `scripts/` — helpers
 - `tests/` — backend/frontend tests
@@ -50,8 +50,8 @@ flowchart LR
 1. Work in `feature/*`
 2. Stage tests + review + report
 3. Merge into `develop`
-4. Promote to `railway-demo` for demo
-5. Promote validated code to `main` for server production
+4. After local OK, promote validated code to `main` for server production
+5. Run general smoke on server-prod
 
 ## Stage checklist
 
@@ -148,35 +148,62 @@ Deferred (resolved by Stage 5/6 gate):
 - [x] Per-machine config (`pointId`, `cashierBaseUrl`, fullscreen)
 - [x] Tests + report (`docs/reports/stage-07-desktop-wrapper.md`)
 
-### Stage 8 — Docker / Railway / server-prod — DONE
+### Stage 8 — Docker / server-prod — DONE
 
 - [x] Dockerfile with static frontend
-- [x] Local + prod compose, Railway config
+- [x] Local + prod compose (Railway config later removed 2026-08-04)
 - [x] Healthchecks, restart policies, reconcile worker, startup crash alert
 - [x] Report `docs/reports/stage-08-deploy.md`
 
 ### Stage 9 — CI/CD — DONE
 
 - [x] GitHub Actions lint/tests (`.github/workflows/ci.yml`)
-- [x] Branch → environment mapping (`docs/branching.md`)
-- [x] Railway/prod deploy documented (native Railway + server Docker; no GHCR in this stage)
+- [x] Branch → environment mapping (`docs/branching.md`) — `develop` + `main`
+- [x] Prod deploy documented (server Docker; no GHCR in this stage)
 - [x] Docs + report (`docs/reports/stage-09-cicd.md`)
 
 ### Stage 10 — Runbooks polish — DONE
 
-- [x] local / railway / server docs (`docs/runbooks/`)
+- [x] local / server-prod docs (`docs/runbooks/`)
 - [x] env matrix finalized (`docs/env-matrix.md`)
 - [x] employee launch instructions (`docs/runbooks/employee-cashier.md`)
 - [x] Report `docs/reports/stage-10-runbooks.md`
+
+### Stage T / U — Telegram ops — DONE
+
+- [x] Subscribe bot, Russian human alerts, `/demo` (`docs/reports/stage-t-telegram-ops.md`)
+- [x] Daily digests 10:00 / 22:00 + `full` / `digest` modes (`docs/reports/stage-u-telegram-daily.md`)
+
+### Stage V — Pre-production segment and data scope — DONE
+
+- [x] Migration `005_campaign_scope`: `campaigns.kind` / `code_prefix`, customer fields on
+      `promocodes`, unique code per customer per campaign, `app_settings`
+- [x] Segment import with generated prefixed codes, dry-run, rollback, issued CSV export
+- [x] Global TEST / LIVE scope enforced in cashier, reconcile and fraud through
+      `backend/app/services/campaign_scope.py`
+- [x] Admin scope switch + table filters and pagination; cashier `TEST MODE` badge
+- [x] Telegram `campaign_import` / `scope_switched` + campaign lines in the daily digest
+- [x] Local rehearsal on the real 175-customer segment
+- [x] Report `docs/reports/stage-v-preprod-segment.md`
+
+### Launch backlog (open)
+
+- [ ] Delivery channel for issued codes (SMS / Telegram / print)
+- [ ] Shop card ERP ids for calibration (`data/input/staff_cards.csv`)
+- [ ] Owner decision: auto-close when the customer never showed the code
+- [ ] Server rollout: backup → migrate 005 → import → switch scope to LIVE
+- [ ] PII retention policy for customer names and phones
 
 ## Business tables (checker Postgres)
 
 ### `promocodes`
 
 - `id` UUID PK
-- `customer_erp_id` VARCHAR indexed
+- `customer_erp_id` VARCHAR indexed (ERP `ORGN.ID`)
 - `promocode` VARCHAR(8) unique indexed, exactly 8 digits
 - `status` ACTIVE|USED
+- `campaign_id` UUID nullable FK, unique together with `customer_erp_id`
+- `customer_card` / `customer_name` / `customer_phone` nullable (issued-codes export)
 - `created_at`
 - `expires_at`
 - `redeemed_at` nullable

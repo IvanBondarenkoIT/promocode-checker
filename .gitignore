@@ -38,6 +38,10 @@ frontend/.npm/
 desktop/config.json
 
 logs/
-data/
 tmp/
+
+# Customer segments and issued-code exports contain PII (names, phones, cards).
+# Never commit them; use docs/examples/*.example.csv for formats.
+data/
+!data/**/.gitkeep
 artifacts/

@@ -23,10 +23,9 @@ def test_compose_files_define_healthchecks() -> None:
     assert "restart:" in prod_compose
 
 
-def test_railway_config_present() -> None:
-    railway = ROOT / "railway.toml"
-    assert railway.is_file()
-    assert "/health" in railway.read_text(encoding="utf-8")
+def test_prod_compose_health_endpoint() -> None:
+    prod_compose = (ROOT / "infra" / "docker-compose.prod.yml").read_text(encoding="utf-8")
+    assert "/health" in prod_compose
 
 
 def test_prod_env_example_has_required_keys() -> None:

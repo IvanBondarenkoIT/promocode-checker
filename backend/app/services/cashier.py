@@ -4,8 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import get_settings
-from app.models import CheckerActionType, CheckerLog, Promocode, PromocodeStatus
+from app.models import CampaignKind, CheckerActionType, CheckerLog, Promocode, PromocodeStatus
 from app.schemas.cashier import CashierCodeResponse, CashierResult
+from app.services.campaign_scope import get_active_kind, in_scope
 from app.services.promocode_close import close_promocode, lock_promocode_by_code
 from app.services.promocode_generator import is_valid_promocode
 from app.services.telegram import send_alert
@@ -24,9 +25,15 @@ def _is_expired(promocode: Promocode, *, now: datetime | None = None) -> bool:
     return expires_at <= current
 
 
-def _resolve_lookup_result(promocode: Promocode | None) -> CashierResult:
+def _resolve_lookup_result(
+    promocode: Promocode | None,
+    *,
+    active_kind: CampaignKind,
+) -> CashierResult:
     if promocode is None:
         return CashierResult.NOT_FOUND
+    if not in_scope(promocode, active_kind):
+        return CashierResult.OUT_OF_SCOPE
     if promocode.status == PromocodeStatus.USED:
         return CashierResult.USED
     if _is_expired(promocode):
@@ -41,6 +48,7 @@ def _build_response(
     point_id: str,
     promocode: Promocode | None = None,
     log_id: int | None = None,
+    active_kind: CampaignKind | None = None,
 ) -> CashierCodeResponse:
     campaign = promocode.campaign if promocode is not None else None
     return CashierCodeResponse(
@@ -54,6 +62,8 @@ def _build_response(
         campaign_code=campaign.code if campaign is not None else None,
         campaign_name=campaign.name if campaign is not None else None,
         campaign_ends_at=campaign.ends_at if campaign is not None else None,
+        campaign_kind=campaign.kind.value if campaign is not None else None,
+        active_campaign_kind=active_kind.value if active_kind is not None else None,
     )
 
 
@@ -86,15 +96,17 @@ def _write_log(
 
 
 def check_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeResponse:
+    active_kind = get_active_kind(db)
     if not is_valid_promocode(code):
         return _build_response(
             result=CashierResult.INVALID_FORMAT,
             code=code,
             point_id=point_id,
+            active_kind=active_kind,
         )
 
     promocode = _get_promocode(db, code)
-    result = _resolve_lookup_result(promocode)
+    result = _resolve_lookup_result(promocode, active_kind=active_kind)
     log = _write_log(
         db,
         scanned_code=code,
@@ -108,27 +120,31 @@ def check_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeResp
         point_id=point_id,
         promocode=promocode,
         log_id=log.id,
+        active_kind=active_kind,
     )
     _notify_scan(db, response=response, promocode=promocode, when=log.scan_time)
     return response
 
 
 def redeem_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeResponse:
+    active_kind = get_active_kind(db)
     if not is_valid_promocode(code):
         return _build_response(
             result=CashierResult.INVALID_FORMAT,
             code=code,
             point_id=point_id,
+            active_kind=active_kind,
         )
 
     promocode = lock_promocode_by_code(db, code)
-    lookup_result = _resolve_lookup_result(promocode)
+    lookup_result = _resolve_lookup_result(promocode, active_kind=active_kind)
     if lookup_result != CashierResult.VALID:
         return _build_response(
             result=lookup_result,
             code=code,
             point_id=point_id,
             promocode=promocode,
+            active_kind=active_kind,
         )
 
     assert promocode is not None
@@ -145,6 +161,7 @@ def redeem_promocode(db: Session, *, code: str, point_id: str) -> CashierCodeRes
         point_id=point_id,
         promocode=promocode,
         log_id=log.id,
+        active_kind=active_kind,
     )
     _notify_manual_close(db, promocode=promocode, point_id=point_id, when=log.scan_time)
     return response
@@ -158,6 +175,7 @@ def _status_label(result: CashierResult) -> str:
         CashierResult.NOT_FOUND: "NOT FOUND",
         CashierResult.REDEEMED: "APPLIED",
         CashierResult.INVALID_FORMAT: "INVALID",
+        CashierResult.OUT_OF_SCOPE: "OTHER CAMPAIGN",
     }
     return mapping.get(result, result.value)
 
@@ -184,6 +202,7 @@ def _notify_scan(
             tz_name=settings.app_timezone,
         ),
         settings=settings,
+        audience="events",
     )
 
 
@@ -208,4 +227,5 @@ def _notify_manual_close(
             tz_name=settings.app_timezone,
         ),
         settings=settings,
+        audience="events",
     )

@@ -10,7 +10,7 @@
 
 1. ERP (Granit): PostgreSQL/Firebird доступ только на чтение, схему ERP не меняем.
 2. POS (шоп-челлер): оффлайн-касса, не редактируется; кассир бьет скидку вручную.
-3. Стек: FastAPI, внешний PostgreSQL чекера, Docker, Railway как demo.
+3. Стек: FastAPI, внешний PostgreSQL чекера, Docker; прод на Windows Server.
 
 ## Основной процесс
 

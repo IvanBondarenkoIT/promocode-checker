@@ -1,4 +1,4 @@
-"""Poll Telegram getUpdates for subscribe / stop / demo commands."""
+"""Poll Telegram getUpdates for subscribe / mode / stop / demo commands."""
 
 from __future__ import annotations
 
@@ -9,10 +9,14 @@ import httpx
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
-from app.models.telegram_subscriber import TelegramBotState
+from app.models.telegram_subscriber import (
+    ALERT_MODE_DIGEST,
+    ALERT_MODE_FULL,
+    TelegramBotState,
+)
 from app.services import telegram_messages as msgs
 from app.services.telegram import send_alert, send_to_chat
-from app.services.telegram_subscribers import subscribe, unsubscribe
+from app.services.telegram_subscribers import set_alert_mode, subscribe, unsubscribe
 
 logger = logging.getLogger(__name__)
 
@@ -103,9 +107,41 @@ def process_bot_updates(
             continue
 
         if lower == keyword or lower == f"/{keyword}":
-            created = subscribe(db, chat_id)
-            reply = msgs.msg_subscribed() if created else msgs.msg_already_subscribed()
+            created = subscribe(db, chat_id, alert_mode=ALERT_MODE_FULL)
+            reply = (
+                msgs.msg_subscribed(alert_mode=ALERT_MODE_FULL)
+                if created
+                else msgs.msg_already_subscribed()
+            )
             send_to_chat(chat_id=chat_id, message=reply, settings=cfg)
+            handled += 1
+            continue
+
+        if _is_command(lower, "/full") or lower in {"полный", "full"}:
+            ok = set_alert_mode(db, chat_id, ALERT_MODE_FULL)
+            if not ok:
+                subscribe(db, chat_id, alert_mode=ALERT_MODE_FULL)
+            send_to_chat(
+                chat_id=chat_id,
+                message=msgs.msg_mode_set(alert_mode=ALERT_MODE_FULL),
+                settings=cfg,
+            )
+            handled += 1
+            continue
+
+        if (
+            _is_command(lower, "/digest")
+            or _is_command(lower, "/итоги")
+            or lower in {"digest", "итоги"}
+        ):
+            ok = set_alert_mode(db, chat_id, ALERT_MODE_DIGEST)
+            if not ok:
+                subscribe(db, chat_id, alert_mode=ALERT_MODE_DIGEST)
+            send_to_chat(
+                chat_id=chat_id,
+                message=msgs.msg_mode_set(alert_mode=ALERT_MODE_DIGEST),
+                settings=cfg,
+            )
             handled += 1
             continue
 
@@ -148,5 +184,6 @@ def send_demo_to_all_subscribers(db: Session, *, settings: Settings | None = Non
             message=f"[DEMO {index}/{total} · {label}]\n{body}",
             settings=cfg,
             skip_dedup=True,
+            audience="digest",
         )
     return total

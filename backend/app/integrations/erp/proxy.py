@@ -37,6 +37,8 @@ class ProxyErpAdapter:
         *,
         since: datetime,
         until: datetime,
+        all_customers: bool = False,
+        row_limit: int | None = None,
     ) -> list[CoffeeSaleMatch]:
         if not self._base_url:
             raise ErpError("PROXY_API_URL is not set")
@@ -49,6 +51,8 @@ class ProxyErpAdapter:
             since=since,
             until=until,
             paid_statuses=self._paid_statuses,
+            all_customers=all_customers,
+            row_limit=row_limit,
         )
         rows = self._execute_query(query, params)
         return rows_to_matches(rows)

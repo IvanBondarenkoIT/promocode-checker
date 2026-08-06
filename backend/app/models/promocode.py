@@ -1,7 +1,16 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, Enum, ForeignKey, Index, String, func
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,6 +27,7 @@ class Promocode(Base):
         Index("ix_promocodes_status", "status"),
         Index("ix_promocodes_expires_at", "expires_at"),
         Index("ix_promocodes_campaign_id", "campaign_id"),
+        UniqueConstraint("campaign_id", "customer_erp_id", name="uq_promocodes_campaign_customer"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -37,6 +47,9 @@ class Promocode(Base):
         ForeignKey("campaigns.id", ondelete="SET NULL"),
         nullable=True,
     )
+    customer_card: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    customer_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    customer_phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { DashboardStats, fetchDashboard } from "./api";
 import { useAdminSession } from "./AdminContext";
+import { ScopeSwitch } from "./ScopeSwitch";
 
 const TABLES = [
   "promocodes",
@@ -18,6 +19,7 @@ export function AdminDashboardPage() {
   const { session, logout } = useAdminSession();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!session) {
@@ -26,7 +28,7 @@ export function AdminDashboardPage() {
     fetchDashboard(session.token)
       .then(setStats)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load dashboard"));
-  }, [session]);
+  }, [session, reloadKey]);
 
   if (!session) {
     return null;
@@ -57,10 +59,12 @@ export function AdminDashboardPage() {
 
       {error ? <p className="admin-error">{error}</p> : null}
 
+      <ScopeSwitch onChanged={() => setReloadKey((value) => value + 1)} />
+
       {stats ? (
         <div className="admin-grid" data-testid="admin-dashboard-grid">
           <div className="admin-stat">
-            <span>Active</span>
+            <span>Active ({stats.active_campaign_kind})</span>
             <strong>{stats.promocodes_active}</strong>
           </div>
           <div className="admin-stat">
