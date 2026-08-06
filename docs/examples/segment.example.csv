@@ -1,0 +1,4 @@
+customer_id,customer_name,customer_full_name,phone,tier,tag,coffee_beans_kg_avg_monthly,months_active,months_hit_quota,months_hit_quota_count,monthly_kg_detail,recency_group,target_kg,offer_discount_pct
+10001,2200000000001,Example Customer One,995500000001,1_2,COFFEE_BEANS_KG_1_2,1.0,3,2026-05;2026-06;2026-07,3,2026-05:1.0;2026-06:1.0;2026-07:1.0,ACTIVE,2.0,20
+10002,2200000000002,Example Customer Two,,1_2,COFFEE_BEANS_KG_1_2,1.25,2,2026-06;2026-07,2,2026-06:1.25;2026-07:1.25,SLEEPING,2.5,20
+10003,2200000000003,Example Customer Three,995500000003,1_2,COFFEE_BEANS_KG_1_2,1.5,4,2026-04;2026-07,2,2026-04:1.5;2026-07:1.5,LOST,3.0,20

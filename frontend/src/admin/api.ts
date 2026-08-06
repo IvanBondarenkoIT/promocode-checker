@@ -77,6 +77,8 @@ export async function adminLogin(username: string, password: string): Promise<Ad
   };
 }
 
+export type CampaignKind = "TEST" | "LIVE";
+
 export type DashboardStats = {
   promocodes_active: number;
   promocodes_used: number;
@@ -85,10 +87,44 @@ export type DashboardStats = {
   auto_closes_total: number;
   fraud_open: number;
   telegram_sent_last_24h: number;
+  active_campaign_kind: CampaignKind;
 };
 
 export async function fetchDashboard(token: string): Promise<DashboardStats> {
   return request<DashboardStats>("/api/v1/admin/dashboard", {}, token);
+}
+
+export type CampaignSummary = {
+  code: string;
+  name: string;
+  kind: CampaignKind;
+  status: string;
+  issued: number;
+  used: number;
+};
+
+export type ScopeResponse = {
+  active_campaign_kind: CampaignKind;
+  campaigns: CampaignSummary[];
+};
+
+export async function fetchScope(token: string): Promise<ScopeResponse> {
+  return request<ScopeResponse>("/api/v1/admin/scope", {}, token);
+}
+
+export async function updateScope(
+  token: string,
+  kind: CampaignKind,
+  reason: string,
+): Promise<ScopeResponse> {
+  return request<ScopeResponse>(
+    "/api/v1/admin/scope",
+    {
+      method: "PUT",
+      body: JSON.stringify({ active_campaign_kind: kind, reason }),
+    },
+    token,
+  );
 }
 
 export type TableResponse = {
@@ -99,12 +135,37 @@ export type TableResponse = {
   rows: Record<string, unknown>[];
 };
 
+export type TableFilters = {
+  offset?: number;
+  limit?: number;
+  campaignCode?: string;
+  kind?: CampaignKind | "";
+  status?: string;
+  search?: string;
+};
+
 export async function fetchTable(
   token: string,
   table: string,
-  offset = 0,
+  filters: TableFilters = {},
 ): Promise<TableResponse> {
-  return request<TableResponse>(`/api/v1/admin/tables/${table}?limit=50&offset=${offset}`, {}, token);
+  const params = new URLSearchParams({
+    limit: String(filters.limit ?? 50),
+    offset: String(filters.offset ?? 0),
+  });
+  if (filters.campaignCode) {
+    params.set("campaign_code", filters.campaignCode);
+  }
+  if (filters.kind) {
+    params.set("kind", filters.kind);
+  }
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+  if (filters.search) {
+    params.set("search", filters.search);
+  }
+  return request<TableResponse>(`/api/v1/admin/tables/${table}?${params.toString()}`, {}, token);
 }
 
 export async function patchPromocode(

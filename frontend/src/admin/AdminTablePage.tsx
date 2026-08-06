@@ -1,8 +1,17 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { TableResponse, fetchTable, patchFraudWarning, patchPromocode } from "./api";
+import {
+  CampaignKind,
+  TableResponse,
+  fetchTable,
+  patchFraudWarning,
+  patchPromocode,
+} from "./api";
 import { useAdminSession } from "./AdminContext";
+
+const PAGE_SIZE = 50;
+const FILTERABLE = new Set(["promocodes", "campaigns", "checker_logs", "fraud_warnings"]);
 
 export function AdminTablePage() {
   const { tableName = "promocodes" } = useParams();
@@ -14,18 +23,54 @@ export function AdminTablePage() {
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
+  const [offset, setOffset] = useState(0);
+  const [campaignCode, setCampaignCode] = useState("");
+  const [kind, setKind] = useState<CampaignKind | "">("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState({
+    campaignCode: "",
+    kind: "" as CampaignKind | "",
+    status: "",
+    search: "",
+  });
+
   const reload = () => {
     if (!session) {
       return;
     }
-    fetchTable(session.token, tableName)
+    fetchTable(session.token, tableName, {
+      offset,
+      limit: PAGE_SIZE,
+      ...appliedFilters,
+    })
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load table"));
   };
 
   useEffect(() => {
     reload();
-  }, [session, tableName]);
+  }, [session, tableName, offset, appliedFilters]);
+
+  useEffect(() => {
+    setOffset(0);
+    setAppliedFilters({ campaignCode: "", kind: "", status: "", search: "" });
+    setCampaignCode("");
+    setKind("");
+    setStatusFilter("");
+    setSearch("");
+  }, [tableName]);
+
+  const applyFilters = (event: FormEvent) => {
+    event.preventDefault();
+    setOffset(0);
+    setAppliedFilters({
+      campaignCode: campaignCode.trim(),
+      kind,
+      status: statusFilter.trim(),
+      search: search.trim(),
+    });
+  };
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -49,19 +94,60 @@ export function AdminTablePage() {
   };
 
   const columns = data?.rows[0] ? Object.keys(data.rows[0]) : [];
+  const total = data?.total ?? 0;
+  const pageEnd = Math.min(offset + PAGE_SIZE, total);
 
   return (
     <div className="admin-shell">
       <header className="admin-header">
         <div>
           <h1>{tableName}</h1>
-          <p>{data ? `${data.total} rows` : "..."}</p>
+          <p>{data ? `${total} rows` : "..."}</p>
         </div>
         <Link to="/admin/dashboard">Dashboard</Link>
       </header>
 
       {error ? <p className="admin-error">{error}</p> : null}
       {message ? <p className="admin-ok">{message}</p> : null}
+
+      {FILTERABLE.has(tableName) ? (
+        <form className="admin-filters" onSubmit={applyFilters} data-testid="admin-filters">
+          {tableName === "promocodes" || tableName === "campaigns" ? (
+            <>
+              <input
+                aria-label="Campaign code"
+                placeholder="Campaign code"
+                value={campaignCode}
+                onChange={(e) => setCampaignCode(e.target.value)}
+              />
+              <select
+                aria-label="Campaign kind"
+                value={kind}
+                onChange={(e) => setKind(e.target.value as CampaignKind | "")}
+              >
+                <option value="">All kinds</option>
+                <option value="TEST">TEST</option>
+                <option value="LIVE">LIVE</option>
+              </select>
+            </>
+          ) : null}
+          <input
+            aria-label="Status filter"
+            placeholder="Status"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          />
+          <input
+            aria-label="Search"
+            placeholder="Search code or customer"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button type="submit" data-testid="admin-apply-filters">
+            Apply
+          </button>
+        </form>
+      ) : null}
 
       <div className="admin-table-wrap">
         <table className="admin-table" data-testid="admin-table">
@@ -86,6 +172,26 @@ export function AdminTablePage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="admin-pagination" data-testid="admin-pagination">
+        <button
+          type="button"
+          disabled={offset === 0}
+          onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+        >
+          Previous
+        </button>
+        <span>
+          {total === 0 ? "0" : `${offset + 1}-${pageEnd}`} of {total}
+        </span>
+        <button
+          type="button"
+          disabled={pageEnd >= total}
+          onClick={() => setOffset(offset + PAGE_SIZE)}
+        >
+          Next
+        </button>
       </div>
 
       {session?.role === "admin" && (tableName === "promocodes" || tableName === "fraud_warnings") ? (

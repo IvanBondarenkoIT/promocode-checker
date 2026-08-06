@@ -64,11 +64,17 @@ class Settings(BaseSettings):
     telegram_notify_ok: int = Field(default=0, alias="TELEGRAM_NOTIFY_OK")
     telegram_dedup_window_seconds: int = Field(default=900, alias="TELEGRAM_DEDUP_WINDOW_SECONDS")
     telegram_disable_ssl_verify: int = Field(default=0, alias="TELEGRAM_DISABLE_SSL_VERIFY")
+    telegram_day_start_hour: int = Field(default=10, alias="TELEGRAM_DAY_START_HOUR")
+    telegram_day_start_minute: int = Field(default=0, alias="TELEGRAM_DAY_START_MINUTE")
+    telegram_eod_hour: int = Field(default=22, alias="TELEGRAM_EOD_HOUR")
+    telegram_eod_minute: int = Field(default=0, alias="TELEGRAM_EOD_MINUTE")
+    telegram_digest_sales_row_limit: int = Field(
+        default=5000, alias="TELEGRAM_DIGEST_SALES_ROW_LIMIT"
+    )
 
     frontend_base_url: str = Field(default="http://localhost:8000", alias="FRONTEND_BASE_URL")
     static_dir: str = Field(default="", alias="STATIC_DIR")
     desktop_default_point_id: str = Field(default="shop_01", alias="DESKTOP_DEFAULT_POINT_ID")
-    railway_public_domain: str = Field(default="", alias="RAILWAY_PUBLIC_DOMAIN")
     public_http_port: int = Field(default=8000, alias="PUBLIC_HTTP_PORT")
 
     @field_validator("database_url", mode="before")

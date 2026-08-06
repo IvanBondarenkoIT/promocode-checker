@@ -21,8 +21,6 @@ cors_origins = {
     "http://127.0.0.1:5173",
     settings.frontend_base_url.rstrip("/"),
 }
-if settings.railway_public_domain.strip():
-    cors_origins.add(f"https://{settings.railway_public_domain.strip()}")
 
 app.add_middleware(
     CORSMiddleware,

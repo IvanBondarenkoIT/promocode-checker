@@ -21,7 +21,7 @@ Close items from the gap audit: ops Telegram runbook, ERP/direct Docker notes + 
 3. `.\desktop\update-prod.ps1` then check reconcile logs / health.
 4. Ensure `desktop\config.json` has `"pointId": ""`.
 5. Optional: seed demo + hardware scanner smoke; real campaign CSV when marketing ready.
-6. Optional later: Railway `railway-demo` connection, TLS, GHCR.
+6. Optional later: TLS, GHCR.
 
 ## Verification (local)
 
@@ -35,4 +35,5 @@ python -m ruff check backend/app/jobs/reconcile.py scripts/send_test_telegram_al
 - Discount-column ERP filter
 - Admin-editable coffee whitelist UI
 - Auto CD to Windows Server
-- TLS / GHCR / Railway confirm
+- TLS / GHCR
+- Railway removed 2026-08-04 — see `drop-railway-2026-08-04.md`

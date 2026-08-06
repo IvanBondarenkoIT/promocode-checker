@@ -27,6 +27,7 @@ if not os.getenv("DATABASE_URL") and os.getenv("POSTGRES_PASSWORD"):
 
 from app.core.config import get_settings  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
+from app.models import CampaignKind  # noqa: E402
 from app.services.campaign_import import (  # noqa: E402
     close_campaign,
     import_campaign_rows,
@@ -49,6 +50,12 @@ def main() -> None:
         help="Stable slug, e.g. beans_wave_2026_08",
     )
     parser.add_argument("--campaign-name", required=True, help="Display name shown in UI")
+    parser.add_argument(
+        "--kind",
+        default="TEST",
+        choices=["TEST", "LIVE"],
+        help="TEST for rehearsals, LIVE for real customers",
+    )
     parser.add_argument("--starts-at", default=None, help="ISO datetime (optional)")
     parser.add_argument("--ends-at", default=None, help="ISO datetime (optional)")
     parser.add_argument("--notes", default=None, help="Optional notes")
@@ -88,6 +95,7 @@ def main() -> None:
             starts_at=parse_optional_datetime(args.starts_at),
             ends_at=parse_optional_datetime(args.ends_at),
             notes=args.notes,
+            kind=CampaignKind(args.kind),
         )
         inserted, skipped, errors = import_campaign_rows(
             db,

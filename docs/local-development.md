@@ -1,6 +1,6 @@
 # Local Development
 
-Operational runbooks (local / Railway / server / employees): [`runbooks/`](runbooks/README.md).
+Operational runbooks (local / server-prod / employees): [`runbooks/`](runbooks/README.md).
 
 ## Requirements
 
@@ -137,7 +137,7 @@ docker compose -f infra/docker-compose.yml -f infra/docker-compose.app.yml up --
 - Admin: `http://localhost:8000/admin/login`
 - Health: `http://localhost:8000/health`
 
-Production and Railway: see [`docs/reports/stage-08-deploy.md`](reports/stage-08-deploy.md) and [`env-matrix.md`](env-matrix.md).
+Production: see [`docs/reports/stage-08-deploy.md`](reports/stage-08-deploy.md) and [`env-matrix.md`](env-matrix.md). General smoke: [`runbooks/server-prod.md`](runbooks/server-prod.md).
 
 ## Stage 1 scope
 

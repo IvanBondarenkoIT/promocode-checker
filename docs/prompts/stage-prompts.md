@@ -99,8 +99,8 @@ Already delivered:
 
 Already delivered:
 
-- `docs/runbooks/` — local, railway, server-prod, employee-cashier
+- `docs/runbooks/` — local, server-prod, employee-cashier
 - `docs/env-matrix.md` finalized
 - report: `docs/reports/stage-10-runbooks.md`
 
-Implementation plan stages **1–10 complete**. Further work is maintenance / deferred follow-ups (e.g. Stage 4.1 live ERP SQL).
+Implementation plan stages **1–10 complete**. Further work is maintenance / deferred follow-ups. Railway dropped — acceptance on server-prod.

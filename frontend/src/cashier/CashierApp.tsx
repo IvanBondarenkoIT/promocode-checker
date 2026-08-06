@@ -240,6 +240,11 @@ export function CashierApp() {
             {pointId}
           </div>
         </div>
+        {lastResponse?.active_campaign_kind === "TEST" ? (
+          <div className="test-mode-badge" data-testid="test-mode-badge">
+            TEST MODE
+          </div>
+        ) : null}
         <div
           className={`ready-indicator ${lampClass}`}
           data-testid="system-ready"

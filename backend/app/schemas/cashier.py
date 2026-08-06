@@ -11,6 +11,7 @@ class CashierResult(StrEnum):
     EXPIRED = "expired"
     USED = "used"
     INVALID_FORMAT = "invalid_format"
+    OUT_OF_SCOPE = "out_of_scope"
 
 
 class CashierCodeRequest(BaseModel):
@@ -29,3 +30,5 @@ class CashierCodeResponse(BaseModel):
     campaign_code: str | None = None
     campaign_name: str | None = None
     campaign_ends_at: datetime | None = None
+    campaign_kind: str | None = None
+    active_campaign_kind: str | None = None

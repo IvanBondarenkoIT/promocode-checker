@@ -31,9 +31,12 @@ You are working in `promocode-checker`.
 - Coffee beans group IDs: `11077`, `16276`, `16279`.
 - ERP: Proxy API primary + direct fallback.
 - Telegram alerts for changes, fraud, and crashes.
-- Targets: local first, Railway demo, Windows Server Docker prod for RDP cashiers.
+- Targets: local first, then Windows Server Docker prod for RDP cashiers (general smoke on server-prod). **No Railway.**
 - Both web/PWA and desktop wrapper.
 - **UI language: English only** — cashier, admin, desktop; no i18n / no Russian labels in product UI.
+- Campaigns are `TEST` or `LIVE`; one global switch (`app_settings.active_campaign_kind`) gates cashier and reconcile.
+- Promocodes are generated with a per-campaign prefix; segment files never contain codes.
+- Segment/export files are PII — keep out of git.
 
 ## Current progress
 
@@ -44,12 +47,15 @@ You are working in `promocode-checker`.
 - Stage 6 done (Admin UI)
 - Stage 6.1 done (cashier polish)
 - Stage 7 done (desktop wrapper)
-- Stage 8 done (Docker / Railway / prod compose)
+- Stage 8 done (Docker / prod compose; Railway later dropped)
 - Stage 9 done (CI/CD)
 - Stage 10 done (runbooks)
 - Stage 4.1 done (ERP coffee probe + live AUTO_CLOSE demo)
 - Gap checklist 2026-08-04 done (TG summary, ops runbook, fdb/proxy notes, update-prod)
-- Next: owner server ops (Telegram/ERP); optional TLS / GHCR
+- Stage T done (Telegram subscribe + RU alerts)
+- Stage U done (daily digests + full/digest modes)
+- Stage V done (segment import, TEST/LIVE campaign scope, admin switch)
+- Next: server rollout (backup → migrate 005 → segment import → scope LIVE), shop-card calibration
 
 ## Coding expectations
 

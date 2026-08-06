@@ -51,7 +51,13 @@ def test_telegram_dedup_skips_second_send(db_session: Session) -> None:
     assert first.delivery_status == "sent"
     assert second.delivery_status == "skipped_dedup"
 
-    rows = list(db_session.scalars(select(TelegramNotificationLog)).all())
+    rows = list(
+        db_session.scalars(
+            select(TelegramNotificationLog).where(
+                TelegramNotificationLog.dedup_key == "fraud:11111111:1"
+            )
+        ).all()
+    )
     assert len(rows) == 2
 
 

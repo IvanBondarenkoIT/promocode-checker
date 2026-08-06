@@ -4,7 +4,8 @@ export type CashierResult =
   | "not_found"
   | "expired"
   | "used"
-  | "invalid_format";
+  | "invalid_format"
+  | "out_of_scope";
 
 export type CashierCodeResponse = {
   result: CashierResult;
@@ -17,6 +18,8 @@ export type CashierCodeResponse = {
   campaign_code?: string | null;
   campaign_name?: string | null;
   campaign_ends_at?: string | null;
+  campaign_kind?: string | null;
+  active_campaign_kind?: string | null;
 };
 
 export type HeartbeatResponse = {

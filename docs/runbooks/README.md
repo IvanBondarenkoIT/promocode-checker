@@ -1,6 +1,6 @@
 # Runbooks — Promocode Checker
 
-Operational guides for local development, Railway demo, Windows Server production, and cashier employees.
+Operational guides for local development, Windows Server production, and cashier employees.
 
 **Product UI language:** English only (cashier, admin, desktop). Runbooks may use Russian for staff steps; on-screen labels stay English.
 
@@ -9,12 +9,17 @@ Operational guides for local development, Railway demo, Windows Server productio
 | Env | Branch | Guide |
 |-----|--------|-------|
 | Local | `develop` | [local.md](local.md) |
-| Railway demo | `railway-demo` | [railway.md](railway.md) |
-| Server prod (RDP) | `main` | [server-prod.md](server-prod.md) |
+| Server prod (RDP) | `main` | [server-prod.md](server-prod.md) — deploy + **general smoke / regression** |
 
 ## Employees
 
 - [employee-cashier.md](employee-cashier.md) — how to open the cashier app and redeem a promocode
+
+## Campaigns
+
+- [campaign-import.md](campaign-import.md) — segment import (generated codes) and wave import
+- [campaign-scope.md](campaign-scope.md) — global TEST / LIVE switch
+- [preprod-calibration.md](preprod-calibration.md) — auto-close rehearsal on shop cards
 
 ## ERP probe
 

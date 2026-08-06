@@ -19,7 +19,9 @@ def test_example_config_is_valid_json_with_required_keys() -> None:
     assert REQUIRED_KEYS.issubset(payload.keys())
     assert payload["browser"] in {"auto", "edge", "chrome"}
     assert re.match(r"^https?://", payload["cashierBaseUrl"])
-    assert payload["pointId"].strip()
+    # Empty pointId is the intended default: the launcher falls back to the
+    # Windows RDP username so each shop account maps to its own point.
+    assert isinstance(payload["pointId"], str)
 
 
 def test_launch_script_exists_and_references_config() -> None:

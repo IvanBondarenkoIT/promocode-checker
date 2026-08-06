@@ -15,7 +15,7 @@ This chat acts as the **external supervisor** for `D:\CursorProjects\promocode-c
 
 - Stages 1–10 + 11a–11d + Stage 4.1: closed
 - Gap checklist 2026-08-04: closed in repo (`docs/reports/gap-checklist-2026-08-04.md`)
-- **Next (owner ops):** Telegram + ERP env on server-prod; `desktop/update-prod.ps1`; optional Railway/TLS/GHCR
+- **Next (owner ops):** Telegram + ERP on server-prod; general smoke checklist; optional TLS/GHCR. Railway dropped.
 
 ## Audits / reports
 

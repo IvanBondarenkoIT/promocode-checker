@@ -21,11 +21,31 @@ def calculate_expires_at(created_at: datetime, ttl_days: int) -> datetime:
     return created_at + timedelta(days=ttl_days)
 
 
-def generate_unique_promocode(db: Session, *, max_attempts: int = MAX_GENERATION_ATTEMPTS) -> str:
+def generate_unique_promocode(
+    db: Session,
+    *,
+    max_attempts: int = MAX_GENERATION_ATTEMPTS,
+    prefix: str | None = None,
+    reserved: set[str] | None = None,
+) -> str:
+    """Random 8-digit code unique across the whole table.
+
+    ``prefix`` pins the leading digits so campaigns never share a range.
+    ``reserved`` holds codes generated in the same uncommitted batch.
+    """
+    lead = (prefix or "").strip()
+    if lead and (not lead.isdigit() or len(lead) >= PROMOCODE_LENGTH):
+        raise ValueError(f"Invalid promocode prefix: {prefix!r}")
+
+    random_len = PROMOCODE_LENGTH - len(lead)
     for _ in range(max_attempts):
-        candidate = "".join(secrets.choice(PROMOCODE_DIGITS) for _ in range(PROMOCODE_LENGTH))
+        candidate = lead + "".join(secrets.choice(PROMOCODE_DIGITS) for _ in range(random_len))
+        if reserved is not None and candidate in reserved:
+            continue
         exists = db.scalar(select(Promocode.id).where(Promocode.promocode == candidate))
         if exists is None:
+            if reserved is not None:
+                reserved.add(candidate)
             return candidate
     raise RuntimeError("Failed to generate a unique promocode after multiple attempts")
 

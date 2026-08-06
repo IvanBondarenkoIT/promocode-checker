@@ -4,25 +4,22 @@ from __future__ import annotations
 
 import logging
 from datetime import UTC, datetime, timedelta
+from typing import Literal
 
 import httpx
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
 from app.models import TelegramNotificationLog
-from app.services.telegram_subscribers import list_recipient_chat_ids
+from app.services.telegram_subscribers import Audience, list_recipient_chat_ids
 
 logger = logging.getLogger(__name__)
+
+AlertAudience = Literal["events", "digest", "errors"]
 
 
 def _now() -> datetime:
     return datetime.now(UTC)
-
-
-def _http_client(settings: Settings, http_client: httpx.Client | None) -> httpx.Client | None:
-    if http_client is not None:
-        return http_client
-    return None
 
 
 def _client_kwargs(settings: Settings) -> dict:
@@ -84,12 +81,13 @@ def send_alert(
     settings: Settings | None = None,
     http_client: httpx.Client | None = None,
     skip_dedup: bool = False,
+    audience: AlertAudience = "digest",
 ) -> TelegramNotificationLog:
-    """Broadcast to all subscribers + seed chats. Returns last log row."""
+    """Broadcast by audience. Returns last log row."""
     cfg = settings or get_settings()
     token = (cfg.telegram_bot_token or "").strip()
     now = _now()
-    recipients = list_recipient_chat_ids(db, cfg)
+    recipients = list_recipient_chat_ids(db, cfg, audience=audience)
 
     if not skip_dedup:
         from sqlalchemy import select
@@ -153,3 +151,7 @@ def send_alert(
     db.flush()
     assert last is not None
     return last
+
+
+# Re-export for type checkers / callers
+__all__ = ["AlertAudience", "Audience", "send_alert", "send_to_chat"]

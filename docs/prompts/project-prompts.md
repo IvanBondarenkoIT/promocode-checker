@@ -33,7 +33,7 @@ UI: только английский (English) во всём продуктов
 - admin/viewer роли
 - ERP reconcile через Proxy API primary + direct fallback
 - Telegram alerts на изменения, fraud и падения
-- local / railway-demo / server-prod
+- local / server-prod
 - UI language: English only (cashier + admin + desktop); no i18n
 Не ломай уже закрытые этапы. Сверяйся с docs/plan/IMPLEMENTATION_PLAN.md и docs/decisions.md.
 ```
@@ -115,10 +115,9 @@ STAGE-GATE шаблон и тексты этапов: docs/prompts/stage-prompts
 ```text
 Проверь деплой-контур:
 - local compose
-- railway-demo
-- server-prod Docker on Windows Server / RDP
+- server-prod Docker on Windows Server / RDP (general smoke checklist)
 - healthchecks, restart policy, crash Telegram alerts
-- ветки develop / railway-demo / main
+- ветки develop / main
 Сверься с соседними проектами dimkava-big-book, prices-monitoring-scrappers, stock-safety-monitor.
 ```
 
