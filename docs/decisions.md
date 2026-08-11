@@ -32,7 +32,9 @@ These decisions are already agreed and should not be re-litigated unless the use
 4. Soft fraud matching window: default **2 hours** (`FRAUD_MATCH_WINDOW_HOURS`).
 5. ERP sale evidence is the antifraud source of truth.
 6. Manual close without ERP coffee sale within the window creates a fraud warning.
-7. Auto-close ACTIVE codes when ERP finds matching discounted coffee sale.
+7. Auto-close ACTIVE codes when ERP finds a matching coffee order of **≥ 2 kg in one order** (`PROMO_MIN_COFFEE_KG`), and only when `PROMO_ENFORCEMENT_MODE=enforce`.
+8. `PROMO_ENFORCEMENT_MODE=monitor` (default): same detection + Telegram + `sale_observations`, but **no** auto-close. Cashier manual close and admin `USED → ACTIVE` still work.
+9. Kg formula: `STORZDTGDS.SOURCE` (pieces) × `GOODS.NW` (kg), summed per `order_id`. Coffee groups: `11077`, `16276`, `16279`.
 
 ## Coffee beans matching
 

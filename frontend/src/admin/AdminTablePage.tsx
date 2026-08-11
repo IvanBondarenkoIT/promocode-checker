@@ -11,7 +11,13 @@ import {
 import { useAdminSession } from "./AdminContext";
 
 const PAGE_SIZE = 50;
-const FILTERABLE = new Set(["promocodes", "campaigns", "checker_logs", "fraud_warnings"]);
+const FILTERABLE = new Set([
+  "promocodes",
+  "campaigns",
+  "checker_logs",
+  "fraud_warnings",
+  "sale_observations",
+]);
 
 export function AdminTablePage() {
   const { tableName = "promocodes" } = useParams();

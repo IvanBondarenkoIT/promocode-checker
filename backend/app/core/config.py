@@ -32,6 +32,10 @@ class Settings(BaseSettings):
 
     promocode_ttl_days: int = Field(default=30, alias="PROMOCODE_TTL_DAYS")
     fraud_match_window_hours: int = Field(default=2, alias="FRAUD_MATCH_WINDOW_HOURS")
+    promo_enforcement_mode: str = Field(default="monitor", alias="PROMO_ENFORCEMENT_MODE")
+    promo_min_coffee_kg: float = Field(default=2.0, alias="PROMO_MIN_COFFEE_KG")
+    coffee_observe_group_ids: str = Field(default="", alias="COFFEE_OBSERVE_GROUP_IDS")
+    reconcile_interval_seconds: int = Field(default=3600, alias="RECONCILE_INTERVAL_SECONDS")
 
     erp_access_mode: str = Field(default="proxy", alias="ERP_ACCESS_MODE")
     proxy_api_url: str = Field(default="", alias="PROXY_API_URL")

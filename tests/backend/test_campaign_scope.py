@@ -27,7 +27,13 @@ pytestmark = pytest.mark.skipif(
 
 
 def _settings() -> Settings:
-    return Settings(_env_file=None, TELEGRAM_BOT_TOKEN="", PROMOCODE_TTL_DAYS="30")
+    return Settings(
+        _env_file=None,
+        TELEGRAM_BOT_TOKEN="",
+        PROMOCODE_TTL_DAYS="30",
+        PROMO_ENFORCEMENT_MODE="enforce",
+        PROMO_MIN_COFFEE_KG="2.0",
+    )
 
 
 def _campaign(db: Session, *, code: str, kind: CampaignKind, prefix: str | None = None) -> Campaign:
@@ -115,8 +121,12 @@ def test_reconcile_skips_out_of_scope_and_closed_campaigns(db_session: Session) 
             customer_erp_id=cid,
             sold_at=now + timedelta(minutes=5),
             group_id=11077,
-            product_name="Coffee",
+            product_name="Coffee blend (250 g)",
+            order_id=f"ord-{cid}",
             unit_price=45.0,
+            quantity=8,
+            net_weight_kg=0.25,
+            line_kg=2.0,
         )
         for cid in ("c1", "c2", "c3")
     ]

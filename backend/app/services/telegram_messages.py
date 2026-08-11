@@ -28,6 +28,65 @@ def customer_line(*, customer_erp_id: str | None, customer_name: str | None = No
     return cid
 
 
+def msg_sale_observed(
+    *,
+    code: str | None,
+    customer_erp_id: str | None,
+    customer_name: str | None,
+    verdict: str,
+    order_kg: float | None,
+    min_coffee_kg: float,
+    products: list[str] | None,
+    order_id: str | None,
+    sold_at: datetime | None,
+    enforcement_mode: str,
+    promocode_closed: bool,
+    total_amount: float | None = None,
+    tz_name: str = TZ_DEFAULT,
+) -> str:
+    client = customer_line(customer_erp_id=customer_erp_id, customer_name=customer_name)
+    if verdict == "QUALIFIED":
+        head = "Акция сработала — условие выполнено"
+    elif verdict == "UNKNOWN_WEIGHT":
+        head = "Продажа кофе: вес не распознан"
+    else:
+        head = "Продажа кофе, условия не хватает"
+
+    kg_line = (
+        f"Куплено: {order_kg:.2f} кг (нужно {min_coffee_kg:g})"
+        if order_kg is not None
+        else f"Куплено: ? кг (нужно {min_coffee_kg:g})"
+    )
+    product_line = " · ".join(products[:5]) if products else "кофе (группа whitelist)"
+    if products and len(products) > 5:
+        product_line += f" (+{len(products) - 5})"
+
+    lines = [
+        head,
+        f"Код: {code or '—'}",
+        f"Клиент: {client}",
+        f"Продано: {product_line}",
+        kg_line,
+    ]
+    if total_amount is not None:
+        lines.append(f"Сумма строк: {total_amount:.2f} ₾")
+    if order_id:
+        lines.append(f"Заказ: {order_id}")
+    lines.append(f"Дата продажи: {format_local(sold_at, tz_name=tz_name)}")
+
+    if verdict == "UNKNOWN_WEIGHT":
+        lines.append("Вес не распознан по GOODS.NW / названию товара")
+
+    if promocode_closed:
+        lines.append("Промокод закрыт автоматически")
+    elif enforcement_mode == "monitor":
+        lines.append("Промокод НЕ закрыт — режим наблюдения")
+    else:
+        lines.append("Промокод не закрыт (условие не выполнено)")
+
+    return "\n".join(lines)
+
+
 def msg_scan(
     *,
     code: str,
@@ -244,6 +303,9 @@ def msg_day_end(
     fraud_count: int,
     active_campaign_kind: str | None = None,
     campaigns: list[tuple[str, int, int]] | None = None,
+    observations_count: int = 0,
+    qualified_observations_count: int = 0,
+    enforcement_mode: str | None = None,
 ) -> str:
     lines = [
         "Итог дня",
@@ -251,6 +313,9 @@ def msg_day_end(
     ]
     if active_campaign_kind:
         lines.append(f"Режим данных: {active_campaign_kind}")
+    if enforcement_mode:
+        mode_label = "наблюдение" if enforcement_mode == "monitor" else "рабочий"
+        lines.append(f"Закрытие кодов: {mode_label}")
     lines.extend(
         _sales_summary_lines(
             sales_count=sales_count,
@@ -265,6 +330,10 @@ def msg_day_end(
             f"· ручные закрытия: {manual_close_count}",
             f"· автозакрытия: {auto_close_count}",
             f"· тревоги (без продажи): {fraud_count}",
+            (
+                f"· наблюдения продаж: {observations_count} "
+                f"(по условию: {qualified_observations_count})"
+            ),
         ]
     )
     if campaigns:
@@ -396,24 +465,47 @@ def demo_messages(*, tz_name: str = TZ_DEFAULT) -> list[tuple[str, str]]:
             ),
         ),
         (
+            "sale_observed_qualified_monitor",
+            msg_sale_observed(
+                code=base["code"],
+                customer_erp_id=base["customer_erp_id"],
+                customer_name=base["customer_name"],
+                verdict="QUALIFIED",
+                order_kg=2.0,
+                min_coffee_kg=2.0,
+                products=['Coffee "Blaser" Rosso & Nero (250 g) ×8'],
+                order_id="447720",
+                sold_at=sold,
+                enforcement_mode="monitor",
+                promocode_closed=False,
+                total_amount=360.0,
+                tz_name=tz_name,
+            ),
+        ),
+        (
+            "sale_observed_not_enough",
+            msg_sale_observed(
+                code=base["code"],
+                customer_erp_id=base["customer_erp_id"],
+                customer_name=base["customer_name"],
+                verdict="NOT_ENOUGH_KG",
+                order_kg=0.5,
+                min_coffee_kg=2.0,
+                products=['Coffee "Blaser" Sera (250 g) ×2'],
+                order_id="447621",
+                sold_at=sold,
+                enforcement_mode="monitor",
+                promocode_closed=False,
+                tz_name=tz_name,
+            ),
+        ),
+        (
             "fraud",
             msg_fraud_no_sale(
                 point_id="IVAN",
                 fraud_window_hours=2,
                 checked_at=now,
                 **base,
-            ),
-        ),
-        (
-            "day_start",
-            msg_day_start(
-                local_date="04.08.2026",
-                sales_count=2,
-                sales_sum=87.5,
-                top_products=[
-                    ('Coffee "Blaser" Rosso & Nero (250 g)', 1),
-                    ('Coffee "Blaser" Sera (250 g)', 1),
-                ],
             ),
         ),
         (
@@ -429,6 +521,21 @@ def demo_messages(*, tz_name: str = TZ_DEFAULT) -> list[tuple[str, str]]:
                 fraud_count=1,
                 active_campaign_kind="LIVE",
                 campaigns=[("Coffee beans 1-2kg", 175, 12)],
+                observations_count=15,
+                qualified_observations_count=9,
+                enforcement_mode="monitor",
+            ),
+        ),
+        (
+            "day_start",
+            msg_day_start(
+                local_date="04.08.2026",
+                sales_count=2,
+                sales_sum=87.5,
+                top_products=[
+                    ('Coffee "Blaser" Rosso & Nero (250 g)', 1),
+                    ('Coffee "Blaser" Sera (250 g)', 1),
+                ],
             ),
         ),
         (

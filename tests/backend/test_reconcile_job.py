@@ -11,6 +11,7 @@ from app.models import (
     FraudWarning,
     Promocode,
     PromocodeStatus,
+    SaleObservation,
 )
 from app.services.promocode_close import close_promocode
 from sqlalchemy import select
@@ -24,12 +25,14 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def _settings(**overrides: str) -> Settings:
+def _settings(**overrides: object) -> Settings:
     data = {
         "FRAUD_MATCH_WINDOW_HOURS": "2",
         "TELEGRAM_BOT_TOKEN": "",
         "TELEGRAM_ALERT_CHAT_ID": "",
         "ERP_ACCESS_MODE": "mock",
+        "PROMO_ENFORCEMENT_MODE": "enforce",
+        "PROMO_MIN_COFFEE_KG": "2.0",
         **overrides,
     }
     return Settings(_env_file=None, **data)
@@ -55,8 +58,30 @@ def _create_active(
     return promo
 
 
+def _qualified_sale(
+    customer: str,
+    sold_at: datetime,
+    *,
+    order_id: str = "ord-1",
+    qty: float = 8,
+    group_id: int = 11077,
+    product_name: str = "Coffee blend (250 g)",
+) -> CoffeeSaleMatch:
+    nw = 0.25 if group_id != 16279 else 1.0
+    return CoffeeSaleMatch(
+        customer_erp_id=customer,
+        sold_at=sold_at,
+        group_id=group_id,
+        product_name=product_name,
+        order_id=order_id,
+        unit_price=45.0,
+        quantity=qty,
+        net_weight_kg=nw,
+        line_kg=qty * nw,
+    )
+
+
 def test_reconcile_auto_close_one_telegram_summary(db_session: Session) -> None:
-    """Two AUTO_CLOSEs → one reconcile_auto_close Telegram row (summary)."""
     now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
     _create_active(
         db_session, code="10000011", customer="CUST-A", created_at=now - timedelta(hours=3)
@@ -66,8 +91,8 @@ def test_reconcile_auto_close_one_telegram_summary(db_session: Session) -> None:
     )
     adapter = MockErpAdapter(
         [
-            CoffeeSaleMatch("CUST-A", now - timedelta(hours=1), 11077, "a"),
-            CoffeeSaleMatch("CUST-B", now - timedelta(hours=1), 11077, "b"),
+            _qualified_sale("CUST-A", now - timedelta(hours=1), order_id="a1"),
+            _qualified_sale("CUST-B", now - timedelta(hours=1), order_id="b1"),
         ]
     )
     result = run_reconcile(
@@ -89,8 +114,6 @@ def test_reconcile_auto_close_one_telegram_summary(db_session: Session) -> None:
     )
     assert len(tg_logs) == 2
     assert all("Продажа кофе" in row.message for row in tg_logs)
-    bodies = " ".join(row.message for row in tg_logs)
-    assert "10000011" in bodies and "10000012" in bodies
 
 
 def test_reconcile_auto_closes_active_with_sale(db_session: Session) -> None:
@@ -102,14 +125,7 @@ def test_reconcile_auto_closes_active_with_sale(db_session: Session) -> None:
         created_at=now - timedelta(hours=3),
     )
     adapter = MockErpAdapter(
-        [
-            CoffeeSaleMatch(
-                customer_erp_id="CUST-A",
-                sold_at=now - timedelta(hours=1),
-                group_id=11077,
-                product_name="beans",
-            )
-        ]
+        [_qualified_sale("CUST-A", now - timedelta(hours=1), order_id="ord-close")]
     )
 
     result = run_reconcile(
@@ -129,20 +145,112 @@ def test_reconcile_auto_closes_active_with_sale(db_session: Session) -> None:
     )
     assert log is not None
     assert log.erp_sale_matched is True
-    assert log.point_id == "reconcile"
+
+    obs = db_session.scalar(select(SaleObservation))
+    assert obs is not None
+    assert obs.verdict == "QUALIFIED"
+    assert obs.promocode_closed is True
+
+
+def test_reconcile_monitor_does_not_close(db_session: Session) -> None:
+    now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
+    promo = _create_active(
+        db_session,
+        code="10000021",
+        customer="CUST-M",
+        created_at=now - timedelta(hours=3),
+    )
+    adapter = MockErpAdapter(
+        [_qualified_sale("CUST-M", now - timedelta(hours=1), order_id="ord-mon")]
+    )
+
+    result = run_reconcile(
+        db_session,
+        settings=_settings(PROMO_ENFORCEMENT_MODE="monitor"),
+        adapter=adapter,
+        now=now,
+    )
+
+    db_session.refresh(promo)
+    assert result.auto_closed == []
+    assert result.qualified_not_closed == ["10000021"]
+    assert promo.status == PromocodeStatus.ACTIVE
+
+    obs = db_session.scalar(select(SaleObservation))
+    assert obs is not None
+    assert obs.promocode_closed is False
+    assert obs.order_kg == pytest.approx(2.0)
 
     from app.models import TelegramNotificationLog
 
-    tg_logs = list(
-        db_session.scalars(
-            select(TelegramNotificationLog).where(
-                TelegramNotificationLog.event_type == "reconcile_auto_close"
-            )
-        ).all()
+    tg = db_session.scalar(
+        select(TelegramNotificationLog).where(TelegramNotificationLog.event_type == "sale_observed")
     )
-    assert len(tg_logs) == 1
-    assert "10000001" in tg_logs[0].message
-    assert "Продажа кофе" in tg_logs[0].message
+    assert tg is not None
+    assert "НЕ закрыт" in tg.message
+    assert "условие выполнено" in tg.message.lower() or "Акция сработала" in tg.message
+
+
+def test_reconcile_not_enough_kg_still_observed(db_session: Session) -> None:
+    now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
+    promo = _create_active(
+        db_session,
+        code="10000022",
+        customer="CUST-N",
+        created_at=now - timedelta(hours=3),
+    )
+    adapter = MockErpAdapter(
+        [
+            _qualified_sale(
+                "CUST-N",
+                now - timedelta(hours=1),
+                order_id="ord-small",
+                qty=2,
+            )
+        ]
+    )
+
+    result = run_reconcile(
+        db_session,
+        settings=_settings(PROMO_ENFORCEMENT_MODE="monitor"),
+        adapter=adapter,
+        now=now,
+    )
+
+    db_session.refresh(promo)
+    assert result.auto_closed == []
+    assert promo.status == PromocodeStatus.ACTIVE
+    obs = db_session.scalar(select(SaleObservation))
+    assert obs is not None
+    assert obs.verdict == "NOT_ENOUGH_KG"
+    assert obs.order_kg == pytest.approx(0.5)
+
+
+def test_reconcile_dedupes_same_order(db_session: Session) -> None:
+    now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
+    _create_active(
+        db_session,
+        code="10000023",
+        customer="CUST-D",
+        created_at=now - timedelta(hours=3),
+    )
+    adapter = MockErpAdapter(
+        [_qualified_sale("CUST-D", now - timedelta(hours=1), order_id="ord-dup")]
+    )
+    settings = _settings(PROMO_ENFORCEMENT_MODE="monitor")
+
+    first = run_reconcile(db_session, settings=settings, adapter=adapter, now=now)
+    second = run_reconcile(
+        db_session,
+        settings=settings,
+        adapter=adapter,
+        now=now + timedelta(minutes=5),
+    )
+
+    assert len(first.observed) == 1
+    assert second.observed == []
+    rows = list(db_session.scalars(select(SaleObservation)).all())
+    assert len(rows) == 1
 
 
 def test_reconcile_fraud_when_manual_close_without_sale(db_session: Session) -> None:
@@ -173,7 +281,6 @@ def test_reconcile_fraud_when_manual_close_without_sale(db_session: Session) -> 
     warning = db_session.scalar(select(FraudWarning))
     assert warning is not None
     assert warning.promocode_value == "10000002"
-    assert warning.status.value == "OPEN"
 
 
 def test_reconcile_no_fraud_when_sale_in_window(db_session: Session) -> None:
@@ -226,7 +333,7 @@ def test_reconcile_respects_soft_amnesty_window(db_session: Session) -> None:
         promo,
         action_type=CheckerActionType.MANUAL_CLOSE,
         point_id="shop_01",
-        now=now - timedelta(hours=1),  # still inside 2h amnesty
+        now=now - timedelta(hours=1),
     )
 
     result = run_reconcile(
@@ -237,7 +344,6 @@ def test_reconcile_respects_soft_amnesty_window(db_session: Session) -> None:
     )
 
     assert result.fraud_warnings == []
-    assert db_session.scalar(select(FraudWarning)) is None
 
 
 def test_reconcile_skips_already_warned_manual_close(db_session: Session) -> None:

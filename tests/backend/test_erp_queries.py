@@ -31,6 +31,8 @@ def test_build_query_uses_granit_tables() -> None:
     assert "ORGN" in query
     assert "DOCHEAD" not in query
     assert "G.OWNER" in query
+    assert "I.SOURCE AS QUANTITY" in query
+    assert "G.NW AS NET_WEIGHT_KG" in query
     assert params[:2] == [11077, 16276]
     assert params[2:4] == ["12523", "21470"]
     assert params[4:8] == ["1", "2", "3", "5"]
@@ -73,21 +75,22 @@ def test_rows_to_matches_optional_fields() -> None:
                 "CUSTOMER_ERP_ID": "12523",
                 "SOLD_AT": sold,
                 "GROUP_ID": 11077,
-                "PRODUCT_NAME": "blend",
+                "PRODUCT_NAME": "blend (250 g)",
                 "CUSTOMER_NAME": "КЛИЕНТ PALIASHVILI",
                 "ORDER_ID": "99",
+                "QUANTITY": 8,
+                "NET_WEIGHT_KG": 0.25,
+                "UNIT_PRICE": 45,
             }
         ]
     )
     assert len(matches) == 1
-    assert matches[0] == CoffeeSaleMatch(
-        customer_erp_id="12523",
-        sold_at=sold,
-        group_id=11077,
-        product_name="blend",
-        customer_name="КЛИЕНТ PALIASHVILI",
-        order_id="99",
-    )
+    row = matches[0]
+    assert row.customer_erp_id == "12523"
+    assert row.order_id == "99"
+    assert row.quantity == 8
+    assert row.net_weight_kg == 0.25
+    assert row.line_kg == 2.0
 
 
 def test_rows_to_matches_parses_string_sold_at() -> None:

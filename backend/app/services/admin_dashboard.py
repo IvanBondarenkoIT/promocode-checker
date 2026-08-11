@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.models import (
     CheckerActionType,
     CheckerLog,
@@ -12,10 +13,12 @@ from app.models import (
     FraudWarningStatus,
     Promocode,
     PromocodeStatus,
+    SaleObservation,
     TelegramNotificationLog,
 )
 from app.schemas.admin import DashboardResponse
 from app.services.campaign_scope import get_active_kind, scoped_promocode_query
+from app.services.sale_evaluation import SaleVerdict
 
 
 def _now() -> datetime:
@@ -26,6 +29,8 @@ def get_dashboard(db: Session) -> DashboardResponse:
     now = _now()
     since = now - timedelta(hours=24)
     active_kind = get_active_kind(db)
+    settings = get_settings()
+    enforcement = (settings.promo_enforcement_mode or "monitor").strip().lower()
 
     def _count_scoped(*conditions) -> int:
         query = scoped_promocode_query(db, kind=active_kind).where(*conditions)
@@ -60,6 +65,19 @@ def get_dashboard(db: Session) -> DashboardResponse:
             TelegramNotificationLog.delivery_status == "sent",
         )
     ) or 0
+    observations_24h = db.scalar(
+        select(func.count())
+        .select_from(SaleObservation)
+        .where(SaleObservation.detected_at >= since)
+    ) or 0
+    qualified_24h = db.scalar(
+        select(func.count())
+        .select_from(SaleObservation)
+        .where(
+            SaleObservation.detected_at >= since,
+            SaleObservation.verdict == SaleVerdict.QUALIFIED.value,
+        )
+    ) or 0
 
     return DashboardResponse(
         promocodes_active=active,
@@ -70,4 +88,8 @@ def get_dashboard(db: Session) -> DashboardResponse:
         fraud_open=fraud_open,
         telegram_sent_last_24h=telegram_24h,
         active_campaign_kind=active_kind.value,
+        enforcement_mode=enforcement,
+        promo_min_coffee_kg=float(settings.promo_min_coffee_kg),
+        sale_observations_24h=observations_24h,
+        sale_qualified_24h=qualified_24h,
     )

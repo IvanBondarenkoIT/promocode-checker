@@ -1,4 +1,4 @@
-"""Hourly ERP reconcile: auto-close ACTIVE and flag unmatched manual closes."""
+"""Hourly ERP reconcile: observe coffee sales, optional auto-close, fraud flags."""
 
 from __future__ import annotations
 
@@ -22,21 +22,27 @@ from app.models import (
     FraudWarningStatus,
     Promocode,
     PromocodeStatus,
+    SaleObservation,
 )
 from app.services.campaign_scope import get_active_kind, in_scope, scoped_promocode_query
 from app.services.promocode_close import close_promocode, lock_promocode_by_id
+from app.services.sale_evaluation import SaleVerdict, evaluate_orders
 from app.services.telegram import send_alert
-from app.services.telegram_messages import msg_auto_close, msg_fraud_no_sale
+from app.services.telegram_messages import msg_auto_close, msg_fraud_no_sale, msg_sale_observed
 
 logger = logging.getLogger(__name__)
 
 RECONCILE_POINT_ID = "reconcile"
+ENFORCEMENT_MONITOR = "monitor"
+ENFORCEMENT_ENFORCE = "enforce"
 
 
 @dataclass
 class ReconcileResult:
     auto_closed: list[str] = field(default_factory=list)
     fraud_warnings: list[str] = field(default_factory=list)
+    observed: list[str] = field(default_factory=list)
+    qualified_not_closed: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
 
@@ -59,27 +65,18 @@ def _sales_by_customer(
     return grouped
 
 
-def _first_sale_in_window(
-    sales: list[CoffeeSaleMatch],
-    *,
-    since: datetime,
-    until: datetime,
-) -> CoffeeSaleMatch | None:
-    since_aware = _ensure_aware(since)
-    until_aware = _ensure_aware(until)
-    for sale in sales:
-        if since_aware <= _ensure_aware(sale.sold_at) <= until_aware:
-            return sale
-    return None
-
-
 def _has_sale_in_window(
     sales: list[CoffeeSaleMatch],
     *,
     since: datetime,
     until: datetime,
 ) -> bool:
-    return _first_sale_in_window(sales, since=since, until=until) is not None
+    since_aware = _ensure_aware(since)
+    until_aware = _ensure_aware(until)
+    for sale in sales:
+        if since_aware <= _ensure_aware(sale.sold_at) <= until_aware:
+            return True
+    return False
 
 
 def _prior_scan(db: Session, promocode_id) -> CheckerLog | None:
@@ -94,7 +91,22 @@ def _prior_scan(db: Session, promocode_id) -> CheckerLog | None:
     )
 
 
-def _auto_close_active(
+def _normalize_enforcement(raw: str) -> str:
+    mode = (raw or ENFORCEMENT_MONITOR).strip().lower()
+    if mode not in {ENFORCEMENT_MONITOR, ENFORCEMENT_ENFORCE}:
+        logger.warning("Unknown PROMO_ENFORCEMENT_MODE=%r; using monitor", raw)
+        return ENFORCEMENT_MONITOR
+    return mode
+
+
+def _is_expired(promocode: Promocode, *, now: datetime) -> bool:
+    expires_at = promocode.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=UTC)
+    return expires_at <= now
+
+
+def _observe_and_maybe_close(
     db: Session,
     *,
     adapter: ErpAdapter,
@@ -102,6 +114,9 @@ def _auto_close_active(
     now: datetime,
     result: ReconcileResult,
 ) -> None:
+    enforcement = _normalize_enforcement(settings.promo_enforcement_mode)
+    min_kg = float(settings.promo_min_coffee_kg)
+
     active_rows = list(
         db.scalars(
             scoped_promocode_query(db)
@@ -117,61 +132,123 @@ def _auto_close_active(
     if not active_rows:
         return
 
-    customer_ids = sorted({row.customer_erp_id for row in active_rows})
+    by_promo_customer = {row.customer_erp_id: row for row in active_rows}
+    # One ACTIVE code per customer is expected; if several, prefer earliest created.
+    for row in active_rows:
+        current = by_promo_customer.get(row.customer_erp_id)
+        if current is None or _ensure_aware(row.created_at) < _ensure_aware(current.created_at):
+            by_promo_customer[row.customer_erp_id] = row
+
+    customer_ids = sorted(by_promo_customer.keys())
     earliest = min(_ensure_aware(row.created_at) for row in active_rows)
     sales = adapter.find_coffee_sales(customer_ids, since=earliest, until=now)
-    by_customer = _sales_by_customer(sales)
+    evaluated = evaluate_orders(sales, min_coffee_kg=min_kg)
 
-    for promo in active_rows:
+    for order in evaluated:
+        promo = by_promo_customer.get(order.customer_erp_id)
+        if promo is None:
+            continue
         created = _ensure_aware(promo.created_at)
-        customer_sales = by_customer.get(promo.customer_erp_id, [])
-        matched_sale = _first_sale_in_window(customer_sales, since=created, until=now)
-        if matched_sale is None:
+        if _ensure_aware(order.sold_at) < created:
             continue
 
-        locked = lock_promocode_by_id(db, promo.id)
-        if locked is None or locked.status != PromocodeStatus.ACTIVE:
-            continue
-        if _is_expired(locked, now=now):
-            continue
-
-        prior = _prior_scan(db, locked.id)
-        close_promocode(
-            db,
-            locked,
-            action_type=CheckerActionType.AUTO_CLOSE,
-            point_id=RECONCILE_POINT_ID,
-            erp_sale_matched=True,
-            now=now,
+        existing = db.scalar(
+            select(SaleObservation.id).where(
+                SaleObservation.customer_erp_id == order.customer_erp_id,
+                SaleObservation.order_id == order.order_id,
+            )
         )
-        result.auto_closed.append(locked.promocode)
+        if existing is not None:
+            continue
+
+        closed = False
+        if (
+            enforcement == ENFORCEMENT_ENFORCE
+            and order.verdict == SaleVerdict.QUALIFIED
+            and promo.status == PromocodeStatus.ACTIVE
+        ):
+            locked = lock_promocode_by_id(db, promo.id)
+            if locked is not None and locked.status == PromocodeStatus.ACTIVE and not _is_expired(
+                locked, now=now
+            ):
+                prior = _prior_scan(db, locked.id)
+                close_promocode(
+                    db,
+                    locked,
+                    action_type=CheckerActionType.AUTO_CLOSE,
+                    point_id=RECONCILE_POINT_ID,
+                    erp_sale_matched=True,
+                    now=now,
+                )
+                closed = True
+                result.auto_closed.append(locked.promocode)
+                send_alert(
+                    db,
+                    event_type="reconcile_auto_close",
+                    dedup_key=f"auto_close:{locked.promocode}:{order.order_id}",
+                    message=msg_auto_close(
+                        code=locked.promocode,
+                        customer_erp_id=locked.customer_erp_id,
+                        customer_name=order.customer_name,
+                        product_name=", ".join(order.products[:3]) if order.products else None,
+                        unit_price=order.total_amount,
+                        order_id=order.order_id,
+                        sold_at=order.sold_at,
+                        prior_scan_point_id=prior.point_id if prior else None,
+                        prior_scan_at=prior.scan_time if prior else None,
+                        tz_name=settings.app_timezone,
+                    ),
+                    settings=settings,
+                    audience="events",
+                )
+                promo = locked
+
+        observation = SaleObservation(
+            promocode_id=promo.id,
+            promocode_value=promo.promocode,
+            customer_erp_id=order.customer_erp_id,
+            customer_name=order.customer_name,
+            order_id=order.order_id,
+            sold_at=_ensure_aware(order.sold_at),
+            order_kg=order.order_kg,
+            qty_pieces=order.qty_pieces,
+            products=" | ".join(order.products) if order.products else None,
+            group_ids=",".join(str(gid) for gid in order.group_ids) if order.group_ids else None,
+            total_amount=order.total_amount,
+            verdict=order.verdict.value,
+            enforcement_mode=enforcement,
+            promocode_closed=closed,
+            detected_at=now,
+            notified_at=now,
+        )
+        db.add(observation)
+        db.flush()
+        result.observed.append(order.order_id)
+        if order.verdict == SaleVerdict.QUALIFIED and not closed:
+            result.qualified_not_closed.append(promo.promocode)
 
         send_alert(
             db,
-            event_type="reconcile_auto_close",
-            dedup_key=f"auto_close:{locked.promocode}:{now.date().isoformat()}",
-            message=msg_auto_close(
-                code=locked.promocode,
-                customer_erp_id=locked.customer_erp_id,
-                customer_name=matched_sale.customer_name,
-                product_name=matched_sale.product_name,
-                unit_price=matched_sale.unit_price,
-                order_id=matched_sale.order_id,
-                sold_at=matched_sale.sold_at,
-                prior_scan_point_id=prior.point_id if prior else None,
-                prior_scan_at=prior.scan_time if prior else None,
+            event_type="sale_observed",
+            dedup_key=f"sale_obs:{order.customer_erp_id}:{order.order_id}",
+            message=msg_sale_observed(
+                code=promo.promocode,
+                customer_erp_id=order.customer_erp_id,
+                customer_name=order.customer_name,
+                verdict=order.verdict.value,
+                order_kg=order.order_kg,
+                min_coffee_kg=min_kg,
+                products=order.products,
+                order_id=order.order_id,
+                sold_at=order.sold_at,
+                enforcement_mode=enforcement,
+                promocode_closed=closed,
+                total_amount=order.total_amount,
                 tz_name=settings.app_timezone,
             ),
             settings=settings,
             audience="events",
         )
-
-
-def _is_expired(promocode: Promocode, *, now: datetime) -> bool:
-    expires_at = promocode.expires_at
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=UTC)
-    return expires_at <= now
 
 
 def _fraud_check_manual_closes(
@@ -285,7 +362,7 @@ def run_reconcile(
     result = ReconcileResult()
 
     try:
-        _auto_close_active(db, adapter=erp, settings=cfg, now=current, result=result)
+        _observe_and_maybe_close(db, adapter=erp, settings=cfg, now=current, result=result)
         _fraud_check_manual_closes(db, adapter=erp, settings=cfg, now=current, result=result)
         db.flush()
     except Exception as exc:

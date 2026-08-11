@@ -2,14 +2,24 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-INTERVAL_SECONDS = 3600
+DEFAULT_INTERVAL_SECONDS = 3600
 BOT_POLL_SECONDS = 5
+
+
+def _reconcile_interval() -> int:
+    raw = os.getenv("RECONCILE_INTERVAL_SECONDS", str(DEFAULT_INTERVAL_SECONDS))
+    try:
+        value = int(raw)
+    except ValueError:
+        return DEFAULT_INTERVAL_SECONDS
+    return max(60, value)
 
 
 def main() -> int:
@@ -17,8 +27,9 @@ def main() -> int:
     reconcile = ROOT / "scripts" / "run_reconcile.py"
     bot_poll = ROOT / "scripts" / "run_telegram_bot_poll.py"
     daily = ROOT / "scripts" / "run_telegram_daily.py"
+    interval = _reconcile_interval()
     print(
-        f"reconcile worker started; reconcile_interval={INTERVAL_SECONDS}s "
+        f"reconcile worker started; reconcile_interval={interval}s "
         f"bot_poll={BOT_POLL_SECONDS}s daily_tick=each_loop",
         flush=True,
     )
@@ -29,7 +40,7 @@ def main() -> int:
             result = subprocess.run([python, str(reconcile)], check=False)
             if result.returncode != 0:
                 print(f"reconcile exit code {result.returncode}", flush=True)
-            next_reconcile = time.monotonic() + INTERVAL_SECONDS
+            next_reconcile = time.monotonic() + interval
 
         poll = subprocess.run([python, str(bot_poll)], check=False)
         if poll.returncode != 0:

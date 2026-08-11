@@ -8,7 +8,8 @@
 Railway убран: только local + server-prod.
 Кампании делятся на TEST/LIVE, глобальный переключатель в админке.
 Промокод сегмента = номер карты лояльности (8–20 цифр); поле promocode отдельное.
-Owner: выкат на сервер (backup → migrate 006 → remap/import → scope LIVE).
+Режим закрытия: PROMO_ENFORCEMENT_MODE=monitor|enforce; порог 2 кг в одном чеке.
+Owner: выкат на сервер (backup → migrate 007 → import → monitor LIVE).
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
@@ -28,12 +29,13 @@ Owner: выкат на сервер (backup → migrate 006 → remap/import →
 - Stage U: daily digests 10:00/22:00 + alert modes full/digest (`docs/reports/stage-u-telegram-daily.md`)
 - Stage V: segment import + TEST/LIVE scope + admin scope switch (`docs/reports/stage-v-preprod-segment.md`)
 - Stage W: promocode = loyalty card, length 8–20, remap script (`docs/reports/stage-w-card-as-promocode.md`)
+- Stage X: monitor/enforce modes + 2 kg per order (`docs/reports/stage-x-monitor-mode.md`)
 
 ## Next (launch preparation)
 
-- Server-prod: backup → `TELEGRAM_BOT_TOKEN` in `infra/.env.prod` → migrate **006** → `desktop/update-prod.ps1`
-- Import or remap segment on the server (`promocode = card`); regenerate mailout from server export
-- Fill `data/input/staff_cards.csv` with shop-card ERP ids **and card numbers** — [runbooks/preprod-calibration.md](runbooks/preprod-calibration.md)
+- Server-prod: backup → migrate **007** → `desktop/update-prod.ps1`
+- Import segment + shop cards; set `PROMO_ENFORCEMENT_MODE=monitor`, scope LIVE
+- Verify Telegram sale_observed alerts; later switch to `enforce`
 - Decide how issued codes reach customers (export CSV is ready)
 - Owner decision: auto-close when the customer never showed the code
 - Run **general smoke / regression** on server — [runbooks/server-prod.md](runbooks/server-prod.md)

@@ -19,6 +19,7 @@ Operational guides for local development, Windows Server production, and cashier
 
 - [campaign-import.md](campaign-import.md) — segment import (generated codes) and wave import
 - [campaign-scope.md](campaign-scope.md) — global TEST / LIVE switch
+- [enforcement-modes.md](enforcement-modes.md) — monitor vs enforce auto-close
 - [preprod-calibration.md](preprod-calibration.md) — auto-close rehearsal on shop cards
 
 ## ERP probe

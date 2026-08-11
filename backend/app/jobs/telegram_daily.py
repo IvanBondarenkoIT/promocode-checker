@@ -15,11 +15,19 @@ from app.core.config import Settings, get_settings
 from app.integrations.erp.base import ErpAdapter
 from app.integrations.erp.factory import get_erp_adapter
 from app.integrations.erp.types import CoffeeSaleMatch
-from app.models import Campaign, CheckerLog, FraudWarning, Promocode, PromocodeStatus
+from app.models import (
+    Campaign,
+    CheckerLog,
+    FraudWarning,
+    Promocode,
+    PromocodeStatus,
+    SaleObservation,
+)
 from app.models.enums import CheckerActionType
 from app.models.telegram_subscriber import TelegramDigestState
 from app.services import telegram_messages as msgs
 from app.services.campaign_scope import get_active_kind
+from app.services.sale_evaluation import SaleVerdict
 from app.services.telegram import send_alert
 
 logger = logging.getLogger(__name__)
@@ -117,6 +125,24 @@ def _fraud_count(db: Session, *, since: datetime, until: datetime) -> int:
         .where(FraudWarning.detected_at >= since, FraudWarning.detected_at <= until)
     )
     return int(n or 0)
+
+
+def _observation_counts(db: Session, *, since: datetime, until: datetime) -> tuple[int, int]:
+    total = db.scalar(
+        select(func.count())
+        .select_from(SaleObservation)
+        .where(SaleObservation.detected_at >= since, SaleObservation.detected_at <= until)
+    )
+    qualified = db.scalar(
+        select(func.count())
+        .select_from(SaleObservation)
+        .where(
+            SaleObservation.detected_at >= since,
+            SaleObservation.detected_at <= until,
+            SaleObservation.verdict == SaleVerdict.QUALIFIED.value,
+        )
+    )
+    return int(total or 0), int(qualified or 0)
 
 
 def _campaign_totals(db: Session, kind) -> list[tuple[str, int, int]]:
@@ -217,6 +243,7 @@ def run_telegram_daily(
             count, sales_sum, top = _aggregate_sales(sales)
             scan_n, manual_n, auto_n = _checker_counts(db, since=day_start, until=day_end)
             fraud_n = _fraud_count(db, since=day_start, until=day_end)
+            obs_n, qual_n = _observation_counts(db, since=day_start, until=day_end)
             send_alert(
                 db,
                 event_type="day_end",
@@ -232,6 +259,9 @@ def run_telegram_daily(
                     fraud_count=fraud_n,
                     active_campaign_kind=active_kind.value,
                     campaigns=_campaign_totals(db, active_kind),
+                    observations_count=obs_n,
+                    qualified_observations_count=qual_n,
+                    enforcement_mode=(cfg.promo_enforcement_mode or "monitor").strip().lower(),
                 ),
                 settings=cfg,
                 audience="digest",

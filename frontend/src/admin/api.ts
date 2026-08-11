@@ -88,6 +88,10 @@ export type DashboardStats = {
   fraud_open: number;
   telegram_sent_last_24h: number;
   active_campaign_kind: CampaignKind;
+  enforcement_mode?: string;
+  promo_min_coffee_kg?: number;
+  sale_observations_24h?: number;
+  sale_qualified_24h?: number;
 };
 
 export async function fetchDashboard(token: string): Promise<DashboardStats> {

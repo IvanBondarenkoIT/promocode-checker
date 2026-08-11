@@ -10,6 +10,7 @@ const TABLES = [
   "campaigns",
   "checker_logs",
   "fraud_warnings",
+  "sale_observations",
   "admin_audit_logs",
   "telegram_notification_logs",
 ];
@@ -64,6 +65,16 @@ export function AdminDashboardPage() {
       {stats ? (
         <div className="admin-grid" data-testid="admin-dashboard-grid">
           <div className="admin-stat">
+            <span>Enforcement</span>
+            <strong>
+              {(stats.enforcement_mode || "monitor") === "enforce" ? "Working" : "Monitor"}
+            </strong>
+          </div>
+          <div className="admin-stat">
+            <span>Min coffee kg</span>
+            <strong>{stats.promo_min_coffee_kg ?? 2}</strong>
+          </div>
+          <div className="admin-stat">
             <span>Active ({stats.active_campaign_kind})</span>
             <strong>{stats.promocodes_active}</strong>
           </div>
@@ -82,6 +93,12 @@ export function AdminDashboardPage() {
           <div className="admin-stat">
             <span>Auto-closes</span>
             <strong>{stats.auto_closes_total}</strong>
+          </div>
+          <div className="admin-stat">
+            <span>Sales seen 24h</span>
+            <strong>
+              {stats.sale_observations_24h ?? 0} / {stats.sale_qualified_24h ?? 0}
+            </strong>
           </div>
           <div className="admin-stat">
             <span>Fraud open</span>

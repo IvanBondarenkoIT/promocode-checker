@@ -14,6 +14,7 @@ from app.models import (
     CheckerLog,
     FraudWarning,
     Promocode,
+    SaleObservation,
     TelegramNotificationLog,
 )
 from app.schemas.admin import AdminTableName, TableListResponse
@@ -50,6 +51,7 @@ _TABLE_MODELS = {
     AdminTableName.CAMPAIGNS: Campaign,
     AdminTableName.CHECKER_LOGS: CheckerLog,
     AdminTableName.FRAUD_WARNINGS: FraudWarning,
+    AdminTableName.SALE_OBSERVATIONS: SaleObservation,
     AdminTableName.ADMIN_AUDIT_LOGS: AdminAuditLog,
     AdminTableName.TELEGRAM_NOTIFICATION_LOGS: TelegramNotificationLog,
 }
@@ -109,6 +111,21 @@ def _apply_filters(
             query = query.where(FraudWarning.status == status)
         if search:
             query = query.where(FraudWarning.promocode_value.ilike(f"%{search}%"))
+        return query
+
+    if table == AdminTableName.SALE_OBSERVATIONS:
+        if status:
+            query = query.where(SaleObservation.verdict == status)
+        if search:
+            pattern = f"%{search}%"
+            query = query.where(
+                or_(
+                    SaleObservation.promocode_value.ilike(pattern),
+                    SaleObservation.customer_erp_id.ilike(pattern),
+                    SaleObservation.order_id.ilike(pattern),
+                    SaleObservation.customer_name.ilike(pattern),
+                )
+            )
         return query
 
     return query

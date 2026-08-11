@@ -29,6 +29,10 @@ class DashboardResponse(BaseModel):
     fraud_open: int
     telegram_sent_last_24h: int
     active_campaign_kind: str = "TEST"
+    enforcement_mode: str = "monitor"
+    promo_min_coffee_kg: float = 2.0
+    sale_observations_24h: int = 0
+    sale_qualified_24h: int = 0
 
 
 class TableListResponse(BaseModel):
@@ -81,5 +85,6 @@ class AdminTableName(StrEnum):
     CAMPAIGNS = "campaigns"
     CHECKER_LOGS = "checker_logs"
     FRAUD_WARNINGS = "fraud_warnings"
+    SALE_OBSERVATIONS = "sale_observations"
     ADMIN_AUDIT_LOGS = "admin_audit_logs"
     TELEGRAM_NOTIFICATION_LOGS = "telegram_notification_logs"

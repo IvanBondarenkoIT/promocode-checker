@@ -37,8 +37,9 @@ def build_coffee_sales_query(
 
     Expected row keys (case-insensitive):
     CUSTOMER_ERP_ID, SOLD_AT, GROUP_ID, PRODUCT_NAME,
-    optional CUSTOMER_NAME, ORDER_ID
+    optional CUSTOMER_NAME, ORDER_ID, UNIT_PRICE, QUANTITY, NET_WEIGHT_KG
 
+    Quantity is ``STORZDTGDS.SOURCE`` (pieces). Net weight is ``GOODS.NW`` (kg).
     When ``all_customers`` is True, skip ORGNID filter (probe only).
     Always pass ``row_limit`` for that mode (safety cap).
     """
@@ -54,7 +55,10 @@ SELECT CAST(NULL AS VARCHAR(64)) AS CUSTOMER_ERP_ID,
        CAST(NULL AS INTEGER) AS GROUP_ID,
        CAST(NULL AS VARCHAR(255)) AS PRODUCT_NAME,
        CAST(NULL AS VARCHAR(255)) AS CUSTOMER_NAME,
-       CAST(NULL AS VARCHAR(64)) AS ORDER_ID
+       CAST(NULL AS VARCHAR(64)) AS ORDER_ID,
+       CAST(NULL AS DOUBLE PRECISION) AS UNIT_PRICE,
+       CAST(NULL AS DOUBLE PRECISION) AS QUANTITY,
+       CAST(NULL AS DOUBLE PRECISION) AS NET_WEIGHT_KG
 FROM RDB$DATABASE
 WHERE 1 = 0
 """.strip(),
@@ -80,7 +84,9 @@ SELECT {first_clause}
     G.NAME AS PRODUCT_NAME,
     COALESCE(NULLIF(TRIM(O.FULLNAME), ''), O.NAME) AS CUSTOMER_NAME,
     CAST(S.ID AS VARCHAR(64)) AS ORDER_ID,
-    I.PRICE AS UNIT_PRICE
+    I.PRICE AS UNIT_PRICE,
+    I.SOURCE AS QUANTITY,
+    G.NW AS NET_WEIGHT_KG
 FROM STORZAKAZDT S
 JOIN STORZDTGDS I ON I.SZID = S.ID
 JOIN GOODS G ON G.ID = I.GODSID
@@ -103,6 +109,8 @@ WHERE G.OWNER IN ({group_placeholders})
 
 
 def rows_to_matches(rows: list[dict]) -> list[CoffeeSaleMatch]:
+    from app.services.coffee_weight import line_kg
+
     matches: list[CoffeeSaleMatch] = []
     for row in rows:
         normalized = {str(k).upper(): v for k, v in row.items()}
@@ -115,20 +123,42 @@ def rows_to_matches(rows: list[dict]) -> list[CoffeeSaleMatch]:
         customer_name = normalized.get("CUSTOMER_NAME")
         order_id = normalized.get("ORDER_ID")
         price_raw = normalized.get("UNIT_PRICE")
+        qty_raw = normalized.get("QUANTITY")
+        nw_raw = normalized.get("NET_WEIGHT_KG")
         unit_price: float | None
+        quantity: float | None
+        net_weight: float | None
         try:
             unit_price = float(price_raw) if price_raw is not None else None
         except (TypeError, ValueError):
             unit_price = None
+        try:
+            quantity = float(qty_raw) if qty_raw is not None else None
+        except (TypeError, ValueError):
+            quantity = None
+        try:
+            net_weight = float(nw_raw) if nw_raw is not None else None
+        except (TypeError, ValueError):
+            net_weight = None
+        group_int = int(group_id)
+        product_name = str(product) if product is not None else None
         matches.append(
             CoffeeSaleMatch(
                 customer_erp_id=str(customer),
                 sold_at=sold_at,
-                group_id=int(group_id),
-                product_name=str(product) if product is not None else None,
+                group_id=group_int,
+                product_name=product_name,
                 customer_name=str(customer_name) if customer_name is not None else None,
                 order_id=str(order_id) if order_id is not None else None,
                 unit_price=unit_price,
+                quantity=quantity,
+                net_weight_kg=net_weight,
+                line_kg=line_kg(
+                    quantity,
+                    product_name=product_name,
+                    stored_nw=net_weight,
+                    group_id=group_int,
+                ),
             )
         )
     return matches
