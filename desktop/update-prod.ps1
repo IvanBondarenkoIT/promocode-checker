@@ -26,7 +26,9 @@ Push-Location $RepoRoot
 try {
     Write-Host "[update] git checkout main and pull"
     git checkout main
+    if ($LASTEXITCODE -ne 0) { throw "git checkout main failed (exit $LASTEXITCODE)" }
     git pull origin main
+    if ($LASTEXITCODE -ne 0) { throw "git pull origin main failed (exit $LASTEXITCODE)" }
 
     Set-Location $infra
     if ($SkipBuild) {
@@ -37,6 +39,7 @@ try {
         Write-Host "[update] docker compose up -d --build"
         docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
     }
+    if ($LASTEXITCODE -ne 0) { throw "docker compose failed (exit $LASTEXITCODE)" }
 
     Write-Host "[update] health"
     Start-Sleep -Seconds 3

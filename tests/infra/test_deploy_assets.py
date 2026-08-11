@@ -15,6 +15,13 @@ def test_dockerfile_exists_and_builds_frontend() -> None:
     assert "/app/static" in text
 
 
+def test_dockerignore_allows_coffee_whitelist() -> None:
+    """Dockerfile copies docs/coffee-beans-whitelist.txt; docs/ must not hide it."""
+    ignore = (ROOT / ".dockerignore").read_text(encoding="utf-8")
+    assert "docs/coffee-beans-whitelist.txt" in ignore or "!docs/coffee-beans-whitelist.txt" in ignore
+    assert (ROOT / "docs" / "coffee-beans-whitelist.txt").is_file()
+
+
 def test_compose_files_define_healthchecks() -> None:
     app_compose = (ROOT / "infra" / "docker-compose.app.yml").read_text(encoding="utf-8")
     prod_compose = (ROOT / "infra" / "docker-compose.prod.yml").read_text(encoding="utf-8")

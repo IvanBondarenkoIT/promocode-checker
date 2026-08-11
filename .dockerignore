@@ -15,7 +15,9 @@ tools
 .cursor
 *.md
 !README.md
-docs
+# Exclude docs from image context, but keep the coffee whitelist the Dockerfile copies.
+docs/**
+!docs/coffee-beans-whitelist.txt
 tests
 desktop/config.json
 infra/postgres_data
