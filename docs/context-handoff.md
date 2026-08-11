@@ -4,10 +4,11 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–10 + 11a–11d + Stage 4.1 + gap checklist + Stage T + Stage U + Stage V закрыты.
+Этапы 1–10 + 11a–11d + Stage 4.1 + gap checklist + Stage T + Stage U + Stage V + Stage W закрыты.
 Railway убран: только local + server-prod.
 Кампании делятся на TEST/LIVE, глобальный переключатель в админке.
-Owner: выкат на сервер (backup → migrate 005 → импорт сегмента → scope LIVE).
+Промокод сегмента = номер карты лояльности (8–20 цифр); поле promocode отдельное.
+Owner: выкат на сервер (backup → migrate 006 → remap/import → scope LIVE).
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
@@ -26,12 +27,13 @@ Owner: выкат на сервер (backup → migrate 005 → импорт с�
 - Drop Railway (2026-08-04): local + server-prod only (`docs/reports/drop-railway-2026-08-04.md`)
 - Stage U: daily digests 10:00/22:00 + alert modes full/digest (`docs/reports/stage-u-telegram-daily.md`)
 - Stage V: segment import + TEST/LIVE scope + admin scope switch (`docs/reports/stage-v-preprod-segment.md`)
+- Stage W: promocode = loyalty card, length 8–20, remap script (`docs/reports/stage-w-card-as-promocode.md`)
 
 ## Next (launch preparation)
 
-- Server-prod: backup → `TELEGRAM_BOT_TOKEN` in `infra/.env.prod` → migrate **005** → `desktop/update-prod.ps1`
-- Import the segment on the server with `--dry-run` first, then switch scope to `LIVE` in the admin UI
-- Fill `data/input/staff_cards.csv` with shop-card ERP ids and run [runbooks/preprod-calibration.md](runbooks/preprod-calibration.md)
+- Server-prod: backup → `TELEGRAM_BOT_TOKEN` in `infra/.env.prod` → migrate **006** → `desktop/update-prod.ps1`
+- Import or remap segment on the server (`promocode = card`); regenerate mailout from server export
+- Fill `data/input/staff_cards.csv` with shop-card ERP ids **and card numbers** — [runbooks/preprod-calibration.md](runbooks/preprod-calibration.md)
 - Decide how issued codes reach customers (export CSV is ready)
 - Owner decision: auto-close when the customer never showed the code
 - Run **general smoke / regression** on server — [runbooks/server-prod.md](runbooks/server-prod.md)

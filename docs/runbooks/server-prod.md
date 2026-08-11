@@ -156,21 +156,25 @@ cd C:\Projects\promocode-checker\infra
 docker compose --env-file .env.prod -f docker-compose.prod.yml exec db `
   pg_dump -U postgres promocode_checker > C:\Projects\backups\promocode_checker_$(Get-Date -Format yyyyMMdd-HHmm).sql
 
-# 2. Update code and schema (migration 005 adds campaign kind + app_settings)
+# 2. Update code and schema (migration 006 widens promocode to 8–20 digits)
 cd C:\Projects\promocode-checker\desktop
 .\update-prod.ps1
 
-# 3. Copy the segment in and dry-run
+# 3. Copy the segment in and dry-run (promocode = loyalty card)
 cd C:\Projects\promocode-checker\infra
 docker compose --env-file .env.prod -f docker-compose.prod.yml cp `
   C:\Projects\segments\segment.csv app:/app/data/input/segment.csv
 docker compose --env-file .env.prod -f docker-compose.prod.yml exec app `
   python /app/scripts/import_segment_promocodes.py --file /app/data/input/segment.csv `
   --campaign-code beans_1_2kg_preprod --campaign-name "Coffee beans 1-2kg" `
-  --kind LIVE --code-prefix 5 --dry-run
+  --kind LIVE --dry-run
 ```
 
-Then run the same command without `--dry-run`, copy the issued CSV out of the container
+If the campaign already has random 8-digit codes from an older import, run
+`python /app/scripts/remap_promocode_to_card.py --campaign-code beans_1_2kg_preprod`
+inside the app container (dry-run first), then regenerate the mailout.
+
+Then run the import without `--dry-run`, copy the issued CSV out of the container
 for the mailout, and only after checking the admin tables switch **Working data** to
 `LIVE` on the dashboard ([campaign-scope.md](campaign-scope.md)).
 

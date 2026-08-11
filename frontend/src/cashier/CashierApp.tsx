@@ -23,6 +23,8 @@ import {
   resultInstruction,
   resultLabel,
   resultToTone,
+  shouldAutoSubmit,
+  PROMOCODE_MAX_LENGTH,
 } from "./logic";
 import { heartbeatIntervalMs, resolvePointId } from "./pointId";
 import type { CashierCodeResponse } from "./types";
@@ -215,7 +217,7 @@ export function CashierApp() {
     }
     const next = digitsOnly(value);
     setCode(next);
-    if (isCompleteCode(next)) {
+    if (shouldAutoSubmit(next)) {
       void runCheck(next);
     }
   };
@@ -294,7 +296,7 @@ export function CashierApp() {
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
-            maxLength={8}
+            maxLength={PROMOCODE_MAX_LENGTH}
             value={code}
             disabled={locked || busy}
             onChange={(event) => onChange(event.target.value)}

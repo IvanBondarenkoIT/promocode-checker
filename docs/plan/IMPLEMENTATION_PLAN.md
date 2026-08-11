@@ -191,7 +191,7 @@ Deferred (resolved by Stage 5/6 gate):
 - [ ] Delivery channel for issued codes (SMS / Telegram / print)
 - [ ] Shop card ERP ids for calibration (`data/input/staff_cards.csv`)
 - [ ] Owner decision: auto-close when the customer never showed the code
-- [ ] Server rollout: backup → migrate 005 → import → switch scope to LIVE
+- [ ] Server rollout: backup → migrate **006** → remap/import (promocode=card) → switch scope to LIVE
 - [ ] PII retention policy for customer names and phones
 
 ## Business tables (checker Postgres)
@@ -200,7 +200,7 @@ Deferred (resolved by Stage 5/6 gate):
 
 - `id` UUID PK
 - `customer_erp_id` VARCHAR indexed (ERP `ORGN.ID`)
-- `promocode` VARCHAR(8) unique indexed, exactly 8 digits
+- `promocode` VARCHAR(20) unique indexed, **8–20 digits** (loyalty card as code for segment import; column separate from `customer_card`)
 - `status` ACTIVE|USED
 - `campaign_id` UUID nullable FK, unique together with `customer_erp_id`
 - `customer_card` / `customer_name` / `customer_phone` nullable (issued-codes export)
@@ -226,7 +226,7 @@ Deferred (resolved by Stage 5/6 gate):
 
 ## Cashier flow
 
-1. Customer receives TG barcode (Code 128 of 8-digit code)
+1. Customer presents loyalty card / TG barcode (Code 128 of the promocode = card)
 2. Cashier scans into checker UI
 3. Checker returns ACTIVE / USED / NOT_FOUND
 4. If ACTIVE, cashier applies discount in offline POS manually

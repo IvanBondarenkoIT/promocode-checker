@@ -3,15 +3,16 @@
 Goal: prove that a real coffee purchase on our own loyalty card closes a promocode
 automatically and that the Telegram alert carries the right product, price and shop.
 
-## 1. Collect the card ERP ids
+## 1. Collect the card ERP ids and card numbers
 
 `customer_id` must be the ERP `ORGN.ID` of the card (the same value reconcile sees as
-`S.ORGNID`), not the printed card number. Put them in `data/input/staff_cards.csv`:
+`S.ORGNID`). `customer_name` is the printed loyalty card number (becomes the promocode).
+Put them in `data/input/staff_cards.csv`:
 
 ```text
-customer_id,label
-13961,Shop card Vake
-14328,Shop card Saburtalo
+customer_id,customer_name,customer_full_name
+13961,2200000109743,Shop card Vake
+14328,2200000097750,Shop card Saburtalo
 ```
 
 Format example: [`../examples/staff_cards.example.csv`](../examples/staff_cards.example.csv)
@@ -23,11 +24,11 @@ python scripts/import_segment_promocodes.py `
   --file data/input/staff_cards.csv `
   --campaign-code preprod_calibration `
   --campaign-name "Preprod calibration" `
-  --kind LIVE `
-  --code-prefix 6
+  --kind LIVE
 ```
 
-Codes land in `artifacts/campaigns/preprod_calibration_issued_*.csv`. Print barcodes:
+Codes land in `artifacts/campaigns/preprod_calibration_issued_*.csv` (`promocode` = card).
+Print barcodes:
 
 ```powershell
 python scripts/export_dummy_barcodes.py --campaign-code preprod_calibration
@@ -39,7 +40,7 @@ Switch the global scope to **LIVE** ([campaign-scope.md](campaign-scope.md)), th
 
 | Step | Expected |
 |------|----------|
-| Scan the calibration code at the cashier | `ACTIVE` + campaign name; Telegram scan alert |
+| Scan the **loyalty card** at the cashier | `ACTIVE` + campaign name; Telegram scan alert |
 | Buy whitelisted coffee beans on that card in the POS | ERP sale recorded |
 | `python scripts/run_reconcile.py` | code becomes `USED` via `AUTO_CLOSE` |
 | Telegram | "Продажа кофе → промокод закрыт автоматически" with product, price and `Скан раньше: да` |
@@ -51,7 +52,7 @@ Second scenario — manual close without a purchase:
 | Scan + press Apply discount, buy nothing | `MANUAL_CLOSE` alert |
 | Wait past `FRAUD_MATCH_WINDOW_HOURS` (2h) and run reconcile | fraud alert "Тревога: ручное закрытие без продажи кофе" |
 
-Scope guard check: switch back to **TEST** and scan a `5`-prefixed customer code —
+Scope guard check: switch back to **TEST** and scan a LIVE customer card —
 the cashier must answer `OTHER CAMPAIGN` and the code must stay `ACTIVE`.
 
 ## 4. Clean up

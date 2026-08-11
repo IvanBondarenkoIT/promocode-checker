@@ -21,7 +21,10 @@ from app.models.enums import PromocodeStatus
 class Promocode(Base):
     __tablename__ = "promocodes"
     __table_args__ = (
-        CheckConstraint("promocode ~ '^[0-9]{8}$'", name="ck_promocodes_promocode_8_digits"),
+        CheckConstraint(
+            "promocode ~ '^[0-9]{8,20}$'",
+            name="ck_promocodes_promocode_digits",
+        ),
         Index("ix_promocodes_customer_erp_id", "customer_erp_id"),
         Index("ix_promocodes_promocode", "promocode"),
         Index("ix_promocodes_status", "status"),
@@ -36,7 +39,7 @@ class Promocode(Base):
         default=uuid.uuid4,
     )
     customer_erp_id: Mapped[str] = mapped_column(String(64), nullable=False)
-    promocode: Mapped[str] = mapped_column(String(8), nullable=False, unique=True)
+    promocode: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
     status: Mapped[PromocodeStatus] = mapped_column(
         Enum(PromocodeStatus, name="promocode_status"),
         nullable=False,

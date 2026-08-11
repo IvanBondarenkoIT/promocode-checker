@@ -8,13 +8,19 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.models import Promocode, PromocodeStatus
 
-PROMOCODE_LENGTH = 8
+PROMOCODE_MIN_LENGTH = 8
+PROMOCODE_MAX_LENGTH = 20
+PROMOCODE_LENGTH = 8  # length used by the random generator (demo / tests)
 PROMOCODE_DIGITS = string.digits
 MAX_GENERATION_ATTEMPTS = 100
 
 
 def is_valid_promocode(value: str) -> bool:
-    return len(value) == PROMOCODE_LENGTH and value.isdigit()
+    return value.isdigit() and PROMOCODE_MIN_LENGTH <= len(value) <= PROMOCODE_MAX_LENGTH
+
+
+def promocode_format_hint() -> str:
+    return f"{PROMOCODE_MIN_LENGTH}-{PROMOCODE_MAX_LENGTH} digits"
 
 
 def calculate_expires_at(created_at: datetime, ttl_days: int) -> datetime:

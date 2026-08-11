@@ -1,8 +1,9 @@
-"""Import a customer segment and issue one generated promocode per customer.
+"""Import a customer segment and issue one promocode per customer.
 
-Input is the segmentation export (``customer_id`` = ERP ORGN id). Codes are not
-supplied by the file: each customer gets a random 8-digit code carrying the
-campaign prefix, so campaigns never share a code range.
+Input is the segmentation export (``customer_id`` = ERP ORGN id). The loyalty
+card number (CSV column ``customer_name``) is stored as ``customer_card`` and,
+for now, also used as ``promocode`` so cashiers scan the customer card. The
+fields stay separate so a future wave can assign different code values.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Campaign, CheckerLog, Promocode, PromocodeStatus
 from app.services.campaign_import import resolve_expires_at
-from app.services.promocode_generator import generate_unique_promocode
+from app.services.promocode_generator import is_valid_promocode, promocode_format_hint
 
 REQUIRED_COLUMN = "customer_id"
 CARD_COLUMN = "customer_name"
@@ -111,7 +112,10 @@ def import_segment(
     now: datetime | None = None,
     dry_run: bool = False,
 ) -> SegmentImportResult:
-    """Issue one code per new customer in the campaign. Re-runs are safe."""
+    """Issue one code per new customer in the campaign. Re-runs are safe.
+
+    ``promocode`` is set to the loyalty card for now (separate column kept).
+    """
     result = SegmentImportResult()
     current = now or datetime.now(UTC)
     expires_at = resolve_expires_at(campaign, current, ttl_days)
@@ -128,23 +132,39 @@ def import_segment(
             result.skipped_existing += 1
             continue
 
-        try:
-            code = generate_unique_promocode(
-                db,
-                prefix=campaign.code_prefix,
-                reserved=reserved,
+        card = (row.card or "").strip()
+        if not card:
+            result.errors.append(
+                f"customer {row.customer_erp_id}: missing loyalty card ({CARD_COLUMN})"
             )
-        except RuntimeError as exc:
-            result.errors.append(f"customer {row.customer_erp_id}: {exc}")
+            continue
+        if not is_valid_promocode(card):
+            result.errors.append(
+                f"customer {row.customer_erp_id}: invalid card '{card}' "
+                f"(need {promocode_format_hint()})"
+            )
+            continue
+        if card in reserved:
+            result.errors.append(
+                f"customer {row.customer_erp_id}: duplicate card '{card}' in this import batch"
+            )
             continue
 
+        collision = db.scalar(select(Promocode.id).where(Promocode.promocode == card))
+        if collision is not None:
+            result.errors.append(
+                f"customer {row.customer_erp_id}: promocode '{card}' already exists"
+            )
+            continue
+
+        reserved.add(card)
         result.created.append(
             IssuedCode(
                 customer_erp_id=row.customer_erp_id,
-                card=row.card,
+                card=card,
                 name=row.name,
                 phone=row.phone,
-                promocode=code,
+                promocode=card,
                 expires_at=expires_at,
             )
         )
@@ -156,10 +176,10 @@ def import_segment(
             Promocode(
                 id=uuid.uuid4(),
                 customer_erp_id=row.customer_erp_id,
-                promocode=code,
+                promocode=card,
                 status=PromocodeStatus.ACTIVE,
                 campaign_id=campaign.id,
-                customer_card=row.card,
+                customer_card=card,
                 customer_name=row.name,
                 customer_phone=row.phone,
                 created_at=current,

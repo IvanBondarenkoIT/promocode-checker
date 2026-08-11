@@ -149,7 +149,7 @@ def main() -> None:
     first = ACTIVE_DUMMY_CODES[0]
     last = ACTIVE_DUMMY_CODES[-1]
     print(f"ACTIVE pool: {first}–{last} ({len(ACTIVE_DUMMY_CODES)} codes)")
-    print("NOT_FOUND test: scan any other 8-digit code, e.g. 99999999")
+    print("NOT_FOUND test: scan any other unused code, e.g. 99999999")
 
 
 if __name__ == "__main__":

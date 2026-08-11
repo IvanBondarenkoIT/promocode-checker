@@ -14,7 +14,7 @@ This file is the primary handoff for any Cursor agent working in this repository
 
 ## Project in one sentence
 
-Validate unique 8-digit customer promocodes at cashier points, close them safely, reconcile against Granit ERP sales, reduce cashier fraud, and give admin/viewer visibility with Telegram alerts.
+Validate unique customer promocodes (loyalty card / 8–20 digits) at cashier points, close them safely, reconcile against Granit ERP sales, reduce cashier fraud, and give admin/viewer visibility with Telegram alerts.
 
 ## Current status (as of 2026-08-04)
 

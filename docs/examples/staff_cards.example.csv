@@ -1,3 +1,3 @@
-customer_id,label
-10001,Shop card Vake
-10002,Shop card Saburtalo
+customer_id,customer_name,customer_full_name
+10001,2200000000001,Shop card Vake
+10002,2200000000002,Shop card Saburtalo

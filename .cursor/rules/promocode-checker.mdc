@@ -35,7 +35,7 @@ You are working in `promocode-checker`.
 - Both web/PWA and desktop wrapper.
 - **UI language: English only** — cashier, admin, desktop; no i18n / no Russian labels in product UI.
 - Campaigns are `TEST` or `LIVE`; one global switch (`app_settings.active_campaign_kind`) gates cashier and reconcile.
-- Promocodes are generated with a per-campaign prefix; segment files never contain codes.
+- Segment import: `promocode = loyalty card` (8–20 digits); `promocode` field stays separate from `customer_card`.
 - Segment/export files are PII — keep out of git.
 
 ## Current progress
@@ -55,7 +55,8 @@ You are working in `promocode-checker`.
 - Stage T done (Telegram subscribe + RU alerts)
 - Stage U done (daily digests + full/digest modes)
 - Stage V done (segment import, TEST/LIVE campaign scope, admin switch)
-- Next: server rollout (backup → migrate 005 → segment import → scope LIVE), shop-card calibration
+- Stage W done (promocode = loyalty card, 8–20 digits, remap script)
+- Next: server rollout (backup → migrate 006 → remap/import → scope LIVE), shop-card calibration
 
 ## Coding expectations
 

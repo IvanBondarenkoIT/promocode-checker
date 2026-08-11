@@ -13,14 +13,14 @@ burned while the team is still testing.
 | Legacy codes | Promocodes with no campaign count as `TEST` and are never served in `LIVE` |
 | Admin dashboard | Promocode counters follow the active kind |
 
-Code prefixes keep ranges apart, so a code can only ever belong to one wave:
+Code prefixes still apply to **demo / generated** codes. LIVE segment and
+calibration imports set ``promocode = loyalty card`` (typically 13 digits), so
+those rows do not use a leading prefix digit.
 
 | Prefix | Use |
 |--------|-----|
 | `1`–`3` | Old `DEMO_LOCAL` seed |
 | `4` | `auto_close_demo` (ERP probe) |
-| `5` | Pre-production customer segment |
-| `6` | Shop-card calibration |
 | `9` | New test campaigns |
 
 ## Switching

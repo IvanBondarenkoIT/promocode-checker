@@ -7,6 +7,11 @@ def test_render_code128_png_returns_png_bytes() -> None:
     assert png[:8] == b"\x89PNG\r\n\x1a\n"
 
 
+def test_render_code128_png_accepts_loyalty_card_length() -> None:
+    png = render_code128_png("2200000109743")
+    assert png[:8] == b"\x89PNG\r\n\x1a\n"
+
+
 def test_render_code128_png_rejects_invalid_code() -> None:
-    with pytest.raises(ValueError, match="8 digits"):
+    with pytest.raises(ValueError, match="8-20 digits"):
         render_code128_png("123")

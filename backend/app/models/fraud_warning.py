@@ -30,7 +30,7 @@ class FraudWarning(Base):
     )
     point_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     customer_erp_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    promocode_value: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    promocode_value: Mapped[str | None] = mapped_column(String(20), nullable=True)
     status: Mapped[FraudWarningStatus] = mapped_column(
         Enum(FraudWarningStatus, name="fraud_warning_status"),
         nullable=False,

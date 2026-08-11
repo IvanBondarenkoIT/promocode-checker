@@ -112,7 +112,7 @@ def import_campaign_rows(
             errors.append(f"line {index}: missing customer_erp_id or promocode")
             continue
         if not is_valid_promocode(code):
-            errors.append(f"line {index}: invalid promocode '{code}' (need 8 digits)")
+            errors.append(f"line {index}: invalid promocode '{code}' (need 8-20 digits)")
             continue
 
         existing = db.scalar(select(Promocode).where(Promocode.promocode == code))

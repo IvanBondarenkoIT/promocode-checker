@@ -8,7 +8,7 @@ from app.services.promocode_generator import is_valid_promocode
 
 def render_code128_png(code: str) -> bytes:
     if not is_valid_promocode(code):
-        raise ValueError("Promocode must be exactly 8 digits")
+        raise ValueError("Promocode must be 8-20 digits")
 
     buffer = BytesIO()
     Code128(code, writer=ImageWriter()).write(

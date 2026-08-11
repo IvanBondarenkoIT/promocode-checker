@@ -133,16 +133,23 @@ def test_reconcile_skips_out_of_scope_and_closed_campaigns(db_session: Session) 
     assert result.auto_closed == ["51000003"]
 
 
-def test_segment_import_generates_prefixed_unique_codes(db_session: Session) -> None:
+def test_segment_import_uses_loyalty_card_as_promocode(db_session: Session) -> None:
     campaign = _campaign(db_session, code="seg", kind=CampaignKind.LIVE, prefix="5")
-    rows = [SegmentRow(customer_erp_id=str(1000 + i), card=f"22{i:06d}") for i in range(20)]
+    rows = [
+        SegmentRow(customer_erp_id=str(1000 + i), card=f"22000001{i:05d}") for i in range(20)
+    ]
 
     result = import_segment(db_session, campaign=campaign, rows=rows, ttl_days=30)
 
     assert result.created_count == 20
     codes = [item.promocode for item in result.created]
+    assert codes == [row.card for row in rows]
     assert len(set(codes)) == 20
-    assert all(code.startswith("5") and len(code) == 8 for code in codes)
+    stored = db_session.scalar(
+        select(Promocode).where(Promocode.customer_erp_id == "1000")
+    )
+    assert stored is not None
+    assert stored.promocode == stored.customer_card == "2200000100000"
 
     # re-running must not issue a second code to the same customer
     again = import_segment(db_session, campaign=campaign, rows=rows, ttl_days=30)
@@ -150,13 +157,27 @@ def test_segment_import_generates_prefixed_unique_codes(db_session: Session) -> 
     assert again.skipped_existing == 20
 
 
+def test_segment_import_requires_card(db_session: Session) -> None:
+    campaign = _campaign(db_session, code="seg_nocard", kind=CampaignKind.LIVE, prefix="5")
+    result = import_segment(
+        db_session,
+        campaign=campaign,
+        rows=[SegmentRow(customer_erp_id="2001")],
+        ttl_days=30,
+    )
+    assert result.created_count == 0
+    assert result.errors
+    assert "missing loyalty card" in result.errors[0]
+
+
 def test_segment_import_dry_run_writes_nothing(db_session: Session) -> None:
     campaign = _campaign(db_session, code="seg_dry", kind=CampaignKind.LIVE, prefix="5")
-    rows = [SegmentRow(customer_erp_id="2001")]
+    rows = [SegmentRow(customer_erp_id="2001", card="2200000099999")]
 
     result = import_segment(db_session, campaign=campaign, rows=rows, ttl_days=30, dry_run=True)
 
     assert result.created_count == 1
+    assert result.created[0].promocode == "2200000099999"
     stored = db_session.scalar(
         select(Promocode).where(Promocode.campaign_id == campaign.id)
     )
@@ -188,8 +209,26 @@ def test_expires_at_follows_campaign_end(db_session: Session) -> None:
     result = import_segment(
         db_session,
         campaign=campaign,
-        rows=[SegmentRow(customer_erp_id="4001")],
+        rows=[SegmentRow(customer_erp_id="4001", card="2200000040011")],
         ttl_days=30,
     )
 
     assert result.created[0].expires_at == campaign.ends_at
+    assert result.created[0].promocode == "2200000040011"
+
+
+def test_remap_promocode_to_card(db_session: Session) -> None:
+    from app.services.promocode_remap import remap_campaign_promocodes_to_card
+
+    campaign = _campaign(db_session, code="seg_remap", kind=CampaignKind.LIVE, prefix="5")
+    promo = _promo(db_session, code="51000099", campaign=campaign, customer="5001")
+    promo.customer_card = "2200000050011"
+    db_session.flush()
+
+    result = remap_campaign_promocodes_to_card(db_session, campaign)
+    assert result.remapped_count == 1
+    assert promo.promocode == "2200000050011"
+
+    again = remap_campaign_promocodes_to_card(db_session, campaign)
+    assert again.already_ok == 1
+    assert again.remapped_count == 0

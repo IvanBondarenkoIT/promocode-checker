@@ -1,7 +1,8 @@
-"""Import a customer segment and issue generated promocodes.
+"""Import a customer segment and issue promocodes (= loyalty card for now).
 
-CSV: segmentation export with a `customer_id` column (ERP ORGN id).
-Codes are generated here, prefixed per campaign; the file must not contain them.
+CSV: segmentation export with ``customer_id`` (ERP ORGN id) and ``customer_name``
+(loyalty card number). ``promocode`` is set to the card; the column stays
+separate for a future wave that may assign different values.
 """
 
 from __future__ import annotations
@@ -63,7 +64,11 @@ def main() -> int:
         choices=[CampaignKind.TEST.value, CampaignKind.LIVE.value],
         help="TEST for rehearsals, LIVE for real customers",
     )
-    parser.add_argument("--code-prefix", default=None, help="Leading digit reserved for this wave")
+    parser.add_argument(
+        "--code-prefix",
+        default=None,
+        help="Optional legacy prefix (unused when promocode = loyalty card)",
+    )
     parser.add_argument("--starts-at", default=None, help="ISO datetime (optional)")
     parser.add_argument("--ends-at", default=None, help="ISO datetime (optional)")
     parser.add_argument("--notes", default=None, help="Optional notes")

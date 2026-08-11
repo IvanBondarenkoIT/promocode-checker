@@ -56,11 +56,11 @@ describe("CashierApp", () => {
     expect(input).toHaveValue("1234");
   });
 
-  it("auto-submits on 8 digits and enables redeem for valid", async () => {
+  it("auto-submits on 13-digit card and enables redeem for valid", async () => {
     const user = userEvent.setup();
     checkPromocode.mockResolvedValue({
       result: "valid",
-      code: "12345678",
+      code: "2200000109743",
       point_id: "shop_test",
       status: "ACTIVE",
       expires_at: null,
@@ -70,21 +70,30 @@ describe("CashierApp", () => {
 
     render(<CashierApp />);
     const input = screen.getByTestId("promocode-input");
-    await user.type(input, "12345678");
+    await user.type(input, "2200000109743");
 
     await waitFor(() => {
-      expect(checkPromocode).toHaveBeenCalledWith("12345678", "shop_test");
+      expect(checkPromocode).toHaveBeenCalledWith("2200000109743", "shop_test");
     });
     expect(screen.getByTestId("status-panel")).toHaveTextContent("ACTIVE");
     expect(screen.getByTestId("status-instruction")).toHaveTextContent(/Apply discount/i);
     expect(screen.getByTestId("redeem-button")).not.toBeDisabled();
   });
 
+  it("does not auto-submit 8-digit demo codes without Enter", async () => {
+    const user = userEvent.setup();
+    render(<CashierApp />);
+    const input = screen.getByTestId("promocode-input");
+    await user.type(input, "12345678");
+    expect(checkPromocode).not.toHaveBeenCalled();
+    expect(input).toHaveValue("12345678");
+  });
+
   it("shows used instruction after used scan", async () => {
     const user = userEvent.setup();
     checkPromocode.mockResolvedValue({
       result: "used",
-      code: "20000001",
+      code: "2200000200001",
       point_id: "shop_test",
       status: "USED",
       expires_at: null,
@@ -93,7 +102,7 @@ describe("CashierApp", () => {
     });
 
     render(<CashierApp />);
-    await user.type(screen.getByTestId("promocode-input"), "20000001");
+    await user.type(screen.getByTestId("promocode-input"), "2200000200001");
 
     await waitFor(() => expect(checkPromocode).toHaveBeenCalled());
     expect(screen.getByTestId("status-panel")).toHaveTextContent("USED");
@@ -104,7 +113,7 @@ describe("CashierApp", () => {
     const user = userEvent.setup();
     checkPromocode.mockResolvedValue({
       result: "valid",
-      code: "11000001",
+      code: "2200000110001",
       point_id: "shop_test",
       status: "ACTIVE",
       expires_at: null,
@@ -116,7 +125,7 @@ describe("CashierApp", () => {
     });
 
     render(<CashierApp />);
-    await user.type(screen.getByTestId("promocode-input"), "11000001");
+    await user.type(screen.getByTestId("promocode-input"), "2200000110001");
 
     await waitFor(() => expect(checkPromocode).toHaveBeenCalled());
     expect(screen.getByTestId("status-campaign")).toHaveTextContent(/Coffee beans Aug 2026/);
@@ -127,7 +136,7 @@ describe("CashierApp", () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     checkPromocode.mockResolvedValue({
       result: "not_found",
-      code: "87654321",
+      code: "2200000876543",
       point_id: "shop_test",
       status: null,
       expires_at: null,
@@ -137,7 +146,7 @@ describe("CashierApp", () => {
 
     render(<CashierApp />);
     const input = screen.getByTestId("promocode-input");
-    await user.type(input, "87654321");
+    await user.type(input, "2200000876543");
 
     await waitFor(() => expect(checkPromocode).toHaveBeenCalled());
     expect(input).toBeDisabled();

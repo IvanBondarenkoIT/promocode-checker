@@ -4,7 +4,7 @@ Two import paths:
 
 | Path | Codes | Use |
 |------|-------|-----|
-| **Segment import** (`import_segment_promocodes.py`) | **generated** unique 8-digit with campaign prefix | Real customer segments from the ERP/segmentation export |
+| **Segment import** (`import_segment_promocodes.py`) | **`promocode = loyalty card`** (8–20 digits; typically 13) | Real customer segments from the ERP/segmentation export |
 | Wave import (`import_campaign_promocodes.py`) | taken from CSV | Marketing already has fixed codes |
 
 Campaign `kind` (`TEST` / `LIVE`) plus the global scope switch decide which promocodes the cashier and reconcile actually serve — see [campaign-scope.md](campaign-scope.md).
@@ -20,7 +20,7 @@ customer_id,customer_name,customer_full_name,phone,...
 ```
 
 - `customer_id` — ERP `ORGN.ID`; this is what reconcile matches against `S.ORGNID`
-- `customer_name` — loyalty card number (stored for the issued-codes export)
+- `customer_name` — loyalty card number → stored as `customer_card` **and** as `promocode` (fields stay separate for a future split)
 - `phone`, `customer_full_name` — optional
 
 Example: [`../examples/segment.example.csv`](../examples/segment.example.csv)
@@ -34,14 +34,13 @@ python scripts/import_segment_promocodes.py `
   --campaign-code beans_1_2kg_preprod `
   --campaign-name "Coffee beans 1-2kg preprod" `
   --kind LIVE `
-  --code-prefix 5 `
   --ends-at 2026-09-30T23:59:59+04:00 `
   --dry-run
 ```
 
 Drop `--dry-run` to write. The script then:
 
-- generates a unique code per customer (`<prefix>` + 7 random digits, checked against the whole `promocodes` table)
+- sets `promocode` to the loyalty card (validated 8–20 digits, globally unique)
 - skips customers already holding a code in this campaign (safe to re-run)
 - writes `artifacts/campaigns/<campaign_code>_issued.csv` for the mailout
 - sends a Telegram ops alert with campaign, kind and counts
@@ -51,6 +50,17 @@ Barcodes for the wave:
 ```powershell
 python scripts/export_dummy_barcodes.py --campaign-code beans_1_2kg_preprod
 ```
+
+## Remap older random codes → card
+
+If a campaign was imported when codes were random 8-digit values, bring them to the card model after migration `006`:
+
+```powershell
+python scripts/remap_promocode_to_card.py --campaign-code beans_1_2kg_preprod --dry-run
+python scripts/remap_promocode_to_card.py --campaign-code beans_1_2kg_preprod
+```
+
+Fallback: `--rollback-campaign` then re-import. Regenerate mailing Excel/PDF after remap — old 8-digit exports are wrong.
 
 ## Wave import (pre-made codes)
 
@@ -95,7 +105,9 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml cp `
 
 docker compose --env-file .env.prod -f docker-compose.prod.yml exec app `
   python /app/scripts/import_segment_promocodes.py --file /app/data/input/segment.csv `
-  --campaign-code beans_1_2kg_preprod --campaign-name "Coffee beans 1-2kg" --kind LIVE --code-prefix 5 --dry-run
+  --campaign-code beans_1_2kg_preprod --campaign-name "Coffee beans 1-2kg" --kind LIVE --dry-run
 ```
+
+If older random codes already exist: run `remap_promocode_to_card.py` inside the app container before mailout.
 
 Switch the global scope to `LIVE` only after the import looks right — [campaign-scope.md](campaign-scope.md).

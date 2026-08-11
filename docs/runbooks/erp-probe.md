@@ -126,7 +126,7 @@ Live query uses Granit tables: `ORGN`, `STORZAKAZDT`, `STORZDTGDS`, `GOODS` (`OW
 
 ## After CSV OK — AUTO_CLOSE demo
 
-1. Import ACTIVE codes for shop cards that had coffee today (codes must be unique 8-digit):
+1. Import ACTIVE codes for shop cards that had coffee today (promocode = loyalty card, 8–20 digits):
 
 ```powershell
 # artifacts/auto_close_demo.csv: customer_erp_id,promocode

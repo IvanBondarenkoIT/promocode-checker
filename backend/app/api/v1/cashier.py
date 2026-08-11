@@ -72,7 +72,7 @@ def barcode_image(code: str) -> Response:
     if not is_valid_promocode(code):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Promocode must be exactly 8 digits",
+            detail="Promocode must be 8-20 digits",
         )
     png = render_code128_png(code)
     return Response(content=png, media_type="image/png")
