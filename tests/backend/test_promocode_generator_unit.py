@@ -1,7 +1,6 @@
 from app.services.promocode_generator import (
     PROMOCODE_MAX_LENGTH,
     PROMOCODE_MIN_LENGTH,
-    calculate_expires_at,
     is_valid_promocode,
 )
 
