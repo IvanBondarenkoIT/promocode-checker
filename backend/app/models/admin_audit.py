@@ -20,7 +20,11 @@ class AdminAuditLog(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     actor_username: Mapped[str] = mapped_column(String(64), nullable=False)
     actor_role: Mapped[AdminRole] = mapped_column(
-        Enum(AdminRole, name="admin_role"),
+        Enum(
+            AdminRole,
+            name="admin_role",
+            values_callable=lambda enum_cls: [member.value for member in enum_cls],
+        ),
         nullable=False,
     )
     entity_name: Mapped[str] = mapped_column(String(64), nullable=False)
