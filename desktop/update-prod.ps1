@@ -19,30 +19,30 @@ $infra = Join-Path $RepoRoot "infra"
 $envFile = Join-Path $infra ".env.prod"
 
 if (-not (Test-Path -LiteralPath $envFile)) {
-    throw "Missing $envFile — copy .env.prod.example and fill secrets first."
+    throw "Missing $envFile - copy .env.prod.example to .env.prod and fill secrets first."
 }
 
 Push-Location $RepoRoot
 try {
-    Write-Host ">>> git checkout main && pull"
+    Write-Host "[update] git checkout main and pull"
     git checkout main
     git pull origin main
 
     Set-Location $infra
     if ($SkipBuild) {
-        Write-Host ">>> docker compose up -d (no rebuild)"
+        Write-Host "[update] docker compose up -d (no rebuild)"
         docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
     }
     else {
-        Write-Host ">>> docker compose up -d --build"
+        Write-Host "[update] docker compose up -d --build"
         docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
     }
 
-    Write-Host ">>> health"
+    Write-Host "[update] health"
     Start-Sleep -Seconds 3
     Invoke-RestMethod http://127.0.0.1:8020/health | ConvertTo-Json -Compress
 
-    Write-Host ">>> reconcile (last 20 lines)"
+    Write-Host "[update] reconcile logs (last 20 lines)"
     docker compose --env-file .env.prod -f docker-compose.prod.yml logs --tail 20 reconcile
 }
 finally {
