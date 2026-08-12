@@ -8,8 +8,9 @@ Product UI stays English; this runbook is ops English.
 
 | Where | Mode | What you need |
 |-------|------|----------------|
-| Local / laptop | `ERP_ACCESS_MODE=proxy` | `PROXY_API_URL` + `PROXY_API_TOKEN` (same Proxy API as prices/granit/stock: `POST /api/query`, Bearer) |
-| Windows Server prod | `ERP_ACCESS_MODE=direct` | `FIREBIRD_DSN=127.0.0.1/3055:DK_GEORGIA` + readonly `FIREBIRD_USER` / `FIREBIRD_PASSWORD` (same pattern as firebird-db-proxy) |
+| Local / laptop (proxy) | `ERP_ACCESS_MODE=proxy` | `PROXY_API_URL` + `PROXY_API_TOKEN` |
+| Local / laptop (GDB copy) | `ERP_ACCESS_MODE=direct` | File DSN + `FIREBIRD_LIBRARY_PATH` to FB 2.5 `fbembed.dll` (see below) |
+| Windows Server prod | `ERP_ACCESS_MODE=direct` | `FIREBIRD_DSN=host.docker.internal/3055:DK_GEORGIA` + readonly creds; optional proxy fallback |
 
 Paid order statuses default: `ERP_PAID_STATUSES=1,2,3,5`.  
 Coffee groups (locked): `COFFEE_BEANS_GROUP_IDS=11077,16276,16279`.
@@ -37,7 +38,26 @@ These are **ORGN customer IDs** (practice clients), not promocode values. Later 
 | 29077 | Giorgi Abashishvili |
 | 29079 | Isabelle Noulard |
 
-## Local setup
+## Local direct (GDB file copy)
+
+For offline validation against `GEORGIA.GDB` (ODS 11 — needs Firebird 2.5 embedded, not FB 5.0 server):
+
+```env
+ERP_ACCESS_MODE=direct
+FIREBIRD_DSN=D:\CursorProjects\DB-copy\GEORGIA.GDB
+FIREBIRD_USER=SYSDBA
+FIREBIRD_PASSWORD=masterkey
+FIREBIRD_LIBRARY_PATH=D:\CursorProjects\granit-clients-based-segmentation\tools\firebird25\embedded\fbembed.dll
+```
+
+```powershell
+pip install -e ".[erp-direct]"
+python scripts/probe_erp_direct.py --customer-ids 21470,12523 --days 30
+```
+
+Read-only: prints engine version + coffee sales table; no DB writes, no Telegram.
+
+## Local setup (proxy)
 
 1. Copy `.env.example` → `.env` (repo root).
 2. Set:
@@ -97,22 +117,35 @@ In `infra/.env.prod` (never commit secrets):
 
 ```env
 ERP_ACCESS_MODE=direct
-FIREBIRD_DSN=127.0.0.1/3055:DK_GEORGIA
-FIREBIRD_USER=<readonly>
+FIREBIRD_DSN=host.docker.internal/3055:DK_GEORGIA
+FIREBIRD_USER=api_readonly
 FIREBIRD_PASSWORD=<secret>
-# Proxy optional if direct works:
-# PROXY_API_URL=
-# PROXY_API_TOKEN=
+FIREBIRD_LIBRARY_PATH=
+# Optional fallback if direct fails:
+PROXY_API_URL=http://178.63.72.227:8010
+PROXY_API_TOKEN=
 ```
 
-One-shot probe on the server (host Python with repo + venv, or exec into app container if env is injected):
+Compose adds `extra_hosts: host.docker.internal:host-gateway` so the Linux container reaches Firebird on the Windows host.
+
+**Do not** use `127.0.0.1` inside the container — that points at the container itself.
+
+Probe from the server (preferred):
 
 ```powershell
-cd C:\Projects\promocode-checker
-python scripts/probe_erp_coffee_sales.py --day today --out artifacts/erp-probe/
+cd C:\Projects\promocode-checker\desktop
+.\check-erp.ps1
+.\check-erp.ps1 -CustomerIds "21470,12523,14661,17306" -Days 30
 ```
 
-Requires Firebird listening on `3055` and `fdb` installed for direct mode.
+Expect `Engine version: ...` and sales lines (or empty window). If connect fails with *Connection refused*, check Firebird service on port **3055** and whether docker bridge IPs are allowed in Firebird whitelist.
+
+Legacy CSV probe (still works):
+
+```powershell
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec reconcile `
+  python /app/scripts/probe_erp_coffee_sales.py --day today --customers config/test_shop_cards.json
+```
 
 ## SQL shape (reference)
 

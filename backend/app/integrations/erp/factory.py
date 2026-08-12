@@ -50,6 +50,25 @@ class FallbackErpAdapter:
             )
 
 
+def _proxy_fallback(cfg: Settings) -> ErpAdapter | None:
+    if not (cfg.proxy_api_url or "").strip():
+        return None
+    if not (cfg.proxy_api_token or "").strip():
+        logger.warning("Proxy ERP fallback unavailable: PROXY_API_TOKEN is not set")
+        return None
+    return ProxyErpAdapter(cfg)
+
+
+def _direct_fallback(cfg: Settings) -> ErpAdapter | None:
+    if not (cfg.firebird_dsn or "").strip():
+        return None
+    try:
+        return DirectErpAdapter(cfg)
+    except ErpError as exc:
+        logger.warning("Direct ERP fallback unavailable: %s", exc)
+        return None
+
+
 def get_erp_adapter(
     settings: Settings | None = None,
     *,
@@ -62,16 +81,11 @@ def get_erp_adapter(
         return MockErpAdapter(sales=mock_sales)
 
     if mode == "direct":
-        return DirectErpAdapter(cfg)
+        primary = DirectErpAdapter(cfg)
+        return FallbackErpAdapter(primary, _proxy_fallback(cfg))
 
     if mode == "proxy":
         primary = ProxyErpAdapter(cfg)
-        fallback: ErpAdapter | None = None
-        if (cfg.firebird_dsn or "").strip():
-            try:
-                fallback = DirectErpAdapter(cfg)
-            except ErpError as exc:
-                logger.warning("Direct ERP fallback unavailable: %s", exc)
-        return FallbackErpAdapter(primary, fallback)
+        return FallbackErpAdapter(primary, _direct_fallback(cfg))
 
     raise ErpError(f"Unsupported ERP_ACCESS_MODE={cfg.erp_access_mode!r}")

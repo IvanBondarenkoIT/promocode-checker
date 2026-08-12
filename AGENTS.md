@@ -26,7 +26,9 @@ Validate unique customer promocodes (loyalty card / 8–20 digits) at cashier po
 - Stage T Telegram ops: **done**; Railway **dropped** (`docs/reports/drop-railway-2026-08-04.md`)
 - Stage U Telegram daily digests + modes: **done** (`docs/reports/stage-u-telegram-daily.md`)
 - Stage V pre-production segment + TEST/LIVE scope: **done** (`docs/reports/stage-v-preprod-segment.md`)
-- Next: server rollout (backup → migrate 005 → segment import → scope to LIVE), shop-card calibration, delivery channel for codes
+- Stage X monitor/enforce + 2 kg: **done** (`docs/reports/stage-x-monitor-mode.md`)
+- Stage Z direct Firebird ERP on server: **done** (`docs/reports/stage-z-direct-firebird.md`)
+- Next: server `.env.prod` → `ERP_ACCESS_MODE=direct`, `check-erp.ps1`, monitor LIVE sales alerts
 
 ## Hard process rules
 

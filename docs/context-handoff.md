@@ -30,12 +30,13 @@ Owner: выкат на сервер (backup → migrate 007 → import → monit
 - Stage V: segment import + TEST/LIVE scope + admin scope switch (`docs/reports/stage-v-preprod-segment.md`)
 - Stage W: promocode = loyalty card, length 8–20, remap script (`docs/reports/stage-w-card-as-promocode.md`)
 - Stage X: monitor/enforce modes + 2 kg per order (`docs/reports/stage-x-monitor-mode.md`)
+- Stage Y: shop ORGN monitor calibration (`docs/reports/stage-y-shop-monitor-calibration.md`)
+- Stage Z: direct Firebird ERP on server + probe CLI (`docs/reports/stage-z-direct-firebird.md`)
 
 ## Next (launch preparation)
 
-- Server-prod: backup → migrate **007** → `desktop/update-prod.ps1`
-- Import segment + shop cards; set `PROMO_ENFORCEMENT_MODE=monitor`, scope LIVE
-- Verify Telegram sale_observed alerts; later switch to `enforce`
+- Server-prod: set `ERP_ACCESS_MODE=direct` + `FIREBIRD_*` in `.env.prod`, run `desktop/check-erp.ps1`, then `update-prod.ps1`
+- Scope LIVE + `PROMO_ENFORCEMENT_MODE=monitor`; verify `sale_observations` + Telegram on real sales
 - Decide how issued codes reach customers (export CSV is ready)
 - Owner decision: auto-close when the customer never showed the code
 - Run **general smoke / regression** on server — [runbooks/server-prod.md](runbooks/server-prod.md)

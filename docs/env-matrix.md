@@ -38,14 +38,15 @@ How-to guides: [`runbooks/`](runbooks/README.md). Templates: [`.env.example`](..
 
 | Variable | Local | Server prod | Notes |
 |----------|-------|-------------|-------|
-| `ERP_ACCESS_MODE` | `proxy` (probe) or `mock` | Prefer `proxy` from Docker; `direct` via `host.docker.internal` | probe: [runbooks/erp-probe.md](runbooks/erp-probe.md) |
-| `PROXY_API_URL` | required for proxy | LAN Proxy API | e.g. `http://178.63.72.227:8010` |
-| `PROXY_API_TOKEN` | **secret** if proxy | **secret** if proxy | |
+| `ERP_ACCESS_MODE` | `proxy`, `direct` (GDB file), or `mock` | **`direct`** (+ optional proxy fallback) | [erp-probe.md](runbooks/erp-probe.md), `check-erp.ps1` |
+| `PROXY_API_URL` | optional | optional fallback | e.g. `http://178.63.72.227:8010` |
+| `PROXY_API_TOKEN` | if proxy | if fallback enabled | empty = no proxy fallback |
 | `PROXY_API_TIMEOUT` | `60` | `60` | |
 | `PROXY_API_MAX_RETRIES` | `3` | `3` | |
-| `FIREBIRD_DSN` | empty | `host.docker.internal/3055:DK_GEORGIA` if direct | not `127.0.0.1` inside container |
-| `FIREBIRD_USER` | empty | readonly user | |
-| `FIREBIRD_PASSWORD` | empty | **secret** | never commit |
+| `FIREBIRD_DSN` | file path for local GDB | `host.docker.internal/3055:DK_GEORGIA` | not `127.0.0.1` inside container |
+| `FIREBIRD_USER` | `SYSDBA` (local GDB) | `api_readonly` | |
+| `FIREBIRD_PASSWORD` | local | **secret** | never commit |
+| `FIREBIRD_LIBRARY_PATH` | path to `fbembed.dll` for ODS 11 GDB | empty (Linux image uses `libfbclient2`) | Windows dev only |
 
 ## Coffee matching
 

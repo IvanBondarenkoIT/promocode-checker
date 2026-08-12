@@ -77,10 +77,17 @@ Invoke-WebRequest http://127.0.0.1:8020/api/v1/cashier/barcode/10000001 -OutFile
 
 | Setting | Production |
 |---------|------------|
-| `ERP_ACCESS_MODE` | Prefer **`proxy`** from Docker (LAN Proxy API). Use `direct` only with `FIREBIRD_DSN=host.docker.internal/3055:DK_GEORGIA` + `fdb` in image |
-| `FIREBIRD_*` | Readonly user; **do not** use `127.0.0.1` inside the container (that is not the Windows host) |
-| `PROXY_API_*` | Required when mode=`proxy` |
+| `ERP_ACCESS_MODE` | **`direct`** — Firebird on the same Windows host (`host.docker.internal/3055:DK_GEORGIA`) |
+| `FIREBIRD_*` | Readonly user (`api_readonly`); `FIREBIRD_LIBRARY_PATH` empty in Linux container (uses `libfbclient2`) |
+| `PROXY_API_*` | Optional fallback when direct fails; leave token empty to disable |
 | Telegram | Required — see [telegram-alerts.md](telegram-alerts.md) |
+
+After deploy, verify ERP before relying on reconcile digests:
+
+```powershell
+cd C:\Projects\promocode-checker\desktop
+.\check-erp.ps1 -CustomerIds "21470,12523,14661,17306" -Days 7
+```
 
 Coffee groups/products list: [`../coffee-beans-whitelist.txt`](../coffee-beans-whitelist.txt).  
 Probe: [erp-probe.md](erp-probe.md).

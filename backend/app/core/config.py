@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     firebird_dsn: str = Field(default="", alias="FIREBIRD_DSN")
     firebird_user: str = Field(default="", alias="FIREBIRD_USER")
     firebird_password: str = Field(default="", alias="FIREBIRD_PASSWORD")
+    firebird_library_path: str = Field(default="", alias="FIREBIRD_LIBRARY_PATH")
 
     coffee_beans_group_ids: str = Field(default="11077,16276,16279", alias="COFFEE_BEANS_GROUP_IDS")
     coffee_beans_param_id: int = Field(default=2, alias="COFFEE_BEANS_PARAM_ID")

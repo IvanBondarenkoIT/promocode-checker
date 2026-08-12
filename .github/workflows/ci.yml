@@ -46,7 +46,7 @@ jobs:
       - name: Ruff
         run: python -m ruff check .
       - name: Pytest
-        run: python -m pytest tests/backend -v
+        run: python -m pytest tests/backend tests/infra -v
 
   frontend:
     name: Frontend test and build

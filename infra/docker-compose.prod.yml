@@ -46,9 +46,11 @@ services:
       # So docker compose exec (alembic/scripts) hits db, not Settings default localhost:5433
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-promocode_checker}
       FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:${PUBLIC_HTTP_PORT:-8000}}
-      ERP_ACCESS_MODE: ${ERP_ACCESS_MODE:-proxy}
+      ERP_ACCESS_MODE: ${ERP_ACCESS_MODE:-direct}
     ports:
       - "${PUBLIC_HTTP_PORT:-8000}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - internal
     depends_on:
@@ -83,7 +85,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-promocode_checker}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-promocode_checker}
-      ERP_ACCESS_MODE: ${ERP_ACCESS_MODE:-proxy}
+      ERP_ACCESS_MODE: ${ERP_ACCESS_MODE:-direct}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - internal
     depends_on:
