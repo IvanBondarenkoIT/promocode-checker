@@ -6,7 +6,6 @@ import {
   TableResponse,
   fetchTable,
   patchFraudWarning,
-  patchPromocode,
 } from "./api";
 import { useAdminSession } from "./AdminContext";
 
@@ -25,7 +24,7 @@ export function AdminTablePage() {
   const [data, setData] = useState<TableResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string>("");
-  const [status, setStatus] = useState("ACTIVE");
+  const [status, setStatus] = useState("OPEN");
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -65,6 +64,7 @@ export function AdminTablePage() {
     setKind("");
     setStatusFilter("");
     setSearch("");
+    setSelectedId("");
   }, [tableName]);
 
   const applyFilters = (event: FormEvent) => {
@@ -83,14 +83,13 @@ export function AdminTablePage() {
     if (!session || session.role !== "admin" || !selectedId || !reason.trim()) {
       return;
     }
+    if (tableName !== "fraud_warnings") {
+      return;
+    }
     setMessage(null);
     setError(null);
     try {
-      if (tableName === "promocodes") {
-        await patchPromocode(session.token, selectedId, { status, reason: reason.trim() });
-      } else if (tableName === "fraud_warnings") {
-        await patchFraudWarning(session.token, selectedId, { status, reason: reason.trim() });
-      }
+      await patchFraudWarning(session.token, selectedId, { status, reason: reason.trim() });
       setMessage("Saved");
       setReason("");
       reload();
@@ -110,11 +109,20 @@ export function AdminTablePage() {
           <h1>{tableName}</h1>
           <p>{data ? `${total} rows` : "..."}</p>
         </div>
-        <Link to="/admin/dashboard">Dashboard</Link>
+        <div className="admin-header-actions">
+          {tableName === "promocodes" ? <Link to="/admin/cards">Customer cards UI</Link> : null}
+          <Link to="/admin/dashboard">Dashboard</Link>
+        </div>
       </header>
 
       {error ? <p className="admin-error">{error}</p> : null}
       {message ? <p className="admin-ok">{message}</p> : null}
+
+      {tableName === "promocodes" ? (
+        <p className="admin-note">
+          Edit or add cards in the <Link to="/admin/cards">Customer cards</Link> forms.
+        </p>
+      ) : null}
 
       {FILTERABLE.has(tableName) ? (
         <form className="admin-filters" onSubmit={applyFilters} data-testid="admin-filters">
@@ -200,24 +208,15 @@ export function AdminTablePage() {
         </button>
       </div>
 
-      {session?.role === "admin" && (tableName === "promocodes" || tableName === "fraud_warnings") ? (
+      {session?.role === "admin" && tableName === "fraud_warnings" ? (
         <form className="admin-card" onSubmit={onSubmit}>
           <h2>Edit selected row</h2>
           <p>ID: {selectedId || "—"}</p>
           <label htmlFor="status">Status</label>
           <select id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
-            {tableName === "promocodes" ? (
-              <>
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="USED">USED</option>
-              </>
-            ) : (
-              <>
-                <option value="OPEN">OPEN</option>
-                <option value="REVIEWED">REVIEWED</option>
-                <option value="DISMISSED">DISMISSED</option>
-              </>
-            )}
+            <option value="OPEN">OPEN</option>
+            <option value="REVIEWED">REVIEWED</option>
+            <option value="DISMISSED">DISMISSED</option>
           </select>
           <label htmlFor="reason">Reason</label>
           <textarea
@@ -231,9 +230,9 @@ export function AdminTablePage() {
             Save with audit
           </button>
         </form>
-      ) : (
+      ) : session?.role !== "admin" ? (
         <p className="admin-note">Viewer mode: read-only.</p>
-      )}
+      ) : null}
     </div>
   );
 }

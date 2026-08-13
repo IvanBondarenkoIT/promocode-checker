@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AdminProvider, useAdminSession } from "./AdminContext";
+import { AdminCardFormPage } from "./AdminCardFormPage";
+import { AdminCardsListPage } from "./AdminCardsListPage";
 import { AdminDashboardPage } from "./AdminDashboardPage";
 import { AdminLoginPage } from "./AdminLoginPage";
 import { AdminTablePage } from "./AdminTablePage";
@@ -23,6 +25,30 @@ export function AdminRoutes() {
           element={
             <RequireAuth>
               <AdminDashboardPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="cards"
+          element={
+            <RequireAuth>
+              <AdminCardsListPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="cards/new"
+          element={
+            <RequireAuth>
+              <AdminCardFormPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="cards/:cardId"
+          element={
+            <RequireAuth>
+              <AdminCardFormPage />
             </RequireAuth>
           }
         />

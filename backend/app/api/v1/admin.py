@@ -16,12 +16,22 @@ from app.schemas.admin import (
     AdminTableName,
     DashboardResponse,
     FraudWarningPatchRequest,
+    PromocodeCreateDefaultsResponse,
+    PromocodeCreateRequest,
+    PromocodeDeleteRequest,
+    PromocodeDetailResponse,
     PromocodePatchRequest,
     TableListResponse,
 )
 from app.services.admin_auth import authenticate_admin
 from app.services.admin_dashboard import get_dashboard
 from app.services.admin_mutations import AdminMutationError, patch_fraud_warning, patch_promocode
+from app.services.admin_promocodes import (
+    create_promocode,
+    delete_promocode,
+    get_create_defaults,
+    get_promocode_detail,
+)
 from app.services.admin_scope import ScopeUpdateError, get_active_scope, update_active_scope
 from app.services.admin_tables import list_table_rows
 
@@ -104,6 +114,46 @@ def admin_table(
     )
 
 
+@router.get("/promocodes/defaults", response_model=PromocodeCreateDefaultsResponse)
+def admin_promocode_defaults(
+    db: DbSession,
+    actor: CurrentAdmin,
+    settings: AppSettings,
+) -> PromocodeCreateDefaultsResponse:
+    _ = actor
+    return get_create_defaults(db, settings=settings)
+
+
+@router.get("/promocodes/{promocode_id}", response_model=PromocodeDetailResponse)
+def admin_get_promocode(
+    promocode_id: uuid.UUID,
+    db: DbSession,
+    actor: CurrentAdmin,
+) -> PromocodeDetailResponse:
+    _ = actor
+    try:
+        return get_promocode_detail(db, promocode_id)
+    except AdminMutationError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+
+
+@router.post(
+    "/promocodes",
+    response_model=AdminMutationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def admin_create_promocode(
+    payload: PromocodeCreateRequest,
+    db: DbSession,
+    actor: AdminOnly,
+    settings: AppSettings,
+) -> AdminMutationResponse:
+    try:
+        return create_promocode(db, actor=actor, payload=payload, settings=settings)
+    except AdminMutationError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+
+
 @router.patch("/promocodes/{promocode_id}", response_model=AdminMutationResponse)
 def admin_patch_promocode(
     promocode_id: uuid.UUID,
@@ -113,6 +163,19 @@ def admin_patch_promocode(
 ) -> AdminMutationResponse:
     try:
         return patch_promocode(db, actor=actor, promocode_id=promocode_id, payload=payload)
+    except AdminMutationError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+
+
+@router.delete("/promocodes/{promocode_id}", response_model=AdminMutationResponse)
+def admin_delete_promocode(
+    promocode_id: uuid.UUID,
+    payload: PromocodeDeleteRequest,
+    db: DbSession,
+    actor: AdminOnly,
+) -> AdminMutationResponse:
+    try:
+        return delete_promocode(db, actor=actor, promocode_id=promocode_id, payload=payload)
     except AdminMutationError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
 

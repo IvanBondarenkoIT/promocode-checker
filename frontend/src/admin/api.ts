@@ -99,6 +99,7 @@ export async function fetchDashboard(token: string): Promise<DashboardStats> {
 }
 
 export type CampaignSummary = {
+  id?: string | null;
   code: string;
   name: string;
   kind: CampaignKind;
@@ -172,15 +173,95 @@ export async function fetchTable(
   return request<TableResponse>(`/api/v1/admin/tables/${table}?${params.toString()}`, {}, token);
 }
 
+export type PromocodeDetail = {
+  id: string;
+  customer_erp_id: string;
+  promocode: string;
+  status: string;
+  campaign_id: string | null;
+  campaign_code: string | null;
+  campaign_name: string | null;
+  campaign_kind: string | null;
+  customer_card: string | null;
+  customer_name: string | null;
+  customer_phone: string | null;
+  created_at: string;
+  expires_at: string;
+  redeemed_at: string | null;
+};
+
+export type PromocodeDefaults = {
+  active_campaign_kind: CampaignKind;
+  default_campaign_id: string | null;
+  status: string;
+  expires_at: string;
+  promocode_ttl_days: number;
+  campaigns: CampaignSummary[];
+};
+
+export type PromocodeWriteBody = {
+  reason: string;
+  customer_erp_id?: string;
+  promocode?: string;
+  campaign_id?: string | null;
+  clear_campaign?: boolean;
+  customer_card?: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  status?: string;
+  expires_at?: string;
+};
+
+export async function fetchPromocodeDefaults(token: string): Promise<PromocodeDefaults> {
+  return request<PromocodeDefaults>("/api/v1/admin/promocodes/defaults", {}, token);
+}
+
+export async function fetchPromocode(token: string, promocodeId: string): Promise<PromocodeDetail> {
+  return request<PromocodeDetail>(`/api/v1/admin/promocodes/${promocodeId}`, {}, token);
+}
+
+export async function createPromocode(
+  token: string,
+  body: PromocodeWriteBody & { customer_erp_id: string; promocode: string },
+): Promise<{ entity_id: string }> {
+  return request<{ entity_id: string }>(
+    "/api/v1/admin/promocodes",
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+    token,
+  );
+}
+
 export async function patchPromocode(
   token: string,
   promocodeId: string,
-  body: { status?: string; expires_at?: string; reason: string },
+  body: PromocodeWriteBody,
 ): Promise<void> {
-  await request(`/api/v1/admin/promocodes/${promocodeId}`, {
-    method: "PATCH",
-    body: JSON.stringify(body),
-  }, token);
+  await request(
+    `/api/v1/admin/promocodes/${promocodeId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+    token,
+  );
+}
+
+export async function deletePromocode(
+  token: string,
+  promocodeId: string,
+  reason: string,
+): Promise<void> {
+  await request(
+    `/api/v1/admin/promocodes/${promocodeId}`,
+    {
+      method: "DELETE",
+      body: JSON.stringify({ reason }),
+    },
+    token,
+  );
 }
 
 export async function patchFraudWarning(
@@ -188,8 +269,12 @@ export async function patchFraudWarning(
   warningId: string,
   body: { status: string; reason: string },
 ): Promise<void> {
-  await request(`/api/v1/admin/fraud-warnings/${warningId}`, {
-    method: "PATCH",
-    body: JSON.stringify(body),
-  }, token);
+  await request(
+    `/api/v1/admin/fraud-warnings/${warningId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+    token,
+  );
 }

@@ -45,6 +45,9 @@ export function AdminDashboardPage() {
           </p>
         </div>
         <div className="admin-header-actions">
+          <Link to="/admin/cards" data-testid="admin-customer-cards-link">
+            Customer cards
+          </Link>
           <Link to="/admin/tables/promocodes">Browse tables</Link>
           <button
             type="button"
@@ -114,6 +117,7 @@ export function AdminDashboardPage() {
       )}
 
       <nav className="admin-nav">
+        <Link to="/admin/cards">Customer cards</Link>
         {TABLES.map((table) => (
           <Link key={table} to={`/admin/tables/${table}`}>
             {table}

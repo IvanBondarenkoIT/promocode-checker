@@ -9,7 +9,8 @@ Railway убран: только local + server-prod.
 Кампании делятся на TEST/LIVE, глобальный переключатель в админке.
 Промокод сегмента = номер карты лояльности (8–20 цифр); поле promocode отдельное.
 Режим закрытия: PROMO_ENFORCEMENT_MODE=monitor|enforce; порог 2 кг в одном чеке.
-Server ERP: direct Firebird OK (3050 + C:/db/GEORGIA.GDB). Next: LIVE + monitor alerts, then enforce.
+Server ERP: direct Firebird OK (3050 + C:/db/GEORGIA.GDB). Stage AA: admin card forms.
+Next: LIVE + monitor alerts, then enforce.
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
@@ -32,6 +33,7 @@ Server ERP: direct Firebird OK (3050 + C:/db/GEORGIA.GDB). Next: LIVE + monitor 
 - Stage X: monitor/enforce modes + 2 kg per order (`docs/reports/stage-x-monitor-mode.md`)
 - Stage Y: shop ORGN monitor calibration (`docs/reports/stage-y-shop-monitor-calibration.md`)
 - Stage Z: direct Firebird ERP on server + probe CLI; **server probe PASS 2026-08-13** (`docs/reports/stage-z-direct-firebird.md`)
+- Stage AA: admin customer card list + element forms (`docs/reports/stage-aa-admin-card-forms.md`)
 
 ## Next (launch preparation)
 
@@ -41,6 +43,7 @@ Server ERP: direct Firebird OK (3050 + C:/db/GEORGIA.GDB). Next: LIVE + monitor 
 - Owner decision: auto-close when the customer never showed the code
 - Run **general smoke / regression** on server — [runbooks/server-prod.md](runbooks/server-prod.md)
 - Optional TLS / reverse proxy, GHCR image publish
+- Merge Stage AA to `main` after local admin card UI PASS
 
 ## Commands
 

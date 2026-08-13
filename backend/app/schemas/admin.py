@@ -43,18 +43,13 @@ class TableListResponse(BaseModel):
     rows: list[dict]
 
 
-class PromocodePatchRequest(BaseModel):
-    status: str | None = None
-    expires_at: datetime | None = None
-    reason: str = Field(min_length=3, max_length=2000)
-
-
 class FraudWarningPatchRequest(BaseModel):
     status: str = Field(min_length=1, max_length=32)
     reason: str = Field(min_length=3, max_length=2000)
 
 
 class CampaignSummary(BaseModel):
+    id: str | None = None
     code: str
     name: str
     kind: str
@@ -71,6 +66,61 @@ class ActiveScopeResponse(BaseModel):
 class ActiveScopeUpdateRequest(BaseModel):
     active_campaign_kind: str = Field(min_length=1, max_length=16)
     reason: str = Field(min_length=3, max_length=2000)
+
+
+class PromocodeCreateRequest(BaseModel):
+    customer_erp_id: str = Field(min_length=1, max_length=64)
+    promocode: str = Field(min_length=8, max_length=20)
+    reason: str = Field(min_length=3, max_length=2000)
+    campaign_id: str | None = None
+    customer_card: str | None = Field(default=None, max_length=64)
+    customer_name: str | None = Field(default=None, max_length=128)
+    customer_phone: str | None = Field(default=None, max_length=32)
+    expires_at: datetime | None = None
+    status: str | None = None
+
+
+class PromocodePatchRequest(BaseModel):
+    status: str | None = None
+    expires_at: datetime | None = None
+    campaign_id: str | None = None
+    customer_erp_id: str | None = Field(default=None, min_length=1, max_length=64)
+    promocode: str | None = Field(default=None, min_length=8, max_length=20)
+    customer_card: str | None = Field(default=None, max_length=64)
+    customer_name: str | None = Field(default=None, max_length=128)
+    customer_phone: str | None = Field(default=None, max_length=32)
+    clear_campaign: bool = False
+    reason: str = Field(min_length=3, max_length=2000)
+
+
+class PromocodeDeleteRequest(BaseModel):
+    reason: str = Field(min_length=3, max_length=2000)
+
+
+class PromocodeDetailResponse(BaseModel):
+    id: str
+    customer_erp_id: str
+    promocode: str
+    status: str
+    campaign_id: str | None = None
+    campaign_code: str | None = None
+    campaign_name: str | None = None
+    campaign_kind: str | None = None
+    customer_card: str | None = None
+    customer_name: str | None = None
+    customer_phone: str | None = None
+    created_at: str
+    expires_at: str
+    redeemed_at: str | None = None
+
+
+class PromocodeCreateDefaultsResponse(BaseModel):
+    active_campaign_kind: str
+    default_campaign_id: str | None = None
+    status: str = "ACTIVE"
+    expires_at: str
+    promocode_ttl_days: int
+    campaigns: list[CampaignSummary] = []
 
 
 class AdminMutationResponse(BaseModel):

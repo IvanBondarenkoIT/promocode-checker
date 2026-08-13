@@ -23,6 +23,7 @@ class ScopeUpdateError(Exception):
 def _campaign_summaries(db: Session) -> list[CampaignSummary]:
     rows = db.execute(
         select(
+            Campaign.id,
             Campaign.code,
             Campaign.name,
             Campaign.kind,
@@ -31,11 +32,19 @@ def _campaign_summaries(db: Session) -> list[CampaignSummary]:
             func.count(Promocode.id).filter(Promocode.status == PromocodeStatus.USED),
         )
         .join(Promocode, Promocode.campaign_id == Campaign.id, isouter=True)
-        .group_by(Campaign.code, Campaign.name, Campaign.kind, Campaign.status, Campaign.created_at)
+        .group_by(
+            Campaign.id,
+            Campaign.code,
+            Campaign.name,
+            Campaign.kind,
+            Campaign.status,
+            Campaign.created_at,
+        )
         .order_by(Campaign.created_at.desc())
     ).all()
     return [
         CampaignSummary(
+            id=str(campaign_id),
             code=code,
             name=name,
             kind=kind.value,
@@ -43,7 +52,7 @@ def _campaign_summaries(db: Session) -> list[CampaignSummary]:
             issued=int(issued or 0),
             used=int(used or 0),
         )
-        for code, name, kind, status, issued, used in rows
+        for campaign_id, code, name, kind, status, issued, used in rows
     ]
 
 

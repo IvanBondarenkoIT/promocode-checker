@@ -28,6 +28,7 @@ Validate unique customer promocodes (loyalty card / 8–20 digits) at cashier po
 - Stage V pre-production segment + TEST/LIVE scope: **done** (`docs/reports/stage-v-preprod-segment.md`)
 - Stage X monitor/enforce + 2 kg: **done** (`docs/reports/stage-x-monitor-mode.md`)
 - Stage Z direct Firebird ERP on server: **done** — server probe PASS (`docs/reports/stage-z-direct-firebird.md`)
+- Stage AA admin customer card forms: **done** (`docs/reports/stage-aa-admin-card-forms.md`)
 - Next: LIVE scope + monitor `sale_observations` / Telegram on real sales; then owner switch to `enforce`
 
 ## Hard process rules
