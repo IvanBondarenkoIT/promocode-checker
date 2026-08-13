@@ -239,7 +239,7 @@ def _observe_and_maybe_close(
                         tz_name=tz_name,
                     ),
                     settings=settings,
-                    audience="events",
+                    topic="closures",
                 )
                 promo = locked
 
@@ -288,7 +288,7 @@ def _observe_and_maybe_close(
                 tz_name=tz_name,
             ),
             settings=settings,
-            audience="events",
+            topic="sales",
         )
 
     record_observe_scan(
@@ -339,6 +339,8 @@ def _fraud_check_manual_closes(
     for log in manual_logs:
         if log.id in existing_warning_log_ids:
             continue
+        if log.erp_sale_matched:
+            continue
         if log.promocode_id is None:
             continue
         promo = db.get(Promocode, log.promocode_id)
@@ -368,6 +370,8 @@ def _fraud_check_manual_closes(
             since=redeemed_at - window,
             until=redeemed_at + window,
         ):
+            log.erp_sale_matched = True
+            db.flush()
             continue
 
         warning = FraudWarning(
@@ -402,7 +406,7 @@ def _fraud_check_manual_closes(
                 tz_name=settings.app_timezone,
             ),
             settings=settings,
-            audience="events",
+            topic="fraud",
         )
 
 
@@ -432,7 +436,7 @@ def run_reconcile(
                 dedup_key=f"job_crash:reconcile:{current.strftime('%Y%m%d%H')}",
                 message=f"Reconcile job failed: {type(exc).__name__}: {exc}",
                 settings=cfg,
-                audience="errors",
+                topic="system",
             )
             db.flush()
         except Exception:  # noqa: BLE001 — never mask original failure

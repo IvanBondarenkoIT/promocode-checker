@@ -346,6 +346,45 @@ def test_reconcile_respects_soft_amnesty_window(db_session: Session) -> None:
     assert result.fraud_warnings == []
 
 
+def test_reconcile_marks_manual_close_erp_matched(db_session: Session) -> None:
+    now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
+    promo = _create_active(
+        db_session,
+        code="10000006",
+        customer="CUST-F",
+        created_at=now - timedelta(hours=5),
+    )
+    redeemed_at = now - timedelta(hours=3)
+    log = close_promocode(
+        db_session,
+        promo,
+        action_type=CheckerActionType.MANUAL_CLOSE,
+        point_id="shop_01",
+        now=redeemed_at,
+    )
+    adapter = MockErpAdapter(
+        [
+            CoffeeSaleMatch(
+                customer_erp_id="CUST-F",
+                sold_at=redeemed_at + timedelta(minutes=20),
+                group_id=16279,
+            )
+        ]
+    )
+
+    result = run_reconcile(
+        db_session,
+        settings=_settings(),
+        adapter=adapter,
+        now=now,
+    )
+
+    assert result.fraud_warnings == []
+    db_session.refresh(log)
+    assert log.erp_sale_matched is True
+    assert db_session.scalar(select(FraudWarning)) is None
+
+
 def test_reconcile_skips_already_warned_manual_close(db_session: Session) -> None:
     now = datetime(2026, 7, 28, 15, 0, tzinfo=UTC)
     promo = _create_active(

@@ -203,7 +203,7 @@ def run_telegram_daily(
                     top_products=top,
                 ),
                 settings=cfg,
-                audience="digest",
+                topic="digest",
                 http_client=http_client,
                 skip_dedup=True,
             )
@@ -226,7 +226,7 @@ def run_telegram_daily(
                         local_date=date_label,
                     ),
                     settings=cfg,
-                    audience="errors",
+                    topic="system",
                     http_client=http_client,
                 )
                 db.flush()
@@ -264,7 +264,7 @@ def run_telegram_daily(
                     enforcement_mode=(cfg.promo_enforcement_mode or "monitor").strip().lower(),
                 ),
                 settings=cfg,
-                audience="digest",
+                topic="digest",
                 http_client=http_client,
                 skip_dedup=True,
             )
@@ -287,7 +287,7 @@ def run_telegram_daily(
                         local_date=date_label,
                     ),
                     settings=cfg,
-                    audience="errors",
+                    topic="system",
                     http_client=http_client,
                 )
                 db.flush()

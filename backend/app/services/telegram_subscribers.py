@@ -3,19 +3,24 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Literal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
-from app.models.telegram_subscriber import (
+from app.models.telegram_subscriber import TelegramSubscriber
+from app.services.telegram_topics import (
+    ALERT_MODE_CUSTOM,
     ALERT_MODE_DIGEST,
     ALERT_MODE_FULL,
-    TelegramSubscriber,
+    DEFAULT_TOPICS_CSV,
+    TOPIC_SYSTEM,
+    has_topic,
+    infer_alert_mode,
+    preset_topics,
+    toggle_topic,
+    topics_to_csv,
 )
-
-Audience = Literal["events", "digest", "errors"]
 
 
 def parse_extra_chat_ids(raw: str) -> list[str]:
@@ -44,12 +49,14 @@ def list_recipient_chat_ids(
     db: Session,
     settings: Settings,
     *,
-    audience: Audience = "digest",
+    topic: str | None = None,
 ) -> list[str]:
-    """Recipients by audience.
+    """Recipients for a topic.
 
-    - events: active alert_mode=full ∪ seed chats (seeds always get events)
-    - digest / errors: all active ∪ seed chats
+    - seed chats always receive every topic
+    - active subscribers receive if ``topics`` includes the topic
+    - ``topic=None`` means all active subscribers (demo / broadcast)
+    - ``system`` is always present in subscriber topics
     """
     seen: set[str] = set()
     out: list[str] = []
@@ -64,14 +71,21 @@ def list_recipient_chat_ids(
     for cid in seed_chat_ids(settings):
         add(cid)
 
-    stmt = select(TelegramSubscriber).where(TelegramSubscriber.active.is_(True))
-    if audience == "events":
-        stmt = stmt.where(TelegramSubscriber.alert_mode == ALERT_MODE_FULL)
-
-    for row in db.scalars(stmt).all():
-        add(row.chat_id)
+    active = select(TelegramSubscriber).where(TelegramSubscriber.active.is_(True))
+    for row in db.scalars(active).all():
+        if topic is None or has_topic(row.topics, topic) or topic == TOPIC_SYSTEM:
+            add(row.chat_id)
 
     return out
+
+
+def is_active_subscriber(db: Session, chat_id: str | int) -> bool:
+    row = db.get(TelegramSubscriber, str(chat_id).strip())
+    return row is not None and bool(row.active)
+
+
+def get_subscriber(db: Session, chat_id: str | int) -> TelegramSubscriber | None:
+    return db.get(TelegramSubscriber, str(chat_id).strip())
 
 
 def subscribe(
@@ -79,10 +93,27 @@ def subscribe(
     chat_id: str | int,
     *,
     alert_mode: str = ALERT_MODE_FULL,
+    topics: str | None = None,
 ) -> bool:
     """Return True if newly subscribed (or reactivated)."""
     cid = str(chat_id).strip()
-    mode = alert_mode if alert_mode in {ALERT_MODE_FULL, ALERT_MODE_DIGEST} else ALERT_MODE_FULL
+    if topics is not None:
+        topics_csv = topics_to_csv(topics)
+        mode = infer_alert_mode(topics_csv)
+    else:
+        mode_key = (alert_mode or ALERT_MODE_FULL).strip().lower()
+        if mode_key in {ALERT_MODE_FULL, ALERT_MODE_DIGEST}:
+            mode = mode_key
+            topics_csv = topics_to_csv(preset_topics(mode))
+        elif mode_key == ALERT_MODE_CUSTOM:
+            mode = ALERT_MODE_CUSTOM
+            topics_csv = topics_to_csv(DEFAULT_TOPICS_CSV)
+        else:
+            # critical / sales presets
+            chosen = preset_topics(mode_key)
+            topics_csv = topics_to_csv(chosen)
+            mode = infer_alert_mode(chosen)
+
     row = db.get(TelegramSubscriber, cid)
     now = datetime.now(UTC)
     if row is None:
@@ -91,6 +122,7 @@ def subscribe(
                 chat_id=cid,
                 active=True,
                 alert_mode=mode,
+                topics=topics_csv,
                 created_at=now,
                 updated_at=now,
             )
@@ -100,6 +132,7 @@ def subscribe(
     if not row.active:
         row.active = True
         row.alert_mode = mode
+        row.topics = topics_csv
         row.updated_at = now
         db.flush()
         return True
@@ -107,16 +140,45 @@ def subscribe(
 
 
 def set_alert_mode(db: Session, chat_id: str | int, alert_mode: str) -> bool:
-    """Set mode for an active subscriber. Returns False if not subscribed."""
+    """Apply a preset for an active subscriber. Returns False if not subscribed."""
     cid = str(chat_id).strip()
-    mode = alert_mode if alert_mode in {ALERT_MODE_FULL, ALERT_MODE_DIGEST} else ALERT_MODE_FULL
     row = db.get(TelegramSubscriber, cid)
     if row is None or not row.active:
         return False
-    row.alert_mode = mode
+    mode_key = (alert_mode or ALERT_MODE_FULL).strip().lower()
+    topics_csv = topics_to_csv(preset_topics(mode_key))
+    row.topics = topics_csv
+    row.alert_mode = infer_alert_mode(topics_csv)
     row.updated_at = datetime.now(UTC)
     db.flush()
     return True
+
+
+def set_topics(db: Session, chat_id: str | int, topics: str | list[str]) -> bool:
+    cid = str(chat_id).strip()
+    row = db.get(TelegramSubscriber, cid)
+    if row is None or not row.active:
+        return False
+    topics_csv = topics_to_csv(topics)
+    row.topics = topics_csv
+    row.alert_mode = infer_alert_mode(topics_csv)
+    row.updated_at = datetime.now(UTC)
+    db.flush()
+    return True
+
+
+def toggle_subscriber_topic(db: Session, chat_id: str | int, topic: str) -> str | None:
+    """Toggle topic; returns new topics CSV or None if not subscribed."""
+    cid = str(chat_id).strip()
+    row = db.get(TelegramSubscriber, cid)
+    if row is None or not row.active:
+        return None
+    new_csv = toggle_topic(row.topics, topic)
+    row.topics = new_csv
+    row.alert_mode = infer_alert_mode(new_csv)
+    row.updated_at = datetime.now(UTC)
+    db.flush()
+    return new_csv
 
 
 def unsubscribe(db: Session, chat_id: str | int) -> bool:

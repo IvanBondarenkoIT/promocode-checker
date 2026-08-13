@@ -92,17 +92,19 @@ This repo provides:
 
 A separate marketing / CRM Telegram bot (other project) may call the barcode API or export PNGs.
 
-### Ops alert bot (locked 2026-08-04; digests 2026-08-04)
+### Ops alert bot (locked 2026-08-04; digests 2026-08-04; topics 2026-08-13)
 
 - Bot `@dimkava_promo_alerts_bot` with **self-subscribe**: `/start` → keyword `promo` → `/stop`
-- Modes: **`full`** (events + digests) · **`digest`** (day digests only); `/full` · `/digest`
-- Errors/crashes always to all active subscribers
-- Recipients = DB subscribers ∪ `TELEGRAM_ALERT_CHAT_ID` ∪ `TELEGRAM_CHAT_IDS` (seeds = full)
-- Human Russian messages for scan, manual close, AUTO_CLOSE (with sale/price/prior scan), fraud
-- Daily digests (Asia/Tbilisi): **10:00** day start + morning ERP coffee check; **22:00** EOD sales + checker event counts
+- **Topics** (CSV on `telegram_subscribers.topics`): `scans`, `closures`, `sales`, `fraud`, `digest`, `system`
+- `system` is **mandatory** (crashes, digest ERP errors, TEST/LIVE switch) — cannot be disabled
+- Presets: `/full` · `/digest` · `/critical` · `/sales`; custom mix via persistent + inline buttons
+- Seed chats (`TELEGRAM_ALERT_CHAT_ID` / `TELEGRAM_CHAT_IDS`) always get every topic
+- Routing map lives only in `backend/app/services/telegram_topics.py`
+- **Code lookup** from chat (8–20 digits): read-only status for **active subscribers only**; never writes `CheckerLog` or fan-out alerts
+- Human Russian messages for scan, manual close, AUTO_CLOSE, sale observed, fraud
+- Daily digests (Asia/Tbilisi): **10:00** / **22:00**
 - Calibration: `/demo` or `scripts/send_telegram_message_samples.py`
 - Runbook: [`docs/runbooks/telegram-alerts.md`](runbooks/telegram-alerts.md)
-- AUTO_CLOSE ops alerts are **per code** (human detail); not a single dry summary dump
 
 ## Stage 4 / Stage 5 gate (locked 2026-07-28)
 

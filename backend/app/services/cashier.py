@@ -202,7 +202,7 @@ def _notify_scan(
             tz_name=settings.app_timezone,
         ),
         settings=settings,
-        audience="events",
+        topic="scans",
     )
 
 
@@ -227,5 +227,5 @@ def _notify_manual_close(
             tz_name=settings.app_timezone,
         ),
         settings=settings,
-        audience="events",
+        topic="closures",
     )

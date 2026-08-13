@@ -142,7 +142,7 @@ def main() -> int:
                     dry_run=False,
                 ),
                 settings=settings,
-                audience="errors",
+                topic="system",
                 skip_dedup=True,
             )
             db.commit()

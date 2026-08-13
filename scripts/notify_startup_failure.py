@@ -24,7 +24,7 @@ def main() -> int:
                 dedup_key="app_crash:startup",
                 message=f"[startup] {message}",
                 settings=settings,
-                audience="errors",
+                topic="system",
             )
             db.commit()
     except Exception as exc:  # noqa: BLE001

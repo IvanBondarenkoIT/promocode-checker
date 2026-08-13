@@ -58,13 +58,11 @@ def _client() -> httpx.Client:
 
 def test_send_alert_events_skips_digest_subscribers(db_session: Session) -> None:
     settings = _settings()
-    db_session.add(
-        TelegramSubscriber(chat_id="full1", active=True, alert_mode=ALERT_MODE_FULL)
-    )
-    db_session.add(
-        TelegramSubscriber(chat_id="digest1", active=True, alert_mode=ALERT_MODE_DIGEST)
-    )
-    db_session.flush()
+    from app.services.telegram_subscribers import subscribe
+    from app.services.telegram_topics import ALERT_MODE_DIGEST, ALERT_MODE_FULL
+
+    subscribe(db_session, "full1", alert_mode=ALERT_MODE_FULL)
+    subscribe(db_session, "digest1", alert_mode=ALERT_MODE_DIGEST)
 
     send_alert(
         db_session,
@@ -73,7 +71,6 @@ def test_send_alert_events_skips_digest_subscribers(db_session: Session) -> None
         message="scan",
         settings=settings,
         http_client=_client(),
-        audience="events",
         skip_dedup=True,
     )
     chats = {
@@ -86,13 +83,11 @@ def test_send_alert_events_skips_digest_subscribers(db_session: Session) -> None
 
 def test_send_alert_digest_reaches_both_modes(db_session: Session) -> None:
     settings = _settings()
-    db_session.add(
-        TelegramSubscriber(chat_id="full1", active=True, alert_mode=ALERT_MODE_FULL)
-    )
-    db_session.add(
-        TelegramSubscriber(chat_id="digest1", active=True, alert_mode=ALERT_MODE_DIGEST)
-    )
-    db_session.flush()
+    from app.services.telegram_subscribers import subscribe
+    from app.services.telegram_topics import ALERT_MODE_DIGEST, ALERT_MODE_FULL
+
+    subscribe(db_session, "full1", alert_mode=ALERT_MODE_FULL)
+    subscribe(db_session, "digest1", alert_mode=ALERT_MODE_DIGEST)
 
     send_alert(
         db_session,
@@ -101,7 +96,6 @@ def test_send_alert_digest_reaches_both_modes(db_session: Session) -> None:
         message="day",
         settings=settings,
         http_client=_client(),
-        audience="digest",
         skip_dedup=True,
     )
     chats = {
@@ -113,11 +107,10 @@ def test_send_alert_digest_reaches_both_modes(db_session: Session) -> None:
 
 
 def test_day_start_idempotent(db_session: Session) -> None:
+    from app.services.telegram_subscribers import subscribe
+
     settings = _settings()
-    db_session.add(
-        TelegramSubscriber(chat_id="ops1", active=True, alert_mode=ALERT_MODE_FULL)
-    )
-    db_session.flush()
+    subscribe(db_session, "ops1", alert_mode=ALERT_MODE_FULL)
 
     tz = ZoneInfo("Asia/Tbilisi")
     local = datetime(2026, 8, 4, 10, 5, tzinfo=tz)
@@ -163,11 +156,10 @@ def test_day_start_idempotent(db_session: Session) -> None:
 
 def test_eod_includes_checker_counts(db_session: Session) -> None:
     from app.models import CheckerLog
+    from app.services.telegram_subscribers import subscribe
 
     settings = _settings()
-    db_session.add(
-        TelegramSubscriber(chat_id="ops1", active=True, alert_mode=ALERT_MODE_DIGEST)
-    )
+    subscribe(db_session, "ops1", alert_mode=ALERT_MODE_DIGEST)
     tz = ZoneInfo("Asia/Tbilisi")
     scan_at = datetime(2026, 8, 4, 12, 0, tzinfo=tz)
     db_session.add(
@@ -213,15 +205,14 @@ def test_eod_includes_checker_counts(db_session: Session) -> None:
 
 
 def test_digest_error_on_erp_failure(db_session: Session) -> None:
+    from app.services.telegram_subscribers import subscribe
+
     class BoomAdapter:
         def find_coffee_sales(self, *args, **kwargs):
             raise RuntimeError("erp down")
 
     settings = _settings()
-    db_session.add(
-        TelegramSubscriber(chat_id="ops1", active=True, alert_mode=ALERT_MODE_FULL)
-    )
-    db_session.flush()
+    subscribe(db_session, "ops1", alert_mode=ALERT_MODE_FULL)
 
     tz = ZoneInfo("Asia/Tbilisi")
     local = datetime(2026, 8, 4, 10, 5, tzinfo=tz)
@@ -278,6 +269,8 @@ def test_bot_sets_digest_mode(db_session: Session) -> None:
     assert row is not None
     assert row.active is True
     assert row.alert_mode == ALERT_MODE_DIGEST
+    assert "digest" in row.topics
+    assert "scans" not in row.topics
 
 
 def test_digest_templates_smoke() -> None:

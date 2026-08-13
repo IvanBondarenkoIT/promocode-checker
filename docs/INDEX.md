@@ -57,6 +57,7 @@
 - [`reports/verification-2026-07-29.md`](reports/verification-2026-07-29.md) — post Stage 10 full audit PASS
 - [`reports/stage-ab-coffee-kg-source.md`](reports/stage-ab-coffee-kg-source.md)
 - [`reports/stage-ac-reconcile-cursor.md`](reports/stage-ac-reconcile-cursor.md)
+- [`reports/stage-ad-telegram-topics.md`](reports/stage-ad-telegram-topics.md)
 
 ## Supervisor
 

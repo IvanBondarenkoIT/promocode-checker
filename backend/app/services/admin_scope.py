@@ -100,7 +100,7 @@ def update_active_scope(
             current=kind.value,
             actor=actor.username,
         ),
-        audience="errors",
+        topic="system",
         skip_dedup=True,
     )
     db.flush()

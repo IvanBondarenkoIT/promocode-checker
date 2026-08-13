@@ -4,9 +4,20 @@ from sqlalchemy import BigInteger, Boolean, Date, DateTime, Integer, String, fun
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.services.telegram_topics import (
+    ALERT_MODE_DIGEST,
+    ALERT_MODE_FULL,
+    DEFAULT_TOPICS_CSV,
+)
 
-ALERT_MODE_FULL = "full"
-ALERT_MODE_DIGEST = "digest"
+# Re-export modes for callers that import from the model module.
+__all__ = [
+    "ALERT_MODE_DIGEST",
+    "ALERT_MODE_FULL",
+    "TelegramBotState",
+    "TelegramDigestState",
+    "TelegramSubscriber",
+]
 
 
 class TelegramSubscriber(Base):
@@ -16,6 +27,12 @@ class TelegramSubscriber(Base):
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     alert_mode: Mapped[str] = mapped_column(
         String(16), nullable=False, default=ALERT_MODE_FULL, server_default=ALERT_MODE_FULL
+    )
+    topics: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        default=DEFAULT_TOPICS_CSV,
+        server_default=DEFAULT_TOPICS_CSV,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

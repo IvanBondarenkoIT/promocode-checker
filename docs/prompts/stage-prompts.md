@@ -114,3 +114,12 @@ Already delivered:
 - same-calendar-day ERP sales count
 - report: `docs/reports/stage-ac-reconcile-cursor.md`
 
+## Stage AD — Telegram topics + code lookup — DONE
+
+Already delivered:
+
+- six alert topics + mandatory `system`
+- persistent keyboard + inline toggles
+- read-only promocode status from chat
+- report: `docs/reports/stage-ad-telegram-topics.md`
+

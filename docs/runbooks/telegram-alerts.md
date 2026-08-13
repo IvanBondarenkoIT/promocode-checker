@@ -6,49 +6,76 @@ Bot: [@dimkava_promo_alerts_bot](https://t.me/dimkava_promo_alerts_bot)
 
 ## Subscribe (anyone)
 
-1. Open the bot → `/start`
-2. Send `promo` (or `TELEGRAM_SUBSCRIBE_KEYWORD`) → mode **full** (events + digests)
-3. Switch mode:
-   - `/full` or `полный` — all live events + day digests
-   - `/digest` / `/итоги` / `итоги` — **only** day digests (+ errors always)
+1. Open the bot → `/start` (persistent buttons appear)
+2. Send `promo` (or `TELEGRAM_SUBSCRIBE_KEYWORD`) → all topics on
+3. Use buttons or presets to tune what you get
 4. `/stop` to unsubscribe
 5. `/demo` — sample message types **to you only**
 
-Errors / crashes always go to every active subscriber (both modes).
+### Persistent buttons
 
-A poller must be running (local or reconcile worker):
+| Button | Action |
+|--------|--------|
+| Мои подписки | List of topics with ✅/⬜ and description |
+| Настроить | Inline toggles per topic (tap to flip) |
+| Проверить код | Prompt, then send 8–20 digits |
+| Итоги дня | Preset: digests + system only |
+| Помощь | Welcome / help text |
+
+### Presets
+
+| Command | Topics |
+|---------|--------|
+| `/full` | all six |
+| `/digest` / «Итоги дня» | digest + system |
+| `/critical` | fraud + system |
+| `/sales` | sales + system |
+
+Custom mix: **Настроить** (inline). Topic **system** is always on (🔒).
+
+## Alert topics
+
+| Topic | Events | Can disable? |
+|-------|--------|--------------|
+| `scans` | Cashier scans (any result) | yes |
+| `closures` | Manual close + AUTO_CLOSE | yes |
+| `sales` | ERP coffee sale observed (enough / not enough kg) | yes |
+| `fraud` | Manual close without sale | yes |
+| `digest` | Day start ~10:00, day end ~22:00 | yes |
+| `system` | job_crash, digest_error, scope_switched | **no** |
+
+Seed chats (`TELEGRAM_ALERT_CHAT_ID` / `TELEGRAM_CHAT_IDS`) always receive every topic.
+
+Storage: `telegram_subscribers.topics` (CSV) + `alert_mode` label (`full` / `digest` / `critical` / `sales` / `custom`). Migration `009` backfills from the old `full`/`digest` modes.
+
+## Check promocode status
+
+Active subscribers only. Send `220000012523` or `/code 220000012523`.
+
+Read-only: **no** `CheckerLog`, **no** broadcast alert.
+
+Possible answers:
+
+- активен / просрочен / не найден
+- закрыт автоматически (продажа в ERP)
+- закрыт вручную, продажа подтверждена
+- закрыт вручную — ждём покупку в ERP (окно `FRAUD_MATCH_WINDOW_HOURS`)
+- закрыт вручную без продажи — открыта тревога
+
+## Poller
 
 ```powershell
-# Local (keep running while testing the bot)
 python scripts/run_telegram_bot_poll.py --loop --timeout 25
 ```
 
-On server-prod the **reconcile** container polls every ~5s and runs a daily-digest tick each loop (`scripts/run_reconcile_loop.py`).
+On server-prod the **reconcile** container polls every ~5s (`scripts/run_reconcile_loop.py`).
 
 ## Daily digests (Asia/Tbilisi)
 
 | When | Message |
 |------|---------|
 | **10:00** | «Рабочий день начался» + ERP coffee sales so far today |
-| **22:00** | «Итог дня» — ERP coffee totals/top products + checker counts (scans / manual / AUTO_CLOSE / fraud) |
-
-On ERP failure for a digest: error alert to all; stamp is **not** advanced (retries next loop).
-
-Env knobs:
-
-```env
-TELEGRAM_DAY_START_HOUR=10
-TELEGRAM_DAY_START_MINUTE=0
-TELEGRAM_EOD_HOUR=22
-TELEGRAM_EOD_MINUTE=0
-TELEGRAM_DIGEST_SALES_ROW_LIMIT=5000
-```
-
-Manual tick:
-
-```powershell
-python scripts/run_telegram_daily.py
-```
+| **22:00** | «Итог дня» — ERP coffee totals + checker counts |
 
 ## Env
 
@@ -60,27 +87,12 @@ TELEGRAM_SUBSCRIBE_KEYWORD=promo
 TELEGRAM_DEDUP_WINDOW_SECONDS=900
 ```
 
-Recipients = active DB subscribers ∪ seed chat ∪ `TELEGRAM_CHAT_IDS`.  
-Seed chats always receive **events** (treated as full).
-
 ## Calibration pack
 
 ```powershell
 python scripts/send_telegram_message_samples.py
 ```
 
-## Live event catalogue (Russian)
-
-| Event | Audience | When |
-|-------|----------|------|
-| Скан промокода | full | Cashier check |
-| Промокод закрыт вручную | full | Cashier redeem |
-| Продажа кофе → автозакрытие | full | Reconcile AUTO_CLOSE |
-| Тревога: без продажи | full | Fraud after MANUAL_CLOSE |
-| Рабочий день начался | full+digest | ~10:00 |
-| Итог дня | full+digest | ~22:00 |
-| job_crash / digest_error / startup | all | Failures |
-
 ## Server
 
-Put token in `infra/.env.prod`, rebuild (`desktop\update-prod.ps1`), migrate (004), then `/start` + `promo` again if needed.
+Put token in `infra/.env.prod`, rebuild (`desktop\update-prod.ps1`), migrate through `009`, then `/start` + `promo` again if needed.
