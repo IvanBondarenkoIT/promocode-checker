@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import httpx
@@ -43,11 +42,12 @@ def main() -> int:
         headers = {"Authorization": f"Bearer {token}"}
 
         dash = client.get("/api/v1/admin/dashboard", headers=headers)
-        check(
-            "dashboard",
-            dash.status_code == 200,
-            f"active={dash.json().get('promocodes_active') if dash.status_code == 200 else dash.text}",
+        dash_detail = (
+            f"active={dash.json().get('promocodes_active')}"
+            if dash.status_code == 200
+            else dash.text
         )
+        check("dashboard", dash.status_code == 200, dash_detail)
 
         defaults = client.get("/api/v1/admin/promocodes/defaults", headers=headers)
         check("defaults", defaults.status_code == 200)

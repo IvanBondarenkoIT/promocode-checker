@@ -47,7 +47,14 @@ def test_prod_compose_health_endpoint() -> None:
 def test_prod_env_example_has_required_keys() -> None:
     example = ROOT / "infra" / ".env.prod.example"
     content = example.read_text(encoding="utf-8")
-    for key in ("POSTGRES_PASSWORD", "APP_SECRET_KEY", "ADMIN_PASSWORD", "ERP_ACCESS_MODE", "FIREBIRD_DSN"):
+    required = (
+        "POSTGRES_PASSWORD",
+        "APP_SECRET_KEY",
+        "ADMIN_PASSWORD",
+        "ERP_ACCESS_MODE",
+        "FIREBIRD_DSN",
+    )
+    for key in required:
         assert key in content
 
 
