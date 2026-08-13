@@ -123,3 +123,12 @@ Already delivered:
 - read-only promocode status from chat
 - report: `docs/reports/stage-ad-telegram-topics.md`
 
+## Stage AE — Telegram subscriber join alert + list UI — DONE
+
+Already delivered:
+
+- `subscriber_joined` → `system` (exclude joining chat)
+- profile columns username/display_name (migration `010`)
+- button «Подписчики» + `/subscribers`
+- report: `docs/reports/stage-ae-telegram-subscribers-ui.md`
+

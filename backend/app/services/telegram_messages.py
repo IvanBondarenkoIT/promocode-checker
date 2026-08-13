@@ -271,6 +271,72 @@ def msg_need_subscribe() -> str:
     return "Сначала подпишитесь: напишите «promo» (или своё ключевое слово)."
 
 
+def msg_subscriber_joined(
+    *,
+    chat_id: str,
+    username: str | None = None,
+    display_name: str | None = None,
+    alert_mode: str = "full",
+    when: datetime | None = None,
+    tz_name: str = TZ_DEFAULT,
+) -> str:
+    who_bits: list[str] = [f"chat_id: {chat_id}"]
+    if username:
+        who_bits.append(f"@{username.lstrip('@')}")
+    if display_name:
+        who_bits.append(display_name)
+    mode_label = {
+        "full": "полный",
+        "digest": "итоги",
+        "critical": "критичные",
+        "sales": "продажи",
+        "custom": "свой набор",
+    }.get(alert_mode, alert_mode)
+    lines = [
+        "Новый подписчик оповещений",
+        " · ".join(who_bits),
+        f"Пресет тем: {mode_label}",
+        f"Дата: {format_local(when, tz_name=tz_name)}",
+    ]
+    return "\n".join(lines)
+
+
+def msg_subscribers_list(
+    *,
+    rows: list[tuple[str, str | None, str | None, str, datetime | None]],
+    tz_name: str = TZ_DEFAULT,
+    max_chars: int = 3500,
+) -> str:
+    """Format active subscribers. Each row: chat_id, username, display_name, mode, created_at."""
+    header = f"Подписчики: {len(rows)}"
+    if not rows:
+        return header + "\nПока никого нет."
+
+    body: list[str] = []
+    for chat_id, username, display_name, mode, created_at in rows:
+        name_part = f"@{username.lstrip('@')}" if username else (display_name or "—")
+        date_part = format_local(created_at, tz_name=tz_name)
+        body.append(f"{chat_id} · {name_part} · {mode} · {date_part}")
+
+    kept: list[str] = []
+    for line in body:
+        trial = "\n".join([header, *kept, line])
+        more_if_stop = len(body) - len(kept)
+        footer = f"\n… ещё {more_if_stop}"
+        # Reserve room for truncation marker when this line would not be the last.
+        if len(kept) + 1 < len(body) and len(trial) + len(footer) > max_chars:
+            break
+        if len(trial) > max_chars:
+            break
+        kept.append(line)
+
+    text = "\n".join([header, *kept])
+    more = len(body) - len(kept)
+    if more > 0:
+        text += f"\n… ещё {more}"
+    return text
+
+
 def _sales_summary_lines(
     *,
     sales_count: int,

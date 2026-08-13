@@ -23,6 +23,7 @@ from app.services.telegram_topics import (
     TOPIC_SALES,
     TOPIC_SCANS,
     TOPIC_SYSTEM,
+    topic_for_event,
     topics_to_csv,
 )
 from sqlalchemy import select
@@ -56,6 +57,10 @@ def _client(updates: list | None = None) -> httpx.Client:
         return httpx.Response(200, json={"ok": True})
 
     return httpx.Client(transport=httpx.MockTransport(handler))
+
+
+def test_subscriber_joined_maps_to_system() -> None:
+    assert topic_for_event("subscriber_joined") == TOPIC_SYSTEM
 
 
 def test_sales_only_gets_sale_not_scan(db_session: Session) -> None:

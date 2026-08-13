@@ -40,7 +40,10 @@ TOPIC_DESCRIPTIONS: dict[str, str] = {
     TOPIC_SALES: "Продажа кофе клиента: условие выполнено или кг не хватает.",
     TOPIC_FRAUD: "Ручное закрытие без продажи кофе в окне антифрода.",
     TOPIC_DIGEST: "Старт дня (~10:00) и итог дня (~22:00).",
-    TOPIC_SYSTEM: "Сбои reconcile/ERP, ошибки сводки, смена TEST/LIVE. Нельзя отключить.",
+    TOPIC_SYSTEM: (
+        "Сбои reconcile/ERP, ошибки сводки, смена TEST/LIVE, новые подписчики. "
+        "Нельзя отключить."
+    ),
 }
 
 EVENT_TOPIC: dict[str, str] = {
@@ -54,6 +57,7 @@ EVENT_TOPIC: dict[str, str] = {
     "job_crash": TOPIC_SYSTEM,
     "digest_error": TOPIC_SYSTEM,
     "scope_switched": TOPIC_SYSTEM,
+    "subscriber_joined": TOPIC_SYSTEM,
 }
 
 ALERT_MODE_FULL = "full"

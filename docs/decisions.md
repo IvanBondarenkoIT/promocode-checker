@@ -92,15 +92,17 @@ This repo provides:
 
 A separate marketing / CRM Telegram bot (other project) may call the barcode API or export PNGs.
 
-### Ops alert bot (locked 2026-08-04; digests 2026-08-04; topics 2026-08-13)
+### Ops alert bot (locked 2026-08-04; digests 2026-08-04; topics 2026-08-13; subscribers UI 2026-08-14)
 
 - Bot `@dimkava_promo_alerts_bot` with **self-subscribe**: `/start` → keyword `promo` → `/stop`
 - **Topics** (CSV on `telegram_subscribers.topics`): `scans`, `closures`, `sales`, `fraud`, `digest`, `system`
-- `system` is **mandatory** (crashes, digest ERP errors, TEST/LIVE switch) — cannot be disabled
+- `system` is **mandatory** (crashes, digest ERP errors, TEST/LIVE switch, **new subscriber**) — cannot be disabled
 - Presets: `/full` · `/digest` · `/critical` · `/sales`; custom mix via persistent + inline buttons
 - Seed chats (`TELEGRAM_ALERT_CHAT_ID` / `TELEGRAM_CHAT_IDS`) always get every topic
 - Routing map lives only in `backend/app/services/telegram_topics.py`
 - **Code lookup** from chat (8–20 digits): read-only status for **active subscribers only**; never writes `CheckerLog` or fan-out alerts
+- **Subscriber list** (`Подписчики` / `/subscribers`): any active subscriber; optional `username` / `display_name` from Telegram profile
+- **Join alert**: on new subscribe / reactivate → `subscriber_joined` to all `system` recipients except the joining chat
 - Human Russian messages for scan, manual close, AUTO_CLOSE, sale observed, fraud
 - Daily digests (Asia/Tbilisi): **10:00** / **22:00**
 - Calibration: `/demo` or `scripts/send_telegram_message_samples.py`

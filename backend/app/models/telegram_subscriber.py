@@ -34,6 +34,8 @@ class TelegramSubscriber(Base):
         default=DEFAULT_TOPICS_CSV,
         server_default=DEFAULT_TOPICS_CSV,
     )
+    username: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    display_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

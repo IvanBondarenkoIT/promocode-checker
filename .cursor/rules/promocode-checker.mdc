@@ -64,6 +64,7 @@ You are working in `promocode-checker`.
 - Stage AB done (coffee kg = SOURCE already kg)
 - Stage AC done (reconcile cursor + 10 min poll)
 - Stage AD done (Telegram topics + code lookup)
+- Stage AE done (Telegram subscriber join alert + list UI)
 - Next: LIVE scope + monitor sale_observations / Telegram; then enforce
 
 ## Coding expectations

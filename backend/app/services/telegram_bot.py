@@ -23,10 +23,13 @@ from app.services.telegram import (
 from app.services.telegram_subscribers import (
     get_subscriber,
     is_active_subscriber,
+    list_active_subscribers,
+    profile_from_telegram_user,
     set_alert_mode,
     subscribe,
     toggle_subscriber_topic,
     unsubscribe,
+    update_subscriber_profile,
 )
 from app.services.telegram_topics import (
     ALERT_MODE_CRITICAL,
@@ -45,6 +48,7 @@ logger = logging.getLogger(__name__)
 BTN_MY = "Мои подписки"
 BTN_SETUP = "Настроить"
 BTN_CHECK = "Проверить код"
+BTN_SUBSCRIBERS = "Подписчики"
 BTN_DIGEST = "Итоги дня"
 BTN_HELP = "Помощь"
 
@@ -56,7 +60,7 @@ def main_reply_keyboard() -> dict[str, Any]:
     return {
         "keyboard": [
             [{"text": BTN_MY}, {"text": BTN_SETUP}],
-            [{"text": BTN_CHECK}],
+            [{"text": BTN_CHECK}, {"text": BTN_SUBSCRIBERS}],
             [{"text": BTN_DIGEST}, {"text": BTN_HELP}],
         ],
         "resize_keyboard": True,
@@ -136,10 +140,44 @@ def _reply(
     )
 
 
-def _apply_preset(db: Session, chat_id: str | int, preset: str) -> None:
+def _notify_subscriber_joined(
+    db: Session,
+    *,
+    chat_id: str | int,
+    settings: Settings,
+    username: str | None = None,
+    display_name: str | None = None,
+    alert_mode: str = ALERT_MODE_FULL,
+    http_client: httpx.Client | None = None,
+) -> None:
+    cid = str(chat_id).strip()
+    now = datetime.now(UTC)
+    send_alert(
+        db,
+        event_type="subscriber_joined",
+        dedup_key=f"subscriber_joined:{cid}:{now.isoformat()}",
+        message=msgs.msg_subscriber_joined(
+            chat_id=cid,
+            username=username,
+            display_name=display_name,
+            alert_mode=alert_mode,
+            when=now,
+            tz_name=settings.app_timezone,
+        ),
+        settings=settings,
+        http_client=http_client,
+        skip_dedup=True,
+        topic="system",
+        exclude_chat_ids=[cid],
+    )
+
+
+def _apply_preset(db: Session, chat_id: str | int, preset: str) -> bool:
+    """Apply preset; subscribe+reactivate if needed. Returns True if newly joined."""
     ok = set_alert_mode(db, chat_id, preset)
     if not ok:
-        subscribe(db, chat_id, alert_mode=preset)
+        return subscribe(db, chat_id, alert_mode=preset)
+    return False
 
 
 def _handle_code_lookup(
@@ -163,6 +201,36 @@ def _handle_code_lookup(
     _reply(chat_id=chat_id, message=text, settings=settings, http_client=http_client)
 
 
+def _handle_subscribers_list(
+    db: Session,
+    *,
+    chat_id: str | int,
+    settings: Settings,
+    http_client: httpx.Client | None = None,
+) -> None:
+    if not is_active_subscriber(db, chat_id):
+        _reply(
+            chat_id=chat_id,
+            message=msgs.msg_need_subscribe(),
+            settings=settings,
+            http_client=http_client,
+        )
+        return
+    active = list_active_subscribers(db)
+    rows = [
+        (
+            s.chat_id,
+            s.username,
+            s.display_name,
+            s.alert_mode or "full",
+            s.created_at,
+        )
+        for s in active
+    ]
+    text = msgs.msg_subscribers_list(rows=rows, tz_name=settings.app_timezone)
+    _reply(chat_id=chat_id, message=text, settings=settings, http_client=http_client)
+
+
 def _handle_callback(
     db: Session,
     *,
@@ -178,6 +246,12 @@ def _handle_callback(
     message_id = msg.get("message_id")
     if chat_id is None:
         return False
+
+    from_user = callback.get("from") or {}
+    username, display_name = profile_from_telegram_user(from_user)
+    update_subscriber_profile(
+        db, chat_id, username=username, display_name=display_name
+    )
 
     if not data.startswith(CALLBACK_TOGGLE_PREFIX):
         answer_callback_query(
@@ -229,6 +303,8 @@ def _handle_text(
     chat_id: str | int,
     text: str,
     settings: Settings,
+    username: str | None = None,
+    display_name: str | None = None,
     http_client: httpx.Client | None = None,
 ) -> bool:
     keyword = (settings.telegram_subscribe_keyword or "promo").strip().lower()
@@ -246,22 +322,48 @@ def _handle_text(
 
     if lower == keyword or lower == f"/{keyword}":
         created = subscribe(db, chat_id, alert_mode=ALERT_MODE_FULL)
+        update_subscriber_profile(
+            db, chat_id, username=username, display_name=display_name
+        )
         reply = (
             msgs.msg_subscribed(alert_mode=ALERT_MODE_FULL)
             if created
             else msgs.msg_already_subscribed()
         )
         _reply(chat_id=chat_id, message=reply, settings=settings, http_client=http_client)
+        if created:
+            _notify_subscriber_joined(
+                db,
+                chat_id=chat_id,
+                settings=settings,
+                username=username,
+                display_name=display_name,
+                alert_mode=ALERT_MODE_FULL,
+                http_client=http_client,
+            )
         return True
 
     if _is_command(lower, "/full") or lower in {"полный", "full"}:
-        _apply_preset(db, chat_id, ALERT_MODE_FULL)
+        joined = _apply_preset(db, chat_id, ALERT_MODE_FULL)
+        update_subscriber_profile(
+            db, chat_id, username=username, display_name=display_name
+        )
         _reply(
             chat_id=chat_id,
             message=msgs.msg_mode_set(alert_mode=ALERT_MODE_FULL),
             settings=settings,
             http_client=http_client,
         )
+        if joined:
+            _notify_subscriber_joined(
+                db,
+                chat_id=chat_id,
+                settings=settings,
+                username=username,
+                display_name=display_name,
+                alert_mode=ALERT_MODE_FULL,
+                http_client=http_client,
+            )
         return True
 
     if (
@@ -270,33 +372,72 @@ def _handle_text(
         or lower in {"digest", "итоги"}
         or raw == BTN_DIGEST
     ):
-        _apply_preset(db, chat_id, ALERT_MODE_DIGEST)
+        joined = _apply_preset(db, chat_id, ALERT_MODE_DIGEST)
+        update_subscriber_profile(
+            db, chat_id, username=username, display_name=display_name
+        )
         _reply(
             chat_id=chat_id,
             message=msgs.msg_mode_set(alert_mode=ALERT_MODE_DIGEST),
             settings=settings,
             http_client=http_client,
         )
+        if joined:
+            _notify_subscriber_joined(
+                db,
+                chat_id=chat_id,
+                settings=settings,
+                username=username,
+                display_name=display_name,
+                alert_mode=ALERT_MODE_DIGEST,
+                http_client=http_client,
+            )
         return True
 
     if _is_command(lower, "/critical") or lower in {"critical", "критичные", "тревоги"}:
-        _apply_preset(db, chat_id, ALERT_MODE_CRITICAL)
+        joined = _apply_preset(db, chat_id, ALERT_MODE_CRITICAL)
+        update_subscriber_profile(
+            db, chat_id, username=username, display_name=display_name
+        )
         _reply(
             chat_id=chat_id,
             message=msgs.msg_mode_set(alert_mode=ALERT_MODE_CRITICAL),
             settings=settings,
             http_client=http_client,
         )
+        if joined:
+            _notify_subscriber_joined(
+                db,
+                chat_id=chat_id,
+                settings=settings,
+                username=username,
+                display_name=display_name,
+                alert_mode=ALERT_MODE_CRITICAL,
+                http_client=http_client,
+            )
         return True
 
     if _is_command(lower, "/sales") or lower in {"sales", "продажи"}:
-        _apply_preset(db, chat_id, ALERT_MODE_SALES)
+        joined = _apply_preset(db, chat_id, ALERT_MODE_SALES)
+        update_subscriber_profile(
+            db, chat_id, username=username, display_name=display_name
+        )
         _reply(
             chat_id=chat_id,
             message=msgs.msg_mode_set(alert_mode=ALERT_MODE_SALES),
             settings=settings,
             http_client=http_client,
         )
+        if joined:
+            _notify_subscriber_joined(
+                db,
+                chat_id=chat_id,
+                settings=settings,
+                username=username,
+                display_name=display_name,
+                alert_mode=ALERT_MODE_SALES,
+                http_client=http_client,
+            )
         return True
 
     if _is_command(lower, "/stop") or lower in {"stop", "отписаться", "unsubscribe"}:
@@ -306,6 +447,16 @@ def _handle_text(
             message=msgs.msg_unsubscribed() if removed else "Вы не были в списке подписчиков.",
             settings=settings,
             http_client=http_client,
+        )
+        return True
+
+    if (
+        raw == BTN_SUBSCRIBERS
+        or _is_command(lower, "/subscribers")
+        or lower in {"подписчики", "subscribers"}
+    ):
+        _handle_subscribers_list(
+            db, chat_id=chat_id, settings=settings, http_client=http_client
         )
         return True
 
@@ -456,8 +607,19 @@ def process_bot_updates(
         if not text:
             continue
 
+        username, display_name = profile_from_telegram_user(msg.get("from"))
+        update_subscriber_profile(
+            db, chat_id, username=username, display_name=display_name
+        )
+
         if _handle_text(
-            db, chat_id=chat_id, text=text, settings=cfg, http_client=http_client
+            db,
+            chat_id=chat_id,
+            text=text,
+            settings=cfg,
+            username=username,
+            display_name=display_name,
+            http_client=http_client,
         ):
             handled += 1
 

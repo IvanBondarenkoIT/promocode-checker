@@ -32,7 +32,8 @@ Validate unique customer promocodes (loyalty card / 8–20 digits) at cashier po
 - Stage AB coffee kg = SOURCE already kg: **done** (`docs/reports/stage-ab-coffee-kg-source.md`)
 - Stage AC reconcile cursor + 10 min poll: **done** (`docs/reports/stage-ac-reconcile-cursor.md`)
 - Stage AD Telegram topics + code lookup: **done** (`docs/reports/stage-ad-telegram-topics.md`)
-- Next: deploy cursor + kg + Telegram topics; LIVE + monitor alerts; then owner switch to `enforce`
+- Stage AE Telegram subscriber join alert + list UI: **done** (`docs/reports/stage-ae-telegram-subscribers-ui.md`)
+- Next: deploy cursor + kg + Telegram topics/subscribers UI; LIVE + monitor alerts; then owner switch to `enforce`
 
 ## Hard process rules
 

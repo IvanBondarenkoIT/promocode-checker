@@ -19,6 +19,7 @@ Bot: [@dimkava_promo_alerts_bot](https://t.me/dimkava_promo_alerts_bot)
 | Мои подписки | List of topics with ✅/⬜ and description |
 | Настроить | Inline toggles per topic (tap to flip) |
 | Проверить код | Prompt, then send 8–20 digits |
+| Подписчики | List of active subscribers (chat_id · @user · mode · date) |
 | Итоги дня | Preset: digests + system only |
 | Помощь | Welcome / help text |
 
@@ -42,11 +43,13 @@ Custom mix: **Настроить** (inline). Topic **system** is always on (🔒
 | `sales` | ERP coffee sale observed (enough / not enough kg) | yes |
 | `fraud` | Manual close without sale | yes |
 | `digest` | Day start ~10:00, day end ~22:00 | yes |
-| `system` | job_crash, digest_error, scope_switched | **no** |
+| `system` | job_crash, digest_error, scope_switched, **subscriber_joined** | **no** |
 
 Seed chats (`TELEGRAM_ALERT_CHAT_ID` / `TELEGRAM_CHAT_IDS`) always receive every topic.
 
-Storage: `telegram_subscribers.topics` (CSV) + `alert_mode` label (`full` / `digest` / `critical` / `sales` / `custom`). Migration `009` backfills from the old `full`/`digest` modes.
+When someone new sends `promo` (or a preset that creates/reactivates them), everyone with `system` gets a short join alert — **except** the joining chat itself.
+
+Storage: `telegram_subscribers.topics` (CSV) + `alert_mode` + optional `username` / `display_name` (migration `010`). Migration `009` backfilled topics from the old `full`/`digest` modes.
 
 ## Check promocode status
 

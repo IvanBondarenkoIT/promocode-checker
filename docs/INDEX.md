@@ -58,6 +58,7 @@
 - [`reports/stage-ab-coffee-kg-source.md`](reports/stage-ab-coffee-kg-source.md)
 - [`reports/stage-ac-reconcile-cursor.md`](reports/stage-ac-reconcile-cursor.md)
 - [`reports/stage-ad-telegram-topics.md`](reports/stage-ad-telegram-topics.md)
+- [`reports/stage-ae-telegram-subscribers-ui.md`](reports/stage-ae-telegram-subscribers-ui.md)
 
 ## Supervisor
 

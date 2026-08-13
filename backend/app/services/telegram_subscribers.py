@@ -190,3 +190,58 @@ def unsubscribe(db: Session, chat_id: str | int) -> bool:
     row.updated_at = datetime.now(UTC)
     db.flush()
     return True
+
+
+def list_active_subscribers(db: Session) -> list[TelegramSubscriber]:
+    """Active subscribers, newest first."""
+    stmt = (
+        select(TelegramSubscriber)
+        .where(TelegramSubscriber.active.is_(True))
+        .order_by(TelegramSubscriber.created_at.desc())
+    )
+    return list(db.scalars(stmt).all())
+
+
+def update_subscriber_profile(
+    db: Session,
+    chat_id: str | int,
+    *,
+    username: str | None = None,
+    display_name: str | None = None,
+) -> None:
+    """Best-effort profile sync from Telegram message.from (known chats only)."""
+    cid = str(chat_id).strip()
+    row = db.get(TelegramSubscriber, cid)
+    if row is None:
+        return
+    changed = False
+    if username is not None:
+        clean_user = (username or "").strip().lstrip("@")[:64] or None
+        if clean_user != row.username:
+            row.username = clean_user
+            changed = True
+    if display_name is not None:
+        clean_name = (display_name or "").strip()[:128] or None
+        if clean_name != row.display_name:
+            row.display_name = clean_name
+            changed = True
+    if changed:
+        row.updated_at = datetime.now(UTC)
+        db.flush()
+
+
+def profile_from_telegram_user(user: dict | None) -> tuple[str | None, str | None]:
+    """Extract (username, display_name) from Telegram User object."""
+    if not user:
+        return None, None
+    username = user.get("username")
+    username_s = str(username).strip() if username else None
+    parts: list[str] = []
+    first = user.get("first_name")
+    last = user.get("last_name")
+    if first:
+        parts.append(str(first).strip())
+    if last:
+        parts.append(str(last).strip())
+    display = " ".join(p for p in parts if p) or None
+    return username_s, display

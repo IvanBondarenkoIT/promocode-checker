@@ -161,11 +161,13 @@ def send_alert(
     http_client: httpx.Client | None = None,
     skip_dedup: bool = False,
     topic: str | None = "",
+    exclude_chat_ids: list[str] | None = None,
 ) -> TelegramNotificationLog:
     """Broadcast by topic. Returns last log row.
 
     ``topic=""`` (default) resolves from ``event_type`` via telegram_topics.
     ``topic=None`` broadcasts to every active subscriber (and seeds) — used for demos.
+    ``exclude_chat_ids`` drops those recipients after fan-out resolution.
     """
     cfg = settings or get_settings()
     token = (cfg.telegram_bot_token or "").strip()
@@ -176,6 +178,9 @@ def send_alert(
     else:
         resolved_topic = topic
     recipients = list_recipient_chat_ids(db, cfg, topic=resolved_topic)
+    if exclude_chat_ids:
+        skip = {str(c).strip() for c in exclude_chat_ids if str(c).strip()}
+        recipients = [cid for cid in recipients if cid not in skip]
 
     if not skip_dedup:
         from sqlalchemy import select
