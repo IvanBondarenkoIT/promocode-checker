@@ -62,6 +62,7 @@ You are working in `promocode-checker`.
 - Stage Z done (direct Firebird ERP on server; probe PASS 2026-08-13)
 - Stage AA done (admin customer card forms)
 - Stage AB done (coffee kg = SOURCE already kg)
+- Stage AC done (reconcile cursor + 10 min poll)
 - Next: LIVE scope + monitor sale_observations / Telegram; then enforce
 
 ## Coding expectations

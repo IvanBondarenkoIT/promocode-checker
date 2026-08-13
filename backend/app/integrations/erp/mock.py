@@ -16,6 +16,9 @@ class MockErpAdapter:
 
     def __init__(self, sales: list[CoffeeSaleMatch] | None = None) -> None:
         self.sales = list(sales or [])
+        self.calls: list[tuple[datetime, datetime]] = []
+        self.last_since: datetime | None = None
+        self.last_until: datetime | None = None
 
     def find_coffee_sales(
         self,
@@ -29,6 +32,9 @@ class MockErpAdapter:
         wanted = set(customer_erp_ids)
         since_aware = _ensure_aware(since)
         until_aware = _ensure_aware(until)
+        self.last_since = since_aware
+        self.last_until = until_aware
+        self.calls.append((since_aware, until_aware))
         matches = [
             sale
             for sale in self.sales

@@ -1,8 +1,9 @@
-"""Hourly ERP reconcile: observe coffee sales, optional auto-close, fraud flags."""
+"""Periodic ERP reconcile: observe coffee sales, optional auto-close, fraud flags."""
 
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
@@ -26,7 +27,13 @@ from app.models import (
 )
 from app.services.campaign_scope import get_active_kind, in_scope, scoped_promocode_query
 from app.services.promocode_close import close_promocode, lock_promocode_by_id
-from app.services.sale_evaluation import SaleVerdict, evaluate_orders
+from app.services.reconcile_state import (
+    compute_observe_window,
+    get_reconcile_state,
+    local_date,
+    record_observe_scan,
+)
+from app.services.sale_evaluation import EvaluatedOrder, SaleVerdict, evaluate_orders
 from app.services.telegram import send_alert
 from app.services.telegram_messages import msg_auto_close, msg_fraud_no_sale, msg_sale_observed
 
@@ -44,6 +51,10 @@ class ReconcileResult:
     observed: list[str] = field(default_factory=list)
     qualified_not_closed: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
+    window_since: datetime | None = None
+    window_until: datetime | None = None
+    erp_rows: int = 0
+    erp_ms: int = 0
 
 
 def _now() -> datetime:
@@ -106,6 +117,23 @@ def _is_expired(promocode: Promocode, *, now: datetime) -> bool:
     return expires_at <= now
 
 
+def _existing_observation_pairs(
+    db: Session,
+    evaluated: list[EvaluatedOrder],
+) -> set[tuple[str, str]]:
+    if not evaluated:
+        return set()
+    customer_ids = {order.customer_erp_id for order in evaluated}
+    order_ids = {order.order_id for order in evaluated}
+    rows = db.execute(
+        select(SaleObservation.customer_erp_id, SaleObservation.order_id).where(
+            SaleObservation.customer_erp_id.in_(customer_ids),
+            SaleObservation.order_id.in_(order_ids),
+        )
+    )
+    return {(customer_id, order_id) for customer_id, order_id in rows}
+
+
 def _observe_and_maybe_close(
     db: Session,
     *,
@@ -116,6 +144,7 @@ def _observe_and_maybe_close(
 ) -> None:
     enforcement = _normalize_enforcement(settings.promo_enforcement_mode)
     min_kg = float(settings.promo_min_coffee_kg)
+    tz_name = settings.app_timezone
 
     active_rows = list(
         db.scalars(
@@ -141,24 +170,35 @@ def _observe_and_maybe_close(
 
     customer_ids = sorted(by_promo_customer.keys())
     earliest = min(_ensure_aware(row.created_at) for row in active_rows)
-    sales = adapter.find_coffee_sales(customer_ids, since=earliest, until=now)
+    state = get_reconcile_state(db)
+    window = compute_observe_window(
+        now=now,
+        earliest_created=earliest,
+        last_scan_until=state.last_scan_until,
+        overlap_hours=settings.reconcile_overlap_hours,
+        tz_name=tz_name,
+    )
+    result.window_since = window.since
+    result.window_until = window.until
+
+    started = time.perf_counter()
+    sales = adapter.find_coffee_sales(customer_ids, since=window.since, until=window.until)
+    erp_ms = int((time.perf_counter() - started) * 1000)
+    result.erp_rows = len(sales)
+    result.erp_ms = erp_ms
+
     evaluated = evaluate_orders(sales, min_coffee_kg=min_kg)
+    existing_pairs = _existing_observation_pairs(db, evaluated)
 
     for order in evaluated:
         promo = by_promo_customer.get(order.customer_erp_id)
         if promo is None:
             continue
-        created = _ensure_aware(promo.created_at)
-        if _ensure_aware(order.sold_at) < created:
+        if local_date(order.sold_at, tz_name) < local_date(promo.created_at, tz_name):
             continue
 
-        existing = db.scalar(
-            select(SaleObservation.id).where(
-                SaleObservation.customer_erp_id == order.customer_erp_id,
-                SaleObservation.order_id == order.order_id,
-            )
-        )
-        if existing is not None:
+        pair = (order.customer_erp_id, order.order_id)
+        if pair in existing_pairs:
             continue
 
         closed = False
@@ -196,7 +236,7 @@ def _observe_and_maybe_close(
                         sold_at=order.sold_at,
                         prior_scan_point_id=prior.point_id if prior else None,
                         prior_scan_at=prior.scan_time if prior else None,
-                        tz_name=settings.app_timezone,
+                        tz_name=tz_name,
                     ),
                     settings=settings,
                     audience="events",
@@ -223,6 +263,7 @@ def _observe_and_maybe_close(
         )
         db.add(observation)
         db.flush()
+        existing_pairs.add(pair)
         result.observed.append(order.order_id)
         if order.verdict == SaleVerdict.QUALIFIED and not closed:
             result.qualified_not_closed.append(promo.promocode)
@@ -244,11 +285,27 @@ def _observe_and_maybe_close(
                 enforcement_mode=enforcement,
                 promocode_closed=closed,
                 total_amount=order.total_amount,
-                tz_name=settings.app_timezone,
+                tz_name=tz_name,
             ),
             settings=settings,
             audience="events",
         )
+
+    record_observe_scan(
+        db,
+        scan_until=window.until,
+        run_at=now,
+        erp_rows=result.erp_rows,
+        erp_ms=erp_ms,
+    )
+    logger.info(
+        "reconcile window since=%s until=%s rows=%s erp_ms=%s observed=%s",
+        window.since.isoformat(),
+        window.until.isoformat(),
+        result.erp_rows,
+        erp_ms,
+        len(result.observed),
+    )
 
 
 def _fraud_check_manual_closes(

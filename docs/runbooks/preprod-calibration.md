@@ -70,8 +70,8 @@ Without LIVE scope, reconcile ignores this LIVE campaign.
 | `python scripts/run_reconcile.py` (or wait up to `RECONCILE_INTERVAL_SECONDS`) | `sale_observations` row; Telegram sale-observed |
 | Promocode | stays **ACTIVE** (no AUTO_CLOSE in monitor) |
 
-Sales with `sold_at` **before** promocode `created_at` are ignored — no backdate unless
-you intentionally replay the same day.
+Sales with `sold_at` on a **calendar day before** promocode issue (`APP_TIMEZONE`) are ignored.
+Same-day ERP sales count even though `S.DAT_` is midnight.
 
 Cashier scan of the synthetic code is optional; physical shop barcodes will not match
 until remapped to real card numbers.

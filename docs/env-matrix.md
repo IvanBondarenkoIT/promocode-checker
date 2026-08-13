@@ -32,7 +32,8 @@ How-to guides: [`runbooks/`](runbooks/README.md). Templates: [`.env.example`](..
 | `FRAUD_MATCH_WINDOW_HOURS` | `2` | `1`–`2` | soft amnesty |
 | `PROMO_ENFORCEMENT_MODE` | `monitor` | `monitor` → later `enforce` | observe+TG vs auto-close; [enforcement-modes.md](runbooks/enforcement-modes.md) |
 | `PROMO_MIN_COFFEE_KG` | `2.0` | `2.0` | kg in one order (`STORZDTGDS.SOURCE` already kg) |
-| `RECONCILE_INTERVAL_SECONDS` | `3600` | `900` while monitoring | min 60 |
+| `RECONCILE_INTERVAL_SECONDS` | `600` | `600` (10 min) | min 60; worker loop |
+| `RECONCILE_OVERLAP_HOURS` | `48` | `48` | re-read before `last_scan_until`; floor to local midnight |
 
 ## ERP
 

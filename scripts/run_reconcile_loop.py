@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INTERVAL_SECONDS = 3600
+DEFAULT_INTERVAL_SECONDS = 600
 BOT_POLL_SECONDS = 5
 
 

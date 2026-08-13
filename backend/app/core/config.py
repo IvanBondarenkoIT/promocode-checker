@@ -35,7 +35,8 @@ class Settings(BaseSettings):
     promo_enforcement_mode: str = Field(default="monitor", alias="PROMO_ENFORCEMENT_MODE")
     promo_min_coffee_kg: float = Field(default=2.0, alias="PROMO_MIN_COFFEE_KG")
     coffee_observe_group_ids: str = Field(default="", alias="COFFEE_OBSERVE_GROUP_IDS")
-    reconcile_interval_seconds: int = Field(default=3600, alias="RECONCILE_INTERVAL_SECONDS")
+    reconcile_interval_seconds: int = Field(default=600, alias="RECONCILE_INTERVAL_SECONDS")
+    reconcile_overlap_hours: int = Field(default=48, alias="RECONCILE_OVERLAP_HOURS")
 
     erp_access_mode: str = Field(default="proxy", alias="ERP_ACCESS_MODE")
     proxy_api_url: str = Field(default="", alias="PROXY_API_URL")

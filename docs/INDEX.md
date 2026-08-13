@@ -55,6 +55,8 @@
 - [`reports/stage-41-erp-probe.md`](reports/stage-41-erp-probe.md)
 - [`reports/gap-checklist-2026-08-04.md`](reports/gap-checklist-2026-08-04.md)
 - [`reports/verification-2026-07-29.md`](reports/verification-2026-07-29.md) — post Stage 10 full audit PASS
+- [`reports/stage-ab-coffee-kg-source.md`](reports/stage-ab-coffee-kg-source.md)
+- [`reports/stage-ac-reconcile-cursor.md`](reports/stage-ac-reconcile-cursor.md)
 
 ## Supervisor
 

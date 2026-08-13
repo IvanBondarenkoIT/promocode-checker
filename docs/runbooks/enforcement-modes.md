@@ -27,6 +27,23 @@ Whitelist groups: `COFFEE_BEANS_GROUP_IDS=11077,16276,16279`.
 
 One alert per `(customer_erp_id, order_id)` thanks to unique constraint on `sale_observations`.
 
+## Reconcile polling
+
+Worker calls ERP every `RECONCILE_INTERVAL_SECONDS` (prod **600** = 10 min). Connection is **not** kept open: connect → SELECT → close.
+
+Observe window is a cursor, not “oldest active code → now”:
+
+- `since = max(oldest_active.created_at, last_scan_until - RECONCILE_OVERLAP_HOURS)`
+- then floor `since` to local midnight (`APP_TIMEZONE`) because `S.DAT_` has no time
+- after a successful pass, `reconcile_state.last_scan_until = now`
+- overlap (default 48 h) covers window seams; duplicates are skipped by `uq_sale_observations_customer_order`
+- if the worker was down, the cursor stays old and the next pass widens backward
+- ERP errors roll back the transaction, so the cursor does not move
+
+A sale on the **same calendar day** the code was issued is counted (ERP date vs issue date in Tbilisi). Older days are ignored.
+
+Worker log line: `reconcile window since=... until=... rows=N erp_ms=M observed=K`.
+
 ## Manual close still works
 
 Cashier can close via GUI; admin can reopen `USED → ACTIVE` with reason.
@@ -45,7 +62,8 @@ Fraud check for manual close without coffee sale stays on in both modes.
 # in infra/.env.prod
 PROMO_ENFORCEMENT_MODE=monitor
 PROMO_MIN_COFFEE_KG=2.0
-RECONCILE_INTERVAL_SECONDS=900
+RECONCILE_INTERVAL_SECONDS=600
+RECONCILE_OVERLAP_HOURS=48
 
 cd C:\Projects\promocode-checker\desktop
 .\update-prod.ps1

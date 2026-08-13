@@ -87,7 +87,7 @@ flowchart LR
 
 - [x] ERP adapter interface
 - [x] Proxy mode + direct fallback + mock
-- [x] Hourly reconcile job (`scripts/run_reconcile.py`)
+- [x] Periodic reconcile job (`scripts/run_reconcile.py`) — cursor + overlap, 10 min on prod
 - [x] Auto-close + erp_sale_matched
 - [x] Fraud warning for unmatched manual closes
 - [x] Soft window default 2h
@@ -231,7 +231,7 @@ Deferred (resolved by Stage 5/6 gate):
 3. Checker returns ACTIVE / USED / NOT_FOUND
 4. If ACTIVE, cashier applies discount in offline POS manually
 5. Cashier presses “Применить скидку” → USED
-6. Hourly reconcile fixes forgotten ACTIVE codes using ERP sales
+6. Periodic reconcile (every `RECONCILE_INTERVAL_SECONDS`, cursor + overlap) closes forgotten ACTIVE codes using ERP sales when `enforce`
 7. Unmatched manual closes create fraud warnings
 
 ## Neighbor project reuse

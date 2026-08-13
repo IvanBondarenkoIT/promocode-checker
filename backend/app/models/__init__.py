@@ -13,6 +13,7 @@ from app.models.enums import (
 )
 from app.models.fraud_warning import FraudWarning
 from app.models.promocode import Promocode
+from app.models.reconcile_state import RECONCILE_STATE_ID, ReconcileState
 from app.models.sale_observation import SaleObservation
 from app.models.telegram_notification import TelegramNotificationLog
 from app.models.telegram_subscriber import (
@@ -36,6 +37,8 @@ __all__ = [
     "FraudWarningStatus",
     "Promocode",
     "PromocodeStatus",
+    "RECONCILE_STATE_ID",
+    "ReconcileState",
     "SaleObservation",
     "TelegramBotState",
     "TelegramDigestState",

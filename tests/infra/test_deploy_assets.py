@@ -53,6 +53,8 @@ def test_prod_env_example_has_required_keys() -> None:
         "ADMIN_PASSWORD",
         "ERP_ACCESS_MODE",
         "FIREBIRD_DSN",
+        "RECONCILE_INTERVAL_SECONDS",
+        "RECONCILE_OVERLAP_HOURS",
     )
     for key in required:
         assert key in content

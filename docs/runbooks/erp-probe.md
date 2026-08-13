@@ -166,7 +166,7 @@ Live query uses Granit tables: `ORGN`, `STORZAKAZDT`, `STORZDTGDS`, `GOODS` (`OW
 python scripts/import_campaign_promocodes.py --file artifacts/auto_close_demo.csv --campaign-code auto_close_demo --campaign-name "AUTO_CLOSE demo"
 ```
 
-2. Backdate `created_at` so ERP sales for today are after code creation (reconcile requires `created_at ≤ sold_at ≤ now`):
+2. Same-calendar-day ERP sales now match without backdating `created_at`. Backdate only if you need **previous** days:
 
 ```sql
 UPDATE promocodes

@@ -35,6 +35,8 @@ These decisions are already agreed and should not be re-litigated unless the use
 7. Auto-close ACTIVE codes when ERP finds a matching coffee order of **≥ 2 kg in one order** (`PROMO_MIN_COFFEE_KG`), and only when `PROMO_ENFORCEMENT_MODE=enforce`.
 8. `PROMO_ENFORCEMENT_MODE=monitor` (default): same detection + Telegram + `sale_observations`, but **no** auto-close. Cashier manual close and admin `USED → ACTIVE` still work.
 9. Kg formula: `STORZDTGDS.SOURCE` is already kg (Granit `qty_unit=kg`). Sum per `order_id`. Do **not** multiply by `GOODS.NW`. Coffee groups: `11077`, `16276`, `16279`.
+10. Reconcile ERP window: persistent cursor `reconcile_state.last_scan_until` minus `RECONCILE_OVERLAP_HOURS` (default 48), never before the oldest active code. Interval default **10 minutes** (`RECONCILE_INTERVAL_SECONDS=600`). Do not re-read the whole campaign TTL.
+11. ERP `STORZAKAZDT.DAT_` has **no clock time** (midnight). Compare a sale to promocode issue by **calendar date** in `APP_TIMEZONE` (same day counts). Floor ERP `since` to that local midnight so date-only rows are not dropped at the window seam.
 
 ## Coffee beans matching
 

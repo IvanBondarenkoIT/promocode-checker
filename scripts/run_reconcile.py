@@ -1,4 +1,4 @@
-"""Run one ERP reconcile pass (intended for hourly cron / Task Scheduler)."""
+"""Run one ERP reconcile pass (worker loop / Task Scheduler)."""
 
 from __future__ import annotations
 
@@ -27,7 +27,10 @@ def main() -> int:
     print(
         "reconcile ok "
         f"auto_closed={len(result.auto_closed)} "
-        f"fraud_warnings={len(result.fraud_warnings)}"
+        f"fraud_warnings={len(result.fraud_warnings)} "
+        f"observed={len(result.observed)} "
+        f"erp_rows={result.erp_rows} "
+        f"erp_ms={result.erp_ms}"
     )
     if result.auto_closed:
         print("auto_closed:", ", ".join(result.auto_closed))

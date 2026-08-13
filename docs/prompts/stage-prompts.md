@@ -104,3 +104,13 @@ Already delivered:
 - report: `docs/reports/stage-10-runbooks.md`
 
 Implementation plan stages **1–10 complete**. Further work is maintenance / deferred follow-ups. Railway dropped — acceptance on server-prod.
+
+## Stage AC — Reconcile cursor — DONE
+
+Already delivered:
+
+- `reconcile_state` cursor + `RECONCILE_OVERLAP_HOURS=48`
+- poll every 10 minutes on prod
+- same-calendar-day ERP sales count
+- report: `docs/reports/stage-ac-reconcile-cursor.md`
+

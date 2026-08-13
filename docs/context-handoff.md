@@ -10,6 +10,7 @@ Railway убран: только local + server-prod.
 Промокод сегмента = номер карты лояльности (8–20 цифр); поле promocode отдельное.
 Режим закрытия: PROMO_ENFORCEMENT_MODE=monitor|enforce; порог 2 кг в одном чеке.
 Server ERP: direct Firebird OK (3050 + C:/db/GEORGIA.GDB). Stage AA: admin card forms.
+Stage AC: reconcile cursor + 10 min poll.
 Next: LIVE + monitor alerts, then enforce.
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
@@ -35,10 +36,12 @@ Next: LIVE + monitor alerts, then enforce.
 - Stage Z: direct Firebird ERP on server + probe CLI; **server probe PASS 2026-08-13** (`docs/reports/stage-z-direct-firebird.md`)
 - Stage AA: admin customer card list + element forms (`docs/reports/stage-aa-admin-card-forms.md`)
 - Stage AB: coffee kg = ERP SOURCE (already kg), no × NW (`docs/reports/stage-ab-coffee-kg-source.md`)
+- Stage AC: reconcile cursor + 10-minute poll (`docs/reports/stage-ac-reconcile-cursor.md`)
 
 ## Next (launch preparation)
 
-- Server `update-prod.ps1` so monitor Telegram uses correct kg
+- Server `update-prod.ps1` so monitor Telegram uses correct kg **and** 10-minute cursor reconcile
+  (`RECONCILE_INTERVAL_SECONDS=600`, `RECONCILE_OVERLAP_HOURS=48` in `infra/.env.prod`)
 - Scope **LIVE** + keep `PROMO_ENFORCEMENT_MODE=monitor`; verify `sale_observations` + Telegram on real coffee sales
 - Owner switch to `enforce` only after monitor alerts look correct
 - Decide how issued codes reach customers (export CSV is ready)
