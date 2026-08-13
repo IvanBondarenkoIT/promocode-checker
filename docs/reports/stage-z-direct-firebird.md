@@ -32,9 +32,9 @@ Against `D:\CursorProjects\DB-copy\GEORGIA.GDB` via FB 2.5 embedded:
 
 ```env
 ERP_ACCESS_MODE=direct
-FIREBIRD_DSN=host.docker.internal/3055:DK_GEORGIA
-FIREBIRD_USER=api_readonly
-FIREBIRD_PASSWORD=<secret>
+FIREBIRD_DSN=host.docker.internal/3050:C:/db/GEORGIA.GDB
+FIREBIRD_USER=SYSDBA
+FIREBIRD_PASSWORD=<same as firebird-db-proxy DB_PASSWORD>
 FIREBIRD_LIBRARY_PATH=
 PROMO_ENFORCEMENT_MODE=monitor
 ```
@@ -44,6 +44,34 @@ PROMO_ENFORCEMENT_MODE=monitor
 4. Confirm reconcile logs: `reconcile ok` (no `Connection refused`)
 5. Keep scope **LIVE** + monitor; watch `sale_observations` / Telegram on next coffee sale
 
+## Server verification (2026-08-13)
+
+On `C:\Projects\promocode-checker` after aligning `.env.prod` with the working Firebird proxy:
+
+```env
+ERP_ACCESS_MODE=direct
+FIREBIRD_DSN=host.docker.internal/3050:C:/db/GEORGIA.GDB
+FIREBIRD_USER=SYSDBA
+FIREBIRD_LIBRARY_PATH=
+PROMO_ENFORCEMENT_MODE=monitor
+```
+
+| Check | Result |
+|-------|--------|
+| `check-erp.ps1 -CustomerIds "21470,12523,14661,17306" -Days 7` | `Engine version: 2.5.9` |
+| Sales window | **91** lines / **78** unique orders |
+| Reconcile logs | `reconcile ok auto_closed=0 fraud_warnings=0` (monitor) |
+
+### Pitfalls fixed during rollout
+
+| Wrong | Correct |
+|-------|---------|
+| `FIREBIRD_LIBRARY_PATH=C:\db\GEORGIA.GDB` | Leave empty in Linux Docker; GDB path belongs in `FIREBIRD_DSN` only |
+| `host.docker.internal/3055:DK_GEORGIA` | Match proxy: port **3050** + `C:/db/GEORGIA.GDB` |
+| Remote Proxy API as primary | Direct to host Firebird; local proxy optional fallback |
+
+Guard: if `FIREBIRD_LIBRARY_PATH` ends with `.gdb`/`.fdb`, the direct adapter ignores it (misconfig safety).
+
 ## Risks
 
 - Firebird IP whitelist may block Docker bridge (172.x) — probe error will show DSN; allow bridge or use host firewall rules.
@@ -51,4 +79,4 @@ PROMO_ENFORCEMENT_MODE=monitor
 
 ## Open questions
 
-- None blocking merge.
+- None blocking. Next ops: LIVE scope + confirm `sale_observations` / Telegram on real sales; switch to `enforce` only when monitor looks correct.

@@ -58,7 +58,9 @@ You are working in `promocode-checker`.
 - Stage V done (segment import, TEST/LIVE campaign scope, admin switch)
 - Stage W done (promocode = loyalty card, 8–20 digits, remap script)
 - Stage X done (monitor/enforce + 2 kg per order + sale_observations)
-- Next: server rollout (backup → migrate 007 → import → monitor LIVE), shop-card calibration
+- Stage Y done (shop ORGN monitor calibration)
+- Stage Z done (direct Firebird ERP on server; probe PASS 2026-08-13)
+- Next: LIVE scope + monitor sale_observations / Telegram; then enforce
 
 ## Coding expectations
 

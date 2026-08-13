@@ -156,7 +156,38 @@ def test_get_erp_adapter_direct_wraps_proxy_fallback(monkeypatch: pytest.MonkeyP
     assert isinstance(adapter, FallbackErpAdapter)
 
 
-def test_get_erp_adapter_direct_without_proxy_token_has_no_fallback() -> None:
+def test_direct_adapter_ignores_gdb_path_as_library(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeCursor:
+        description = [("RDB$GET_CONTEXT",)]
+
+        def execute(self, query: str, params: tuple[object, ...]) -> None:
+            pass
+
+        def fetchall(self) -> list[tuple[str]]:
+            return [("WI-V2.5.9",)]
+
+        def close(self) -> None:
+            pass
+
+    class FakeConnection:
+        def cursor(self) -> FakeCursor:
+            return FakeCursor()
+
+        def close(self) -> None:
+            pass
+
+    fake_fdb = ModuleType("fdb")
+    fake_fdb.connect = lambda **kwargs: captured.update(connect_kwargs=kwargs) or FakeConnection()  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "fdb", fake_fdb)
+
+    adapter = DirectErpAdapter(
+        _settings(FIREBIRD_LIBRARY_PATH=r"C:\db\GEORGIA.GDB"),
+    )
+    assert adapter.library_path == ""
+    adapter.server_version()
+    assert "fb_library_name" not in captured["connect_kwargs"]
     adapter = get_erp_adapter(
         _settings(ERP_ACCESS_MODE="direct", PROXY_API_TOKEN=""),
     )

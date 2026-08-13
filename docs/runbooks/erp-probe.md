@@ -10,7 +10,7 @@ Product UI stays English; this runbook is ops English.
 |-------|------|----------------|
 | Local / laptop (proxy) | `ERP_ACCESS_MODE=proxy` | `PROXY_API_URL` + `PROXY_API_TOKEN` |
 | Local / laptop (GDB copy) | `ERP_ACCESS_MODE=direct` | File DSN + `FIREBIRD_LIBRARY_PATH` to FB 2.5 `fbembed.dll` (see below) |
-| Windows Server prod | `ERP_ACCESS_MODE=direct` | `FIREBIRD_DSN=host.docker.internal/3055:DK_GEORGIA` + readonly creds; optional proxy fallback |
+| Windows Server prod | `ERP_ACCESS_MODE=direct` | `FIREBIRD_DSN=host.docker.internal/3050:C:/db/GEORGIA.GDB` + same user as local Firebird proxy; optional proxy fallback |
 
 Paid order statuses default: `ERP_PAID_STATUSES=1,2,3,5`.  
 Coffee groups (locked): `COFFEE_BEANS_GROUP_IDS=11077,16276,16279`.
@@ -117,12 +117,12 @@ In `infra/.env.prod` (never commit secrets):
 
 ```env
 ERP_ACCESS_MODE=direct
-FIREBIRD_DSN=host.docker.internal/3055:DK_GEORGIA
-FIREBIRD_USER=api_readonly
-FIREBIRD_PASSWORD=<secret>
+FIREBIRD_DSN=host.docker.internal/3050:C:/db/GEORGIA.GDB
+FIREBIRD_USER=SYSDBA
+FIREBIRD_PASSWORD=<same as C:\FirebirdAPI\firebird-db-proxy\.env DB_PASSWORD>
 FIREBIRD_LIBRARY_PATH=
-# Optional fallback if direct fails:
-PROXY_API_URL=http://178.63.72.227:8010
+# Optional fallback if direct fails (local proxy on the same host, usually :8000):
+PROXY_API_URL=http://host.docker.internal:8000
 PROXY_API_TOKEN=
 ```
 
@@ -138,7 +138,7 @@ cd C:\Projects\promocode-checker\desktop
 .\check-erp.ps1 -CustomerIds "21470,12523,14661,17306" -Days 30
 ```
 
-Expect `Engine version: ...` and sales lines (or empty window). If connect fails with *Connection refused*, check Firebird service on port **3055** and whether docker bridge IPs are allowed in Firebird whitelist.
+Expect `Engine version: ...` and sales lines (or empty window). If connect fails with *Connection refused* / `-902`, check Firebird on port **3050** (same as the working proxy `DB_PORT`) and whether docker bridge IPs are allowed in Firebird whitelist. Do not put `C:\db\GEORGIA.GDB` in `FIREBIRD_LIBRARY_PATH`.
 
 Legacy CSV probe (still works):
 

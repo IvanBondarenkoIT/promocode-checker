@@ -53,7 +53,7 @@ Fallback / future expansion:
 
 ## ERP access
 
-1. **Server-prod primary:** direct read-only Firebird (`host.docker.internal/3055:DK_GEORGIA`, user `api_readonly`)
+1. **Server-prod primary:** direct Firebird (`host.docker.internal/3050:C:/db/GEORGIA.GDB`, same user/password as `C:\FirebirdAPI\firebird-db-proxy\.env`)
 2. **Fallback:** Proxy API when direct fails and `PROXY_API_TOKEN` is set
 3. **Local dev:** proxy or direct file DSN with FB 2.5 embedded library for GDB copies
 4. **Tests:** mock ERP provider

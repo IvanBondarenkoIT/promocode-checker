@@ -77,8 +77,8 @@ Invoke-WebRequest http://127.0.0.1:8020/api/v1/cashier/barcode/10000001 -OutFile
 
 | Setting | Production |
 |---------|------------|
-| `ERP_ACCESS_MODE` | **`direct`** — Firebird on the same Windows host (`host.docker.internal/3055:DK_GEORGIA`) |
-| `FIREBIRD_*` | Readonly user (`api_readonly`); `FIREBIRD_LIBRARY_PATH` empty in Linux container (uses `libfbclient2`) |
+| `ERP_ACCESS_MODE` | **`direct`** — Firebird on the same Windows host (`host.docker.internal/3050:C:/db/GEORGIA.GDB`, same creds as `C:\FirebirdAPI\firebird-db-proxy\.env`) |
+| `FIREBIRD_*` | Same as local Firebird proxy (`SYSDBA` + `C:/db/GEORGIA.GDB` on port **3050**); `FIREBIRD_LIBRARY_PATH` empty in Linux container (uses `libfbclient2`) |
 | `PROXY_API_*` | Optional fallback when direct fails; leave token empty to disable |
 | Telegram | Required — see [telegram-alerts.md](telegram-alerts.md) |
 

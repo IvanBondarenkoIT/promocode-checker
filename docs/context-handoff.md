@@ -4,12 +4,12 @@
 
 ```text
 Продолжаем promocode-checker.
-Этапы 1–10 + 11a–11d + Stage 4.1 + gap checklist + Stage T + Stage U + Stage V + Stage W закрыты.
+Этапы 1–10 + 11a–11d + Stage 4.1 + gap checklist + Stage T–Z закрыты.
 Railway убран: только local + server-prod.
 Кампании делятся на TEST/LIVE, глобальный переключатель в админке.
 Промокод сегмента = номер карты лояльности (8–20 цифр); поле promocode отдельное.
 Режим закрытия: PROMO_ENFORCEMENT_MODE=monitor|enforce; порог 2 кг в одном чеке.
-Owner: выкат на сервер (backup → migrate 007 → import → monitor LIVE).
+Server ERP: direct Firebird OK (3050 + C:/db/GEORGIA.GDB). Next: LIVE + monitor alerts, then enforce.
 Прочитай AGENTS.md и docs/context-handoff.md.
 ```
 
@@ -31,12 +31,12 @@ Owner: выкат на сервер (backup → migrate 007 → import → monit
 - Stage W: promocode = loyalty card, length 8–20, remap script (`docs/reports/stage-w-card-as-promocode.md`)
 - Stage X: monitor/enforce modes + 2 kg per order (`docs/reports/stage-x-monitor-mode.md`)
 - Stage Y: shop ORGN monitor calibration (`docs/reports/stage-y-shop-monitor-calibration.md`)
-- Stage Z: direct Firebird ERP on server + probe CLI (`docs/reports/stage-z-direct-firebird.md`)
+- Stage Z: direct Firebird ERP on server + probe CLI; **server probe PASS 2026-08-13** (`docs/reports/stage-z-direct-firebird.md`)
 
 ## Next (launch preparation)
 
-- Server-prod: set `ERP_ACCESS_MODE=direct` + `FIREBIRD_*` in `.env.prod`, run `desktop/check-erp.ps1`, then `update-prod.ps1`
-- Scope LIVE + `PROMO_ENFORCEMENT_MODE=monitor`; verify `sale_observations` + Telegram on real sales
+- Scope **LIVE** + keep `PROMO_ENFORCEMENT_MODE=monitor`; verify `sale_observations` + Telegram on real coffee sales
+- Owner switch to `enforce` only after monitor alerts look correct
 - Decide how issued codes reach customers (export CSV is ready)
 - Owner decision: auto-close when the customer never showed the code
 - Run **general smoke / regression** on server — [runbooks/server-prod.md](runbooks/server-prod.md)

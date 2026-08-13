@@ -19,13 +19,26 @@ _ENGINE_VERSION_SQL = (
     "SELECT rdb$get_context('SYSTEM', 'ENGINE_VERSION') FROM RDB$DATABASE"
 )
 
+_DB_FILE_SUFFIXES = (".gdb", ".fdb")
+
+
+def _normalize_library_path(raw: str) -> str:
+    """Return fbclient/fbembed path, or empty when unset or mis-set to a database file."""
+    path = (raw or "").strip()
+    if not path:
+        return ""
+    lower = path.lower()
+    if lower.endswith(_DB_FILE_SUFFIXES):
+        return ""
+    return path
+
 
 class DirectErpAdapter:
     def __init__(self, settings: Settings) -> None:
         self._dsn = (settings.firebird_dsn or "").strip()
         self._user = (settings.firebird_user or "").strip()
         self._password = (settings.firebird_password or "").strip()
-        self._library_path = (settings.firebird_library_path or "").strip()
+        self._library_path = _normalize_library_path(settings.firebird_library_path)
         self._group_ids = parse_coffee_group_ids(settings.coffee_beans_group_ids)
         self._paid_statuses = parse_paid_statuses(settings.erp_paid_statuses)
 

@@ -43,10 +43,10 @@ How-to guides: [`runbooks/`](runbooks/README.md). Templates: [`.env.example`](..
 | `PROXY_API_TOKEN` | if proxy | if fallback enabled | empty = no proxy fallback |
 | `PROXY_API_TIMEOUT` | `60` | `60` | |
 | `PROXY_API_MAX_RETRIES` | `3` | `3` | |
-| `FIREBIRD_DSN` | file path for local GDB | `host.docker.internal/3055:DK_GEORGIA` | not `127.0.0.1` inside container |
-| `FIREBIRD_USER` | `SYSDBA` (local GDB) | `api_readonly` | |
-| `FIREBIRD_PASSWORD` | local | **secret** | never commit |
-| `FIREBIRD_LIBRARY_PATH` | path to `fbembed.dll` for ODS 11 GDB | empty (Linux image uses `libfbclient2`) | Windows dev only |
+| `FIREBIRD_DSN` | file path for local GDB | `host.docker.internal/3050:C:/db/GEORGIA.GDB` | not `127.0.0.1` inside container; match proxy `DB_PORT`/`DB_NAME` |
+| `FIREBIRD_USER` | `SYSDBA` (local GDB) | `SYSDBA` (same as local Firebird proxy) | |
+| `FIREBIRD_PASSWORD` | local | **secret** (same as proxy `DB_PASSWORD`) | never commit |
+| `FIREBIRD_LIBRARY_PATH` | path to `fbembed.dll` for ODS 11 GDB | empty (Linux image uses `libfbclient2`) | never put `.GDB` here |
 
 ## Coffee matching
 

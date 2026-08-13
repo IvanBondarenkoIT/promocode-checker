@@ -16,7 +16,7 @@ This file is the primary handoff for any Cursor agent working in this repository
 
 Validate unique customer promocodes (loyalty card / 8–20 digits) at cashier points, close them safely, reconcile against Granit ERP sales, reduce cashier fraud, and give admin/viewer visibility with Telegram alerts.
 
-## Current status (as of 2026-08-04)
+## Current status (as of 2026-08-13)
 
 - Project root: `D:\CursorProjects\promocode-checker`
 - GitHub: https://github.com/IvanBondarenkoIT/promocode-checker
@@ -27,8 +27,8 @@ Validate unique customer promocodes (loyalty card / 8–20 digits) at cashier po
 - Stage U Telegram daily digests + modes: **done** (`docs/reports/stage-u-telegram-daily.md`)
 - Stage V pre-production segment + TEST/LIVE scope: **done** (`docs/reports/stage-v-preprod-segment.md`)
 - Stage X monitor/enforce + 2 kg: **done** (`docs/reports/stage-x-monitor-mode.md`)
-- Stage Z direct Firebird ERP on server: **done** (`docs/reports/stage-z-direct-firebird.md`)
-- Next: server `.env.prod` → `ERP_ACCESS_MODE=direct`, `check-erp.ps1`, monitor LIVE sales alerts
+- Stage Z direct Firebird ERP on server: **done** — server probe PASS (`docs/reports/stage-z-direct-firebird.md`)
+- Next: LIVE scope + monitor `sale_observations` / Telegram on real sales; then owner switch to `enforce`
 
 ## Hard process rules
 
