@@ -78,7 +78,7 @@ def test_rows_to_matches_optional_fields() -> None:
                 "PRODUCT_NAME": "blend (250 g)",
                 "CUSTOMER_NAME": "КЛИЕНТ PALIASHVILI",
                 "ORDER_ID": "99",
-                "QUANTITY": 8,
+                "QUANTITY": 2.0,
                 "NET_WEIGHT_KG": 0.25,
                 "UNIT_PRICE": 45,
             }
@@ -88,7 +88,7 @@ def test_rows_to_matches_optional_fields() -> None:
     row = matches[0]
     assert row.customer_erp_id == "12523"
     assert row.order_id == "99"
-    assert row.quantity == 8
+    assert row.quantity == 2.0
     assert row.net_weight_kg == 0.25
     assert row.line_kg == 2.0
 

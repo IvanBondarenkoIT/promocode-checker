@@ -39,7 +39,8 @@ def build_coffee_sales_query(
     CUSTOMER_ERP_ID, SOLD_AT, GROUP_ID, PRODUCT_NAME,
     optional CUSTOMER_NAME, ORDER_ID, UNIT_PRICE, QUANTITY, NET_WEIGHT_KG
 
-    Quantity is ``STORZDTGDS.SOURCE`` (pieces). Net weight is ``GOODS.NW`` (kg).
+    Quantity is ``STORZDTGDS.SOURCE`` (already kg). Net weight is ``GOODS.NW``
+    (pack size, metadata only — do not multiply into line_kg).
     When ``all_customers`` is True, skip ORGNID filter (probe only).
     Always pass ``row_limit`` for that mode (safety cap).
     """

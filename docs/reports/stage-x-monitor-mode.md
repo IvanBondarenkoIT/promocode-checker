@@ -13,7 +13,7 @@ and only auto-close when `PROMO_ENFORCEMENT_MODE=enforce` and order ≥ 2 kg.
 | Area | What |
 |------|------|
 | ERP SQL | `I.SOURCE AS QUANTITY`, `G.NW AS NET_WEIGHT_KG` |
-| Weight | `line_kg = SOURCE × NW` (+ name/group fallback) |
+| Weight | `line_kg = SOURCE` (already kg; NW is metadata only) |
 | Evaluation | per `order_id` verdicts QUALIFIED / NOT_ENOUGH_KG / UNKNOWN_WEIGHT |
 | Migration `007` | `sale_observations` unique `(customer_erp_id, order_id)` |
 | Reconcile | observe + notify; close only in enforce |

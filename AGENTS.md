@@ -29,7 +29,8 @@ Validate unique customer promocodes (loyalty card / 8–20 digits) at cashier po
 - Stage X monitor/enforce + 2 kg: **done** (`docs/reports/stage-x-monitor-mode.md`)
 - Stage Z direct Firebird ERP on server: **done** — server probe PASS (`docs/reports/stage-z-direct-firebird.md`)
 - Stage AA admin customer card forms: **done** (`docs/reports/stage-aa-admin-card-forms.md`)
-- Next: LIVE scope + monitor `sale_observations` / Telegram on real sales; then owner switch to `enforce`
+- Stage AB coffee kg = SOURCE already kg: **done** (`docs/reports/stage-ab-coffee-kg-source.md`)
+- Next: deploy kg fix; LIVE + monitor alerts; then owner switch to `enforce`
 
 ## Hard process rules
 

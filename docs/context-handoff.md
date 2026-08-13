@@ -34,9 +34,11 @@ Next: LIVE + monitor alerts, then enforce.
 - Stage Y: shop ORGN monitor calibration (`docs/reports/stage-y-shop-monitor-calibration.md`)
 - Stage Z: direct Firebird ERP on server + probe CLI; **server probe PASS 2026-08-13** (`docs/reports/stage-z-direct-firebird.md`)
 - Stage AA: admin customer card list + element forms (`docs/reports/stage-aa-admin-card-forms.md`)
+- Stage AB: coffee kg = ERP SOURCE (already kg), no × NW (`docs/reports/stage-ab-coffee-kg-source.md`)
 
 ## Next (launch preparation)
 
+- Server `update-prod.ps1` so monitor Telegram uses correct kg
 - Scope **LIVE** + keep `PROMO_ENFORCEMENT_MODE=monitor`; verify `sale_observations` + Telegram on real coffee sales
 - Owner switch to `enforce` only after monitor alerts look correct
 - Decide how issued codes reach customers (export CSV is ready)

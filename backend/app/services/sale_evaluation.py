@@ -55,6 +55,7 @@ def evaluate_orders(
         )
         products: list[str] = []
         group_ids: list[int] = []
+        # Sum of SOURCE values (already kg in live Granit); column name is historical.
         qty_pieces = 0.0
         amount = 0.0
         has_amount = False

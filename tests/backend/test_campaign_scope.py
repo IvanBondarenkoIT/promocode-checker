@@ -124,7 +124,7 @@ def test_reconcile_skips_out_of_scope_and_closed_campaigns(db_session: Session) 
             product_name="Coffee blend (250 g)",
             order_id=f"ord-{cid}",
             unit_price=45.0,
-            quantity=8,
+            quantity=2.0,
             net_weight_kg=0.25,
             line_kg=2.0,
         )

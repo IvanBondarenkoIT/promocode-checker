@@ -31,7 +31,7 @@ How-to guides: [`runbooks/`](runbooks/README.md). Templates: [`.env.example`](..
 | `PROMOCODE_TTL_DAYS` | `30` | as business needs | |
 | `FRAUD_MATCH_WINDOW_HOURS` | `2` | `1`–`2` | soft amnesty |
 | `PROMO_ENFORCEMENT_MODE` | `monitor` | `monitor` → later `enforce` | observe+TG vs auto-close; [enforcement-modes.md](runbooks/enforcement-modes.md) |
-| `PROMO_MIN_COFFEE_KG` | `2.0` | `2.0` | kg in one order (SOURCE × GOODS.NW) |
+| `PROMO_MIN_COFFEE_KG` | `2.0` | `2.0` | kg in one order (`STORZDTGDS.SOURCE` already kg) |
 | `RECONCILE_INTERVAL_SECONDS` | `3600` | `900` while monitoring | min 60 |
 
 ## ERP

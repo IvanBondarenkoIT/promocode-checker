@@ -1,14 +1,15 @@
-"""Net weight / line kg for coffee bean packages.
+"""Net weight metadata and line kg for coffee bean packages.
 
-Formula aligned with granit-clients-based-segmentation:
-``line_kg = quantity (STORZDTGDS.SOURCE, pieces) × GOODS.NW`` with name/group fallback.
+Live Granit: ``STORZDTGDS.SOURCE`` is already kg (same as granit
+``qty_unit=kg``). Do not multiply by ``GOODS.NW``.
+``GOODS.NW`` / name / group maps stay as optional pack-size metadata.
 """
 
 from __future__ import annotations
 
 import re
 
-# Fallback when GOODS.NW is missing and name has no weight token.
+# Fallback pack size (kg) when GOODS.NW is missing and name has no weight token.
 GROUP_NET_WEIGHT_KG: dict[int, float] = {
     11077: 0.25,  # blend 250 g
     16276: 0.25,  # single origin 250 g
@@ -67,16 +68,12 @@ def line_kg(
     stored_nw: float | None = None,
     group_id: int | None = None,
 ) -> float | None:
-    """Return kg for one order line, or None when weight cannot be resolved."""
-    try:
-        qty = float(quantity or 0)
-    except (TypeError, ValueError):
-        qty = 0.0
-    nw = resolve_net_weight_kg(
-        product_name=product_name,
-        stored_nw=stored_nw,
-        group_id=group_id,
-    )
-    if nw is None:
+    """Return kg for one order line from SOURCE (already kg), or None if missing."""
+    _ = product_name, stored_nw, group_id  # pack-size metadata only; not used for kg
+    if quantity is None:
         return None
-    return qty * nw
+    try:
+        qty = float(quantity)
+    except (TypeError, ValueError):
+        return None
+    return qty

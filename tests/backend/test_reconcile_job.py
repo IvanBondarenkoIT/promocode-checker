@@ -63,7 +63,7 @@ def _qualified_sale(
     sold_at: datetime,
     *,
     order_id: str = "ord-1",
-    qty: float = 8,
+    qty: float = 2.0,
     group_id: int = 11077,
     product_name: str = "Coffee blend (250 g)",
 ) -> CoffeeSaleMatch:
@@ -77,7 +77,7 @@ def _qualified_sale(
         unit_price=45.0,
         quantity=qty,
         net_weight_kg=nw,
-        line_kg=qty * nw,
+        line_kg=qty,
     )
 
 
@@ -205,7 +205,7 @@ def test_reconcile_not_enough_kg_still_observed(db_session: Session) -> None:
                 "CUST-N",
                 now - timedelta(hours=1),
                 order_id="ord-small",
-                qty=2,
+                qty=0.5,
             )
         ]
     )

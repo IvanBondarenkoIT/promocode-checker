@@ -11,7 +11,7 @@ Separate from campaign scope (`TEST` / `LIVE`).
 Threshold: **2 kg coffee beans in one ERP order** (`PROMO_MIN_COFFEE_KG=2.0`).
 
 ```text
-line_kg = STORZDTGDS.SOURCE (pieces) × GOODS.NW (kg)
+line_kg = STORZDTGDS.SOURCE   # already kg; do not multiply by GOODS.NW
 order_kg = sum(line_kg) for the same order_id
 ```
 

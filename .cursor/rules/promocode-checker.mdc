@@ -60,6 +60,8 @@ You are working in `promocode-checker`.
 - Stage X done (monitor/enforce + 2 kg per order + sale_observations)
 - Stage Y done (shop ORGN monitor calibration)
 - Stage Z done (direct Firebird ERP on server; probe PASS 2026-08-13)
+- Stage AA done (admin customer card forms)
+- Stage AB done (coffee kg = SOURCE already kg)
 - Next: LIVE scope + monitor sale_observations / Telegram; then enforce
 
 ## Coding expectations
